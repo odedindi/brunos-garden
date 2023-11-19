@@ -1,131 +1,164 @@
+import { FC, useState } from "react"
+import { Task as TTask } from "@/types/Task"
+import dayjs from "dayjs"
+import { styled } from "styled-components"
 import {
+  Accordion,
+  ActionIcon,
   Card,
-  CardHeader,
-  Heading,
-  CardBody,
-  Stack,
-  StackDivider,
+  Image,
   Text,
-  Box,
-  Flex,
-  Checkbox,
-  Tag,
+  Group,
+  Badge,
   Button,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-} from "@chakra-ui/react";
-import { FC } from "react";
-import { DragHandleIcon } from "@chakra-ui/icons";
-import { Task as TTask } from "@/types/Task";
-import dayjs from "dayjs";
-import TextField from "./TextField";
-import DateField from "./DatePicker";
+  Checkbox,
+} from "@mantine/core"
+import { Carousel } from "@mantine/carousel"
+
+import { IconCamera, IconPlus } from "@tabler/icons-react"
+import { get, isEqual } from "lodash"
+import ScheduleField from "./ScheduleField"
+import Delete from "@/ui/icons/Delete"
+import TextField from "./TextField"
+
+const image =
+  "https://images.unsplash.com/photo-1437719417032-8595fd9e9dc6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&q=80"
+
+const Base = styled(Card)`
+  background-color: ${({ theme }) => get(theme, "colors.gray[1]")};
+  padding: 0;
+`
+const Section = styled(Card.Section).attrs({ px: "md", pb: "md" })`
+  border-bottom: 1px solid ${({ theme }) => get(theme, "colors.gray[3]")};
+`
+
+const Label = styled(Text).attrs({ size: "sm", mt: "md" })`
+  font-weight: 700;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+`
+
+const Tag: FC<{ tag?: string }> = ({ tag }) => (
+  <Badge variant="light">{tag}</Badge>
+)
 
 const Task: FC<{
-  task: TTask;
+  task: TTask
   handle: {
-    create: (task: TTask) => void;
-    update: (task: TTask) => void;
-    delete: (taskId: string) => void;
-  };
+    create: (task: TTask) => void
+    update: (task: TTask) => void
+    delete: (taskId: string) => void
+  }
 }> = ({ task, handle }) => {
-  console.log({ task: task.completed });
+  console.log({ task: task.completed })
+  const [edittedTask, editTask] = useState(() => task)
 
   return (
-    <Card my="2">
-      <CardHeader>
-        <Flex>
-          <Flex flex="1" gap="4" alignItems="center" flexWrap="wrap">
-            <Box w="100%">
-              <Box display="flex" flexFlow="row wrap" gap={2}>
-                <Checkbox
-                  defaultChecked={task.completed}
-                  onChange={({ currentTarget: { checked: completed } }) =>
-                    handle.update({ ...task, completed })
+    <Base>
+      <Accordion style={{ border: "none" }}>
+        <Accordion.Item value={task.id} style={{ border: "none", padding: 0 }}>
+          <Accordion.Control>
+            <Text
+              c={
+                task.completed
+                  ? "green"
+                  : dayjs(edittedTask.schedule).isValid() &&
+                      dayjs(edittedTask.schedule).isBefore(dayjs())
+                    ? "dark"
+                    : "red"
+              }
+            >
+              {task.title}
+            </Text>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <Section mb="md">
+              <TextField
+                value={edittedTask.title}
+                onChange={(title) => editTask((prev) => ({ ...prev, title }))}
+              />
+              <Group justify="apart" grow>
+                <ScheduleField
+                  scheduled={
+                    dayjs(edittedTask.schedule).isValid()
+                      ? dayjs(edittedTask.schedule).toDate()
+                      : undefined
                   }
-                >
-                  {task.completed
-                    ? "Completed"
-                    : task.schedule
-                    ? "Pending"
-                    : "Unscheduled"}
-                </Checkbox>
-                <DateField
-                  date={task.schedule}
-                  onChange={(date) =>
-                    handle.update({ ...task, schedule: dayjs(date).toDate() })
+                  onChange={(schedule) =>
+                    editTask((prev) => ({ ...prev, schedule }))
                   }
                 />
-              </Box>
+                <Checkbox
+                  label="completed"
+                  checked={edittedTask.completed}
+                  onChange={({ target }) => {
+                    console.log({ target })
+                    editTask((prev) => ({ ...prev, completed: target.checked }))
+                  }}
+                  style={{ display: "flex", justifyContent: "flex-end" }}
+                />
+              </Group>
+              <Label c="dimmed">Description</Label>
               <TextField
-                value={task.title}
-                onChange={(title) => {
-                  console.log({ title });
-
-                  handle.update({ ...task, title });
-                }}
-              />
-            </Box>
-          </Flex>
-          <Menu>
-            <MenuButton as={Button}>
-              <DragHandleIcon viewBox="0 0 2 10" pr="6px" />
-            </MenuButton>
-            <MenuList>
-              <MenuItem
-                onClick={() =>
-                  handle.create({
-                    ...task,
-                    id: Math.random().toString().slice(0, 24),
-                  })
+                value={edittedTask.description}
+                onChange={(description) =>
+                  editTask((prev) => ({ ...prev, description }))
                 }
+              />
+            </Section>
+            <Section>
+              <Label c="dimmed">
+                Tags
+                <ActionIcon size="xs" bg="dark.3">
+                  <IconPlus />
+                </ActionIcon>
+              </Label>
+              <Group gap={7} mt={5}>
+                {task.tags.map((tag) => (
+                  <Tag key={tag} tag={tag} />
+                ))}
+              </Group>
+            </Section>
+
+            <Card.Section>
+              <Accordion>
+                <Accordion.Item value="images">
+                  <Accordion.Control>
+                    <IconCamera size="16px" />
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    <Carousel withIndicators loop>
+                      {[image, image, image].map((src, i) => (
+                        <Carousel.Slide key={i}>
+                          <Image src={src} alt={task.title} height={180} />
+                        </Carousel.Slide>
+                      ))}
+                    </Carousel>
+                  </Accordion.Panel>
+                </Accordion.Item>
+              </Accordion>
+            </Card.Section>
+
+            <Group mt="xs">
+              <Button
+                radius="md"
+                style={{ flex: 1 }}
+                disabled={isEqual(task, edittedTask)}
+                onClick={() => handle.update(edittedTask)}
               >
-                Create a Copy
-              </MenuItem>
-              <MenuItem color="red" onClick={() => handle.delete(task.id)}>
-                Delete
-              </MenuItem>
-            </MenuList>
-          </Menu>
-        </Flex>
-      </CardHeader>
+                Save Changes
+              </Button>
+              <Delete
+                verifyBeforeDelete
+                onClick={() => handle.delete(task.id)}
+              />
+            </Group>
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+    </Base>
+  )
+}
 
-      <CardBody>
-        <Stack divider={<StackDivider />} spacing="4">
-          {task.tags.map((tag, i) => (
-            <Tag key={i} size="lg" variant="solid" colorScheme="teal">
-              {tag}
-            </Tag>
-          ))}
-          <Box>
-            <Heading size="xs" textTransform="uppercase">
-              Summary
-            </Heading>
-            <TextField
-              value={task.description}
-              onChange={(description) =>
-                handle.update({ ...task, description })
-              }
-            />
-          </Box>
-          <Box>
-            <Heading size="xs" textTransform="uppercase">
-              Attributes
-            </Heading>
-            {task.attributes.map(({ description, id }) => (
-              <Box key={id}>
-                <Text pt="2" fontSize="sm">
-                  {description}
-                </Text>
-              </Box>
-            ))}
-          </Box>
-        </Stack>
-      </CardBody>
-    </Card>
-  );
-};
-
-export default Task;
+export default Task

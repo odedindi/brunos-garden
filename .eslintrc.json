@@ -21,7 +21,7 @@
   },
   "plugins": ["react", "@typescript-eslint"],
   "rules": {
-    "no-console": 1,
+    "no-console": 0,
     "prefer-template": 1,
     "no-unused-vars": 0,
     "react/display-name": 0,

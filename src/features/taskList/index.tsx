@@ -1,12 +1,12 @@
-import Layout from "@/ui/layout";
-import { FC, useCallback, useMemo } from "react";
+import Layout from "@/ui/layout"
+import { FC, useCallback, useMemo } from "react"
 
-import dayjs from "dayjs";
-import Task from "./task";
-import type { Task as TTask } from "@/types/Task";
-import { useLocalStorage } from "@uidotdev/usehooks";
-import { IconButton } from "@chakra-ui/react";
-import { PlusSquareIcon } from "@chakra-ui/icons";
+import dayjs from "dayjs"
+import Task from "./task"
+import type { Task as TTask } from "@/types/Task"
+import { useLocalStorage } from "@uidotdev/usehooks"
+import { ActionIcon, Tooltip } from "@mantine/core"
+import { IconPlus } from "@tabler/icons-react"
 
 const initalTasks: TTask[] = [
   {
@@ -18,56 +18,58 @@ const initalTasks: TTask[] = [
     attributes: [],
     tags: [],
   },
-];
+]
 const TasksList: FC = () => {
   const [tasksRaw, setTasks] = useLocalStorage(
     "tasks",
-    JSON.stringify(initalTasks)
-  );
+    JSON.stringify(initalTasks),
+  )
   const tasks: TTask[] = useMemo(
     () => (tasksRaw ? JSON.parse(tasksRaw) : []),
-    [tasksRaw]
-  );
+    [tasksRaw],
+  )
 
   const createTask = useCallback(
     (task: TTask) => {
-      const newTasks = [task, ...tasks];
-      setTasks(JSON.stringify(newTasks));
+      const newTasks = [task, ...tasks]
+      setTasks(JSON.stringify(newTasks))
     },
-    [setTasks, tasks]
-  );
+    [setTasks, tasks],
+  )
   const updateTask = useCallback(
     (task: TTask) => {
-      const taskIndex = tasks.findIndex(({ id }) => id === task.id);
-      const newTasks = [...tasks];
-      newTasks[taskIndex] = task;
-      setTasks(JSON.stringify(newTasks));
+      const taskIndex = tasks.findIndex(({ id }) => id === task.id)
+      const newTasks = [...tasks]
+      newTasks[taskIndex] = task
+      setTasks(JSON.stringify(newTasks))
     },
-    [setTasks, tasks]
-  );
+    [setTasks, tasks],
+  )
   const deleteTask = useCallback(
     (taskId: string) => {
-      const newTasks = [...tasks.filter(({ id }) => id !== taskId)];
-      setTasks(JSON.stringify(newTasks));
+      const newTasks = [...tasks.filter(({ id }) => id !== taskId)]
+      setTasks(JSON.stringify(newTasks))
     },
-    [setTasks, tasks]
-  );
+    [setTasks, tasks],
+  )
   return (
     <>
-      <IconButton
-        size="sm"
-        icon={<PlusSquareIcon />}
-        aria-label="New Task"
-        onClick={() => {
-          createTask({
-            id: Math.random().toString(),
-            title: "",
-            description: "",
-            attributes: [],
-            tags: [],
-          });
-        }}
-      />
+      <Tooltip label="New Task">
+        <ActionIcon
+          size="sm"
+          onClick={() => {
+            createTask({
+              id: Math.random().toString(),
+              title: "",
+              description: "",
+              attributes: [],
+              tags: [],
+            })
+          }}
+        >
+          <IconPlus />
+        </ActionIcon>
+      </Tooltip>
 
       {tasks.map((task) => (
         <Task
@@ -75,7 +77,7 @@ const TasksList: FC = () => {
           task={task}
           handle={{
             create: (newTask) => {
-              createTask(newTask);
+              createTask(newTask)
             },
             update: updateTask,
             delete: deleteTask,
@@ -83,7 +85,7 @@ const TasksList: FC = () => {
         />
       ))}
     </>
-  );
-};
+  )
+}
 
-export default TasksList;
+export default TasksList
