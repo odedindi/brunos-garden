@@ -1,12 +1,15 @@
-import { FC, PropsWithChildren } from "react";
-import { ChakraProvider } from "@chakra-ui/react";
-import { CacheProvider } from "@chakra-ui/next-js";
-import { theme } from "@/config/theme";
+import { FC, PropsWithChildren } from "react"
+import { MantineProvider } from "@mantine/core"
+import { NavigationProgress } from "@mantine/nprogress"
+
+import { theme } from "@/config/theme"
+import { ThemeProvider } from "styled-components"
 
 export const StylesProvider: FC<PropsWithChildren> = ({ children }) => (
-  <CacheProvider>
-    <ChakraProvider resetCSS theme={theme}>
+  <MantineProvider theme={theme}>
+    <ThemeProvider theme={theme}>
+      <NavigationProgress />
       {children}
-    </ChakraProvider>
-  </CacheProvider>
-);
+    </ThemeProvider>
+  </MantineProvider>
+)

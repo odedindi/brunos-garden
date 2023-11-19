@@ -1,5 +1,5 @@
-import { FC } from "react";
+import { FC } from "react"
 
-const Table: FC = () => <></>;
+const Table: FC = () => <></>
 
-export default Table;
+export default Table
