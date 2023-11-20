@@ -1,10 +1,11 @@
 import { FC, PropsWithChildren } from "react"
 import Jokes from "@/features/jokes"
-import { AppShell, Burger, Text } from "@mantine/core"
+import { AppShell, Avatar, Box, Burger, Group, Text } from "@mantine/core"
 import { useLocalStorage } from "@mantine/hooks"
 import Link from "next/link"
 import styled from "styled-components"
 import { get } from "lodash"
+import StrawberryLogo from "./StrawberryLogo"
 
 const Header = styled(AppShell.Header)`
   display: flex;
@@ -22,7 +23,14 @@ const Footer = styled(AppShell.Footer)`
   background-color: ${({ theme }) => get(theme, "colors.blue[3]")};
   overflow: auto;
 `
-
+const BrunosGarden = styled.p.attrs({children: <>{"Bruno's Garden"} <sub>BETA</sub></>})<{ $hideFromSm?: boolean; $hideUpToSm?: boolean }>`
+  @media screen and (max-width: ${({ theme }) => theme.breakpoints!.sm!}) {
+    display: ${({ $hideUpToSm }) => ($hideUpToSm ? "none" : "inherit")};
+  }
+  @media screen and (min-width: ${({ theme }) => theme.breakpoints!.sm!}) {
+    display: ${({ $hideFromSm }) => ($hideFromSm ? "none" : "inherit")};
+  }
+`
 const Layout: FC<PropsWithChildren> = ({ children }) => {
   const [navbarOpen, setNavbarOpen] = useLocalStorage({
     key: "navbar",
@@ -41,19 +49,22 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
       padding="md"
     >
       <Header>
-        <Burger
-          opened={navbarOpen}
-          onClick={() => setNavbarOpen((o) => !o)}
-          hiddenFrom="sm"
-          size="sm"
-        />
-        <Text component={Link} href="/" style={{ textDecoration: "unset" }}>
-          {"Bruno's Garden"} <sub>BETA</sub>
-        </Text>
+        <Group w="100%" wrap="nowrap" pr="xs">
+          <Box w="100%" display="flex">
+            <Burger
+              opened={navbarOpen}
+              onClick={() => setNavbarOpen((o) => !o)}
+              hiddenFrom="sm"
+              size="sm"
+            />
+            <BrunosGarden $hideUpToSm/> 
+          </Box>
+          <StrawberryLogo href="/" />
+        </Group>
       </Header>
 
       <Navbar p="md" bg={"pink.3"}>
-        Navbar
+      <BrunosGarden $hideFromSm/> 
       </Navbar>
 
       <Main bg={"green.3"}>{children}</Main>
