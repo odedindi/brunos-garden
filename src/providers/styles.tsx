@@ -5,7 +5,7 @@ import { NavigationProgress } from "@mantine/nprogress"
 import { theme } from "@/config/theme"
 import { ThemeProvider } from "styled-components"
 
-export const StylesProvider: FC<PropsWithChildren> = ({ children }) => (
+const StylesProvider: FC<PropsWithChildren> = ({ children }) => (
   <MantineProvider theme={theme}>
     <ThemeProvider theme={theme}>
       <NavigationProgress />
@@ -13,3 +13,5 @@ export const StylesProvider: FC<PropsWithChildren> = ({ children }) => (
     </ThemeProvider>
   </MantineProvider>
 )
+
+export default StylesProvider

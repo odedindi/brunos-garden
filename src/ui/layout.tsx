@@ -2,10 +2,10 @@ import { FC, PropsWithChildren } from "react"
 import Jokes from "@/features/jokes"
 import { AppShell, Avatar, Box, Burger, Group, Text } from "@mantine/core"
 import { useLocalStorage } from "@mantine/hooks"
-import Link from "next/link"
 import styled from "styled-components"
 import { get } from "lodash"
 import StrawberryLogo from "./StrawberryLogo"
+import UserAvatar from "./Avatar"
 
 const Header = styled(AppShell.Header)`
   display: flex;
@@ -56,13 +56,14 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
     >
       <Header>
         <Group w="100%" wrap="nowrap" pr="xs">
-          <Box w="100%" display="flex">
+          <Box w="100%" style={{ display: "flex", alignItems: "center" }}>
             <Burger
               opened={navbarOpen}
               onClick={() => setNavbarOpen((o) => !o)}
               hiddenFrom="sm"
               size="sm"
             />
+            <UserAvatar />
             <BrunosGarden $hideUpToSm />
           </Box>
           <StrawberryLogo href="/" />
