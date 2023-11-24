@@ -23,7 +23,13 @@ const Footer = styled(AppShell.Footer)`
   background-color: ${({ theme }) => get(theme, "colors.blue[3]")};
   overflow: auto;
 `
-const BrunosGarden = styled.p.attrs({children: <>{"Bruno's Garden"} <sub>BETA</sub></>})<{ $hideFromSm?: boolean; $hideUpToSm?: boolean }>`
+const BrunosGarden = styled.p.attrs({
+  children: (
+    <>
+      {"Bruno's Garden"} <sub>BETA</sub>
+    </>
+  ),
+})<{ $hideFromSm?: boolean; $hideUpToSm?: boolean }>`
   @media screen and (max-width: ${({ theme }) => theme.breakpoints!.sm!}) {
     display: ${({ $hideUpToSm }) => ($hideUpToSm ? "none" : "inherit")};
   }
@@ -57,14 +63,14 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
               hiddenFrom="sm"
               size="sm"
             />
-            <BrunosGarden $hideUpToSm/> 
+            <BrunosGarden $hideUpToSm />
           </Box>
           <StrawberryLogo href="/" />
         </Group>
       </Header>
 
       <Navbar p="md" bg={"pink.3"}>
-      <BrunosGarden $hideFromSm/> 
+        <BrunosGarden $hideFromSm />
       </Navbar>
 
       <Main bg={"green.3"}>{children}</Main>
