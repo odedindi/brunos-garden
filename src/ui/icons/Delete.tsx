@@ -5,7 +5,7 @@ import Icon, { IconProps } from "./Icon"
 import { useDisclosure } from "@mantine/hooks"
 import { Button, Modal, Text } from "@mantine/core"
 
-const Delete: FC<
+const DeleteIcon: FC<
   Omit<IconProps, "label" | "bg"> & { verifyBeforeDelete?: boolean }
 > = ({ onClick, size, verifyBeforeDelete }) => {
   const [opened, { open, close }] = useDisclosure(false)
@@ -43,4 +43,4 @@ const Delete: FC<
   )
 }
 
-export default Delete
+export default DeleteIcon

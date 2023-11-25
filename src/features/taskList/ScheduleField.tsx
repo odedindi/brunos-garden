@@ -1,22 +1,18 @@
 import { FC, useMemo, useRef } from "react"
-import { Task as TTask } from "@/types/Task"
 import dayjs from "dayjs"
-
 import { DateInput } from "@mantine/dates"
-
 import { useDisclosure } from "@mantine/hooks"
 import EditIcon from "@/ui/icons/Edit"
 
 const ScheduleField: FC<{
-  scheduled?: TTask["schedule"]
+  scheduled?: Date
   onChange: (date: Date | null) => void
 }> = ({ scheduled: scheduled, onChange }) => {
-  const [edit, { toggle }] = useDisclosure(false)
+  const [edit, { close, toggle }] = useDisclosure(false)
   const ref = useRef<HTMLInputElement>(null)
 
   const dateInputLabel = useMemo(() => {
-    const isValid = dayjs(scheduled).isValid()
-    if (!isValid) return undefined
+    if (!scheduled) return undefined
     const daysDiff = dayjs(scheduled).diff(dayjs(), "days")
     return `Scheduled: ${
       daysDiff === 0
@@ -34,7 +30,7 @@ const ScheduleField: FC<{
       size="xs"
       valueFormat="DD.MMM-YY"
       label={dateInputLabel}
-      value={dayjs(scheduled).isValid() ? dayjs(scheduled).toDate() : undefined}
+      value={scheduled}
       onChange={(schedule) => onChange(schedule)}
       variant="filled"
       styles={{
@@ -55,6 +51,7 @@ const ScheduleField: FC<{
           size="sm"
         />
       }
+      onBlur={close}
     />
   )
 }
