@@ -51,11 +51,10 @@ const Task: FC<{
     delete: (taskId: string) => void
   }
 }> = ({ task, handle }) => {
-  console.log({ task: task.completed })
   const [edittedTask, editTask] = useState(() => task)
 
   return (
-    <Base>
+    <Base styles={{ root: { marginBottom: "8px" } }}>
       <Accordion style={{ border: "none" }}>
         <Accordion.Item value={task.id} style={{ border: "none", padding: 0 }}>
           <Accordion.Control>
