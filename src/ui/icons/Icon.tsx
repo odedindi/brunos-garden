@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren } from "react"
+import { CSSProperties, FC, PropsWithChildren } from "react"
 
 import { styled } from "styled-components"
 import { ActionIcon, ActionIconProps, Tooltip } from "@mantine/core"
@@ -18,19 +18,17 @@ export type IconProps = {
   label?: string
   size?: ActionIconProps["size"]
   bg?: ActionIconProps["bg"]
+  style?: CSSProperties
 }
 
 const Icon: FC<PropsWithChildren<IconProps>> = ({
-  children,
-  onClick,
   label,
   size = "xs",
   bg = "dark.3",
+  ...iconProps
 }) => (
   <Tooltip openDelay={2500} label={label}>
-    <StyledActionIcon onClick={onClick} size={size} bg={bg}>
-      {children}
-    </StyledActionIcon>
+    <StyledActionIcon size={size} bg={bg} {...iconProps} />
   </Tooltip>
 )
 

@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react"
+import { FC, useMemo, useRef } from "react"
 import { Task as TTask } from "@/types/Task"
 import dayjs from "dayjs"
 
@@ -12,6 +12,8 @@ const ScheduleField: FC<{
   onChange: (date: Date | null) => void
 }> = ({ scheduled: scheduled, onChange }) => {
   const [edit, { toggle }] = useDisclosure(false)
+  const ref = useRef<HTMLInputElement>(null)
+
   const dateInputLabel = useMemo(() => {
     const isValid = dayjs(scheduled).isValid()
     if (!isValid) return undefined
@@ -27,6 +29,7 @@ const ScheduleField: FC<{
 
   return (
     <DateInput
+      ref={ref}
       disabled={!edit}
       size="xs"
       valueFormat="DD.MMM-YY"
@@ -35,10 +38,23 @@ const ScheduleField: FC<{
       onChange={(schedule) => onChange(schedule)}
       variant="filled"
       styles={{
-        input: { padding: 0, cursor: "auto" },
-        section: { width: "min-content" },
+        input: {
+          padding: "0 8px",
+          cursor: "auto",
+          border: edit ? "solid 1px purple" : undefined,
+        },
+        section: { width: "min-content", padding: "0 3px" },
       }}
-      rightSection={<EditIcon onClick={toggle} />}
+      rightSection={
+        <EditIcon
+          onClick={() => {
+            if (!edit) setTimeout(() => ref.current?.focus())
+            toggle()
+          }}
+          bg={edit ? "grape" : undefined}
+          size="sm"
+        />
+      }
     />
   )
 }
