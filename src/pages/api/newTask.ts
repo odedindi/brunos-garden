@@ -43,15 +43,17 @@ export default async function handler(
             values: [[JSON.stringify({ ...task, id: taskId })]],
           },
         })
-        res.status(200).send(taskId)
+        return res.status(200).send(taskId)
       } else
-        res.status(503).send("Error: Cannot confirm creating new task success")
+        return res
+          .status(503)
+          .send("Error: Cannot confirm creating new task success")
     } catch (e) {
       console.log(e)
-      res.status(503).send(JSON.stringify(e))
+      return res.status(503).send(JSON.stringify(e))
     }
   } catch (e) {
     console.log(e)
-    res.status(503).send(JSON.stringify(e))
+    return res.status(503).send(JSON.stringify(e))
   }
 }

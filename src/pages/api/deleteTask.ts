@@ -28,14 +28,17 @@ export default async function handler(
       })
       if (response.data.clearedRange) {
         console.log(response.data.clearedRange)
-        res.status(200).send(taskId)
-      } else res.status(503).send("Error: Cannot confirm deleting task success")
+        return res.status(200).send(taskId)
+      } else
+        return res
+          .status(503)
+          .send("Error: Cannot confirm deleting task success")
     } catch (e) {
       console.log(e)
-      res.status(503).send(JSON.stringify(e))
+      return res.status(503).send(JSON.stringify(e))
     }
   } catch (e) {
     console.log(e)
-    res.status(503).send(JSON.stringify(e))
+    return res.status(503).send(JSON.stringify(e))
   }
 }

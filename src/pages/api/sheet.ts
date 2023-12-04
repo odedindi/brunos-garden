@@ -26,10 +26,10 @@ export default async function handler(
 
     if (response.data.values) {
       const tasks = response.data.values as [string[]]
-      res.status(200).json(JSON.stringify(tasks))
+      return res.status(200).json(JSON.stringify(tasks))
     }
-    res.status(503).json("Error: no data found on spreadsheet")
+    return res.status(503).json("Error: no data found on spreadsheet")
   } catch (e) {
-    res.status(503).json(JSON.stringify(e))
+    return res.status(503).json(JSON.stringify(e))
   }
 }

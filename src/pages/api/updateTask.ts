@@ -29,14 +29,14 @@ export default async function handler(
         requestBody: { values: [[JSON.stringify(task)]] },
       })
 
-      if (response.data) res.status(200).json(JSON.stringify(task.id))
-      else res.status(503).send("Error: Cannot confirm update success")
+      if (response.data) return res.status(200).json(JSON.stringify(task.id))
+      else return res.status(503).send("Error: Cannot confirm update success")
     } catch (e) {
       console.log({ error: e })
-      res.status(503).send(JSON.stringify(e))
+      return res.status(503).send(JSON.stringify(e))
     }
   } catch (e) {
     console.log(e)
-    res.status(503).send(JSON.stringify(e))
+    return res.status(503).send(JSON.stringify(e))
   }
 }

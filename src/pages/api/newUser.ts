@@ -38,13 +38,13 @@ export default async function handler(
           values: [[JSON.stringify({ email, name, image })]],
         },
       })
-      res
+      return res
         .status(response.status)
         .json(JSON.stringify(response.data.updates?.updatedData?.values))
-    } else res.status(newSheetReq.status).send(newSheetReq.statusText)
+    } else return res.status(newSheetReq.status).send(newSheetReq.statusText)
   } catch (e) {
     console.info(e)
-    res.status(503).json(
+    return res.status(503).json(
       JSON.stringify({
         message: "could not parse params",
         error: e,
