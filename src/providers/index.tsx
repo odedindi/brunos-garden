@@ -3,14 +3,17 @@ import StylesProvider from "./styles"
 import HeadProvider from "./head"
 import AuthProvider from "./auth"
 import { Session } from "next-auth"
+import QueryProvider from "./query"
 
 export const Providers: FC<PropsWithChildren<{ session: Session }>> = ({
   children,
   session,
 }) => (
   <AuthProvider session={session}>
-    <HeadProvider />
-    <StylesProvider>{children}</StylesProvider>
+    <QueryProvider>
+      <HeadProvider />
+      <StylesProvider>{children}</StylesProvider>
+    </QueryProvider>
   </AuthProvider>
 )
 

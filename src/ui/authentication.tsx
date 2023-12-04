@@ -1,15 +1,64 @@
-import { Avatar, Button, Box, Menu } from "@mantine/core"
-import { NextPage } from "next"
+import { AuthenticationForm } from "@/features/authenticationForm"
+import { useMeQuery } from "@/hooks/useMe"
+import { useNewUserMutation } from "@/hooks/useNewUserMutation"
+import { Avatar, Button, Box, Menu, Modal, Loader } from "@mantine/core"
+import { useDisclosure } from "@mantine/hooks"
 
 import { signIn, signOut, useSession } from "next-auth/react"
+import Link from "next/link"
 import { ComponentPropsWithoutRef, FC } from "react"
 
-const UserAvatar: FC = () => {
-  const { data: session } = useSession()
-  if (session) {
+const Authentication: FC = () => {
+  const [modalOpened, { open: openModal, close: closeModal }] =
+    useDisclosure(false)
+
+  const { data: session, status: sessionStatus } = useSession()
+  const { data: me, isLoading: meIsLoading } = useMeQuery()
+  const {
+    mutate: createNewUser,
+    data: createdUser,
+    error: createdUserError,
+  } = useNewUserMutation()
+  if (createdUser) console.log({ createdUser })
+  if (createdUserError) console.info({ createdUserError })
+
+  if (sessionStatus === "loading" || meIsLoading)
+    return (
+      <Button>
+        <Loader color="white" size="sm" />
+      </Button>
+    )
+  if (session?.user?.email && !me) {
+    // for first time users, calling createNewUser will create a sheet database for the user
+    return (
+      <Box>
+        <Modal
+          opened={modalOpened}
+          onClose={closeModal}
+          fullScreen
+          radius={0}
+          transitionProps={{ transition: "fade", duration: 200 }}
+        >
+          <AuthenticationForm
+            initialValues={{
+              email: session.user.email,
+              name: session.user.name ?? null,
+              image: session.user.image ?? null,
+            }}
+            onSubmit={async (user) => {
+              createNewUser(user)
+              if (createdUser) closeModal()
+            }}
+          />
+        </Modal>
+        <Button onClick={openModal}> To Start using the app click here</Button>
+      </Box>
+    )
+  }
+  if (me)
     return (
       <Box mx="sm">
-        {session.user?.image ? (
+        {me.image ? (
           <Menu
             shadow="sm"
             position="right"
@@ -19,8 +68,10 @@ const UserAvatar: FC = () => {
           >
             <Menu.Target>
               <Avatar
-                src={session.user.image}
-                title={session.user?.email ?? ""}
+                component={Link}
+                href="/profile"
+                src={me.image}
+                title={me.email}
                 radius="md"
                 style={{ cursor: "pointer" }}
                 color="cyan"
@@ -35,7 +86,6 @@ const UserAvatar: FC = () => {
         )}
       </Box>
     )
-  }
   return (
     <Button
       leftSection={<GoogleIcon />}
@@ -49,7 +99,7 @@ const UserAvatar: FC = () => {
   )
 }
 
-export default UserAvatar
+export default Authentication
 
 const GoogleIcon: FC<ComponentPropsWithoutRef<"svg">> = (props) => (
   <svg

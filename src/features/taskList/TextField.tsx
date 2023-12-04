@@ -1,13 +1,15 @@
+import DeleteIcon from "@/ui/icons/Delete"
 import EditIcon from "@/ui/icons/Edit"
-import { Input } from "@mantine/core"
+import { Flex, Input } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-import { FC, useRef } from "react"
+import { CSSProperties, FC, useRef } from "react"
 
 const TextField: FC<{
   value: string
   onChange?: (nextValue: string) => void
-}> = ({ value, onChange }) => {
-  const [edit, { toggle }] = useDisclosure(false)
+  onDelete?: () => void
+}> = ({ value, onChange, onDelete }) => {
+  const [edit, { close, toggle }] = useDisclosure(false)
   const ref = useRef<HTMLInputElement>(null)
   return (
     <Input
@@ -19,20 +21,24 @@ const TextField: FC<{
       }}
       disabled={!edit}
       rightSection={
-        <EditIcon
-          onClick={() => {
-            if (!edit) setTimeout(() => ref.current?.focus())
-            toggle()
-          }}
-          size="md"
-          bg={edit ? "grape" : undefined}
-        />
+        <Flex gap="2px" direction="column">
+          <EditIcon
+            onClick={() => {
+              if (!edit) setTimeout(() => ref.current?.focus())
+              toggle()
+            }}
+            size="sm"
+            bg={edit ? "grape" : undefined}
+          />
+          {onDelete ? <DeleteIcon onClick={onDelete} size="sm" /> : null}
+        </Flex>
       }
       styles={{
         input: {
           padding: "0 8px",
           cursor: "auto",
           border: edit ? "solid 1px purple" : undefined,
+          color: "black",
         },
         section: {
           width: "min-content",
@@ -40,6 +46,8 @@ const TextField: FC<{
         },
       }}
       rightSectionPointerEvents="all"
+      onBlur={close}
+      size="lg"
     />
   )
 }

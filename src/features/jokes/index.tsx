@@ -1,12 +1,11 @@
-import { IconChevronDown, IconRepeat } from "@tabler/icons-react"
-
-import { Box, ActionIcon, Menu, Text, Tooltip } from "@mantine/core"
+import { Box, Menu, Text } from "@mantine/core"
 import { FC, useCallback, useEffect, useMemo, useState } from "react"
 import { styled, useTheme } from "styled-components"
-
 import { useLocalStorage } from "@mantine/hooks"
 import { get } from "lodash"
 import { jokesConfig } from "./config"
+import ChevronIcon from "@/ui/icons/Chevron"
+import RefreshIcon from "@/ui/icons/Refresh"
 
 const Base = styled(Box)`
   display: flex;
@@ -55,13 +54,12 @@ const Jokes: FC = () => {
   return (
     <Base>
       <Menu>
-        <Tooltip label={jokesConfig[mode]?.title}>
-          <Menu.Target>
-            <ActionIcon size="sm">
-              <IconChevronDown />
-            </ActionIcon>
-          </Menu.Target>
-        </Tooltip>
+        <Menu.Target>
+          <div>
+            <ChevronIcon size="sm" down label={jokesConfig[mode]?.title} />
+          </div>
+        </Menu.Target>
+
         <Menu.Dropdown>
           {jokesConfig.map(({ title }, i) => (
             <Menu.Item
@@ -80,17 +78,13 @@ const Jokes: FC = () => {
         </Menu.Dropdown>
       </Menu>
       <Joke>{joke}</Joke>
-      <Tooltip label="Refresh">
-        <ActionIcon
-          size="sm"
-          aria-label="refresh"
-          onClick={() => {
-            if (!loading) fetchJoke(mode)
-          }}
-        >
-          <IconRepeat />
-        </ActionIcon>
-      </Tooltip>
+
+      <RefreshIcon
+        size="sm"
+        onClick={() => {
+          if (!loading) fetchJoke(mode)
+        }}
+      />
     </Base>
   )
 }

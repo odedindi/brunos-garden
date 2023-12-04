@@ -1,91 +1,48 @@
-import Layout from "@/ui/layout"
-import { FC, useCallback, useMemo } from "react"
+import { FC, useState } from "react"
+import { Card, ScrollArea } from "@mantine/core"
 
+import { Task } from "@/types/Task"
+import { useRouter } from "next/router"
+import { setQueryOnPage } from "@/utils/setQueryOnPage"
+import { ParsedUrlQuery } from "querystring"
 import dayjs from "dayjs"
-import Task from "./task"
-import type { Task as TTask } from "@/types/Task"
-import { useLocalStorage } from "@uidotdev/usehooks"
-import { ActionIcon, Tooltip } from "@mantine/core"
-import { IconPlus } from "@tabler/icons-react"
 
-const initalTasks: TTask[] = [
-  {
-    id: Math.random().toString().slice(0, 24),
-    title: "Demo task",
-    description: "the first task",
-    schedule: dayjs().add(1, "day").toDate(),
-    completed: false,
-    attributes: [],
-    tags: [],
-  },
-]
-const TasksList: FC = () => {
-  const [tasksRaw, setTasks] = useLocalStorage(
-    "tasks",
-    JSON.stringify(initalTasks),
-  )
-  const tasks: TTask[] = useMemo(
-    () => (tasksRaw ? JSON.parse(tasksRaw) : []),
-    [tasksRaw],
-  )
-
-  const createTask = useCallback(
-    (task: TTask) => {
-      const newTasks = [task, ...tasks]
-      setTasks(JSON.stringify(newTasks))
-    },
-    [setTasks, tasks],
-  )
-  const updateTask = useCallback(
-    (task: TTask) => {
-      const taskIndex = tasks.findIndex(({ id }) => id === task.id)
-      const newTasks = [...tasks]
-      newTasks[taskIndex] = task
-      setTasks(JSON.stringify(newTasks))
-    },
-    [setTasks, tasks],
-  )
-  const deleteTask = useCallback(
-    (taskId: string) => {
-      const newTasks = [...tasks.filter(({ id }) => id !== taskId)]
-      setTasks(JSON.stringify(newTasks))
-    },
-    [setTasks, tasks],
-  )
-  return (
-    <>
-      <Tooltip label="New Task">
-        <ActionIcon
-          size="sm"
-          onClick={() => {
-            createTask({
-              id: Math.random().toString(),
-              title: "",
-              description: "",
-              attributes: [],
-              tags: [],
-            })
-          }}
-        >
-          <IconPlus />
-        </ActionIcon>
-      </Tooltip>
-
-      {tasks.map((task) => (
-        <Task
-          key={task.id}
-          task={task}
-          handle={{
-            create: (newTask) => {
-              createTask(newTask)
-            },
-            update: updateTask,
-            delete: deleteTask,
-          }}
-        />
-      ))}
-    </>
-  )
-}
+const TasksList: FC<{ tasks: Task[] }> = ({ tasks }) => (
+  <ScrollArea.Autosize h="100%" mt="xl" style={{ zIndex: 1 }} offsetScrollbars>
+    {tasks.map((task) => (
+      <TaskCard key={task.id} task={task} />
+    ))}
+  </ScrollArea.Autosize>
+)
 
 export default TasksList
+
+const TaskCard: FC<{ task: Task }> = ({ task }) => {
+  const router = useRouter()
+  const query = router.query as ParsedUrlQuery & { task: string }
+  const [isHovering, setIsHovering] = useState(false)
+
+  const taskIsOverdue = task.schedule ? dayjs().isAfter(task.schedule) : false
+  return (
+    <Card
+      mt="sm"
+      style={{
+        fontSize: query.task === task.id ? "18px" : "14px",
+        fontWeight: 600,
+        color: task.completed
+          ? "lightgreen"
+          : taskIsOverdue
+            ? "red"
+            : "inherit",
+        cursor: "pointer",
+        transition: "all 0.3s ease",
+      }}
+      shadow={isHovering ? "md" : undefined}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      onClick={() => setQueryOnPage(router, { task: task.id })}
+    >
+      {task.title}
+    </Card>
+  )
+}
