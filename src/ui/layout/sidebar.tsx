@@ -1,4 +1,4 @@
-import { FC, ReactNode, useMemo, useState } from "react"
+import { FC, ReactNode, forwardRef, useMemo, useState } from "react"
 import { AppShell, Flex, TextInput, Menu } from "@mantine/core"
 
 import styled from "styled-components"
@@ -48,9 +48,19 @@ const sortTasks = ({
 }) => {
   switch (sortBy) {
     case "ascLetters":
-      return tasks.sort(({ title: a }, { title: b }) => a.localeCompare(b))
+      return tasks.sort(({ title: a }, { title: b }) =>
+        a.localeCompare(b, undefined, {
+          sensitivity: "base",
+          ignorePunctuation: true,
+        }),
+      )
     case "descLetters":
-      return tasks.sort(({ title: a }, { title: b }) => b.localeCompare(a))
+      return tasks.sort(({ title: a }, { title: b }) =>
+        b.localeCompare(a, undefined, {
+          sensitivity: "base",
+          ignorePunctuation: true,
+        }),
+      )
     case "notCompleted":
       return tasks.sort(({ completed: a }, { completed: b }) =>
         !a && !b ? 0 : !a ? 1 : -1,
@@ -81,13 +91,17 @@ const Sidebar: FC = () => {
     if (searchQuery.length >= 2)
       return sortTasks({
         sortBy,
-        tasks: tasks.filter(
-          (t) =>
-            t.title.includes(searchQuery) ||
-            t.description.includes(searchQuery) ||
-            t.category?.includes(searchQuery) ||
-            t.tags.some((tag) => tag.includes(searchQuery)),
-        ),
+        tasks: tasks.filter((t) => {
+          const searchQueryLowerCase = searchQuery.toLowerCase()
+          return (
+            t.title.toLowerCase().includes(searchQueryLowerCase) ||
+            t.description.toLowerCase().includes(searchQueryLowerCase) ||
+            t.category?.toLowerCase().includes(searchQueryLowerCase) ||
+            t.tags.some((tag) =>
+              tag.toLowerCase().includes(searchQueryLowerCase),
+            )
+          )
+        }),
       })
     return sortTasks({ sortBy, tasks })
   }, [searchQuery, sortBy, tasks])
@@ -113,7 +127,7 @@ const Sidebar: FC = () => {
             closeOnItemClick={false}
           >
             <Menu.Target>
-              <SortIcon size="md" />
+              <IconWRef />
             </Menu.Target>
             <Menu.Dropdown>
               <Menu.Label>Sort </Menu.Label>
@@ -139,3 +153,9 @@ const Sidebar: FC = () => {
 }
 
 export default Sidebar
+
+const IconWRef = forwardRef<HTMLDivElement>((props, ref) => (
+  <Flex ref={ref}>
+    <SortIcon size="md" {...props} />
+  </Flex>
+))
