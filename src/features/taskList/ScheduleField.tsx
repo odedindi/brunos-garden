@@ -12,15 +12,15 @@ const ScheduleField: FC<{
   const ref = useRef<HTMLInputElement>(null)
 
   const dateInputLabel = useMemo(() => {
-    if (!scheduled) return undefined
     const daysDiff = dayjs(scheduled).diff(dayjs(), "days")
-    return `Scheduled: ${
-      daysDiff === 0
+    const scheduledFor = !scheduled
+      ? ""
+      : daysDiff === 0
         ? "Today"
         : `${daysDiff > 0 ? "in" : ""} ${daysDiff} day${
             daysDiff < -1 ? "s" : ""
           } ${daysDiff < 0 ? "ago" : ""}`
-    }`
+    return `Scheduled: ${scheduledFor}`
   }, [scheduled])
 
   return (
