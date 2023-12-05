@@ -13,21 +13,21 @@ const StyledActionIcon = styled(ActionIcon)`
   }
 `
 
-export type IconProps = {
+export type IconProps = PropsWithChildren<{
   onClick?: () => void
   label?: string
   size?: ActionIconProps["size"]
   bg?: ActionIconProps["bg"]
   style?: CSSProperties
-}
+}>
 
-const Icon: FC<PropsWithChildren<IconProps>> = ({
+const Icon: FC<IconProps> = ({
   label,
   size = "xs",
   bg = "dark.3",
   ...iconProps
 }) => (
-  <Tooltip openDelay={2500} label={label}>
+  <Tooltip openDelay={500} label={label}>
     <StyledActionIcon size={size} bg={bg} {...iconProps} />
   </Tooltip>
 )
