@@ -1,13 +1,25 @@
-import { AuthenticationForm } from "@/features/authenticationForm"
 import { useMeQuery } from "@/hooks/useMe"
 import { useNewUserMutation } from "@/hooks/useNewUserMutation"
-import { Avatar, Button, Box, Menu, Modal, Loader } from "@mantine/core"
+import {
+  Avatar,
+  Button,
+  Box,
+  Menu,
+  Loader as MantineLoader,
+} from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
 
 import { signIn, signOut, useSession } from "next-auth/react"
 import Link from "next/link"
 import { ComponentPropsWithoutRef, FC } from "react"
 
+const Loader: FC = () => (
+  <Box mr={5}>
+    <Button>
+      <MantineLoader color="white" size="sm" />
+    </Button>
+  </Box>
+)
 const Authentication: FC = () => {
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false)
@@ -22,38 +34,14 @@ const Authentication: FC = () => {
   if (createdUser) console.log({ createdUser })
   if (createdUserError) console.info({ createdUserError })
 
-  if (sessionStatus === "loading" || meIsLoading)
-    return (
-      <Button>
-        <Loader color="white" size="sm" />
-      </Button>
-    )
+  if (sessionStatus === "loading" || meIsLoading) return <Loader />
   if (session?.user?.email && !me) {
-    // for first time users, calling createNewUser will create a sheet database for the user
-    return (
-      <Box>
-        <Modal
-          opened={modalOpened}
-          onClose={closeModal}
-          fullScreen
-          radius={0}
-          transitionProps={{ transition: "fade", duration: 200 }}
-        >
-          <AuthenticationForm
-            initialValues={{
-              email: session.user.email,
-              name: session.user.name ?? null,
-              image: session.user.image ?? null,
-            }}
-            onSubmit={async (user) => {
-              createNewUser(user)
-              if (createdUser) closeModal()
-            }}
-          />
-        </Modal>
-        <Button onClick={openModal}> To Start using the app click here</Button>
-      </Box>
-    )
+    const user = createNewUser({
+      email: session.user.email,
+      name: session.user.name ?? null,
+      image: session.user.image ?? null,
+    })
+    return <MantineLoader color="white" size="sm" />
   }
   if (me)
     return (
