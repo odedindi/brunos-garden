@@ -7,8 +7,6 @@ import {
   Menu,
   Loader as MantineLoader,
 } from "@mantine/core"
-import { useDisclosure } from "@mantine/hooks"
-
 import { signIn, signOut, useSession } from "next-auth/react"
 import Link from "next/link"
 import { ComponentPropsWithoutRef, FC } from "react"
@@ -21,9 +19,6 @@ const Loader: FC = () => (
   </Box>
 )
 const Authentication: FC = () => {
-  const [modalOpened, { open: openModal, close: closeModal }] =
-    useDisclosure(false)
-
   const { data: session, status: sessionStatus } = useSession()
   const { data: me, isLoading: meIsLoading } = useMeQuery()
   const {
