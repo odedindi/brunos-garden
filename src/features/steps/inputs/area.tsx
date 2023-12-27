@@ -41,6 +41,7 @@ const SelectArea: FC<{
       onUnitChange={(unit) => onChange({ unit: unit as Area })}
       onSubmit={onSubmit}
       placeholder="Area"
+      focusOnLoad
     />
   )
 }

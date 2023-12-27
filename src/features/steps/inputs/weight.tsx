@@ -45,6 +45,7 @@ const SelectWeight: FC<{
       onUnitChange={(unit) => onChange({ unit: unit as Weight })}
       onSubmit={onSubmit}
       placeholder="Weight"
+      focusOnLoad
     />
   )
 }

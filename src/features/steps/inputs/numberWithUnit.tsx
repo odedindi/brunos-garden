@@ -1,7 +1,8 @@
-import { FC, useMemo } from "react"
+import { FC, useMemo, useRef } from "react"
 
 import { Flex, NumberInput, Select, Text } from "@mantine/core"
 import ChevronIcon from "@/ui/icons/Chevron"
+import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
 
 const weight = ["g", "kg"] as const
 export type Weight = (typeof weight)[number]
@@ -16,13 +17,26 @@ const SelectNumberWithUnit: FC<{
   onUnitChange: (unit: Unit) => void
   onSubmit?: () => void
   placeholder?: string
-}> = ({ value, onChange, unit, onUnitChange, onSubmit, placeholder }) => {
+  focusOnLoad?: boolean
+}> = ({
+  focusOnLoad,
+  value,
+  onChange,
+  unit,
+  onUnitChange,
+  onSubmit,
+  placeholder,
+}) => {
   const data = useMemo(
     () => Array.from(area.includes(unit as Area) ? area : weight),
     [unit],
   )
+  const ref = useRef<HTMLInputElement>(null)
+  useFocusOnLoad(focusOnLoad ? ref : undefined)
+
   return (
     <NumberInput
+      ref={ref}
       value={value}
       onChange={(value) => {
         if (Number(value)) onChange(Number(value))

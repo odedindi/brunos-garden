@@ -1,10 +1,11 @@
-import { FC, useEffect, useMemo, useState } from "react"
+import { FC, useEffect, useMemo, useRef, useState } from "react"
 import { useTasksQuery } from "@/hooks/useTasksQuery"
 import { Combobox, InputBase, useCombobox } from "@mantine/core"
 import ChevronIcon from "@/ui/icons/Chevron"
 import { useRouter } from "next/router"
 import { ParsedUrlQuery } from "querystring"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
+import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
 
 type Query = ParsedUrlQuery & {
   title?: string
@@ -31,6 +32,8 @@ const SelectTitle: FC<{
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   })
+  const ref = useRef<HTMLInputElement>(null)
+  useFocusOnLoad(ref)
 
   const [data, setData] = useTitleData()
   const router = useRouter()
@@ -80,6 +83,7 @@ const SelectTitle: FC<{
     >
       <Combobox.Target>
         <InputBase
+          ref={ref}
           value={query.title !== search ? search : query.title}
           onChange={(event) => {
             combobox.openDropdown()

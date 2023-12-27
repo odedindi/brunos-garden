@@ -1,9 +1,10 @@
-import { FC, useState } from "react"
+import { FC, useRef, useState } from "react"
 import { DatePicker } from "@mantine/dates"
 import { ParsedUrlQuery } from "querystring"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
 import dayjs from "dayjs"
 import { useRouter } from "next/router"
+import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
 
 type Query = ParsedUrlQuery & {
   date?: string
@@ -14,6 +15,9 @@ const dateFormat = "DD-MM-YYYY"
 const SelectDate: FC<{
   onSubmit?: () => void
 }> = ({ onSubmit }) => {
+  const ref = useRef<HTMLDivElement>(null)
+  useFocusOnLoad(ref)
+
   const router = useRouter()
   const query = router.query as Query
 
@@ -51,6 +55,7 @@ const SelectDate: FC<{
   }
   return (
     <DatePicker
+      ref={ref}
       type="range"
       value={state}
       onChange={(date) => {
