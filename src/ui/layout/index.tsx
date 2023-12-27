@@ -1,6 +1,5 @@
-import { FC, PropsWithChildren } from "react"
-import Jokes from "@/features/jokes"
-import { AppShell, Box, Burger, Group } from "@mantine/core"
+import { FC, PropsWithChildren, ReactNode } from "react"
+import { AppShell, Box, Group } from "@mantine/core"
 import { useLocalStorage } from "@mantine/hooks"
 import styled from "styled-components"
 import { get } from "lodash"
@@ -8,24 +7,33 @@ import StrawberryLogo from "../StrawberryLogo"
 import Authentication from "../authentication"
 
 import { Slogen } from "./slogen"
-import Sidebar from "./sidebar"
 
 const Header = styled(AppShell.Header)`
   display: flex;
   align-items: center;
   padding: 0 8px;
-  background-color: ${({ theme }) => get(theme, "colors.orange[3]")};
+  background-color: ${({ theme }) => get(theme, "colors.gray[3]")};
 `
 
-const Main = styled(AppShell.Main)`
-  background-color: ${({ theme }) => get(theme, "colors.green[3]")};
-`
+const Main = styled(AppShell.Main)``
 const Footer = styled(AppShell.Footer)`
-  background-color: ${({ theme }) => get(theme, "colors.blue[3]")};
+  background-color: ${({ theme }) => get(theme, "colors.gray[3]")};
   overflow: auto;
 `
 
-const Layout: FC<PropsWithChildren> = ({ children }) => {
+type LayoutProps = PropsWithChildren<{
+  headerProps?: {
+    logoHref?: string
+  }
+  sidebar?: ReactNode
+  footer?: ReactNode
+}>
+const Layout: FC<LayoutProps> = ({
+  children,
+  sidebar,
+  footer,
+  headerProps,
+}) => {
   const [navbarOpen, setNavbarOpen] = useLocalStorage({
     key: "navbar",
     defaultValue: true,
@@ -34,35 +42,34 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
   return (
     <AppShell
       header={{ height: 50 }}
-      navbar={{
-        width: 350,
-        breakpoint: "sm",
-        collapsed: { mobile: !navbarOpen },
-      }}
+      navbar={
+        sidebar
+          ? {
+              width: 350,
+              breakpoint: "sm",
+              collapsed: { mobile: !navbarOpen },
+            }
+          : undefined
+      }
       footer={{ height: 75 }}
       padding="md"
     >
       <Header>
         <Group w="100%" wrap="nowrap" pr="xl">
           <Box w="100%" style={{ display: "flex", alignItems: "center" }}>
-            <Burger
-              opened={navbarOpen}
-              onClick={() => setNavbarOpen((o) => !o)}
-              hiddenFrom="sm"
-              size="sm"
-            />
             <Authentication />
             <Slogen $hideUpToSm />
           </Box>
-          <StrawberryLogo href="/" />
+          <StrawberryLogo href={headerProps?.logoHref} />
         </Group>
       </Header>
-
-      <Sidebar />
-      <Main bg={"green.3"}>{children}</Main>
-      <Footer p="md" bg={"blue.3"} zIndex={1000}>
-        <Jokes />
-      </Footer>
+      {sidebar ? sidebar : null}
+      <Main>{children}</Main>
+      {footer ? (
+        <Footer p="md" zIndex={1000}>
+          {footer}
+        </Footer>
+      ) : null}
     </AppShell>
   )
 }

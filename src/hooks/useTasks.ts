@@ -6,15 +6,12 @@ import { useUpdateTasksMutation } from "./useUpdateTasksMutation"
 import { useNewTaskMutation } from "./useNewTaskMutation"
 import { useDeleteTaskMutation } from "./useDeleteTaskMutation"
 
-const newTask = ({ title = "", description = "" }: Partial<Task>): Task => ({
+const newTask = ({ title, date, weight, area }: Omit<Task, "id">): Task => ({
   id: Math.random().toString(),
   title,
-  description,
-  attributes: [],
-  tags: [],
-  completed: false,
-  schedule: null,
-  category: null,
+  date,
+  weight,
+  area,
 })
 
 export const useTasks = () => {
@@ -33,9 +30,9 @@ export const useTasks = () => {
   const { mutate: deleteTaskMutation } = useDeleteTaskMutation()
   const { mutate: updateTaskMutation } = useUpdateTasksMutation()
 
-  const createTask = async () => {
+  const createTask = async (task: Omit<Task, "id">) => {
     if (!userEmail || newTaskIsPending) return
-    newTaskMutation({ email: userEmail, task: newTask({}) })
+    newTaskMutation({ email: userEmail, task: newTask(task) })
   }
   const updateTask = (task: Task) => {
     if (!userEmail) return

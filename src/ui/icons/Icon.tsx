@@ -26,10 +26,13 @@ const Icon: FC<IconProps> = ({
   size = "xs",
   bg = "dark.3",
   ...iconProps
-}) => (
-  <Tooltip openDelay={500} label={label}>
+}) =>
+  label ? (
+    <Tooltip openDelay={500} label={label}>
+      <StyledActionIcon size={size} bg={bg} {...iconProps} />
+    </Tooltip>
+  ) : (
     <StyledActionIcon size={size} bg={bg} {...iconProps} />
-  </Tooltip>
-)
+  )
 
 export default Icon

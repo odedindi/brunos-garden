@@ -37,13 +37,10 @@ const QueryProvider: FC<PropsWithChildren> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
+      <ReactQueryDevtools initialIsOpen={false} />
       {showDevtools && (
         <Suspense fallback={null}>
-          <ReactQueryDevtoolsProduction
-            initialIsOpen={false}
-            buttonPosition="top-right"
-          />
+          <ReactQueryDevtoolsProduction initialIsOpen={false} />
         </Suspense>
       )}
     </QueryClientProvider>

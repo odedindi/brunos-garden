@@ -7,7 +7,9 @@ import styled from "styled-components"
 
 const BerryCage = styled(Box)`
   position: relative;
+  cursor: pointer;
 `
+
 const StrawberryShadow = styled(Avatar).attrs({
   src: "/strawberry.svg",
 })`
@@ -24,11 +26,19 @@ const Strawberry = styled(Avatar).attrs({
   z-index: 2;
 `
 
-const StrawberryLogo: FC<{ href?: string }> = ({ href }) => (
-  <BerryCage as={href ? Link : undefined} href="/">
-    <StrawberryShadow />
-    <Strawberry />
-  </BerryCage>
-)
+const StrawberryLogo: FC<{ href?: string }> = ({ href }) =>
+  href ? (
+    <BerryCage>
+      <Link href={href}>
+        <StrawberryShadow />
+        <Strawberry />
+      </Link>
+    </BerryCage>
+  ) : (
+    <BerryCage>
+      <StrawberryShadow />
+      <Strawberry />
+    </BerryCage>
+  )
 
 export default StrawberryLogo

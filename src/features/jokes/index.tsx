@@ -1,4 +1,4 @@
-import { Box, Menu, Text } from "@mantine/core"
+import { Box, Menu, Stack, Text } from "@mantine/core"
 import { FC, useCallback, useEffect, useMemo, useState } from "react"
 import { styled, useTheme } from "styled-components"
 import { useLocalStorage } from "@mantine/hooks"
@@ -54,11 +54,19 @@ const Jokes: FC = () => {
   return (
     <Base>
       <Menu>
-        <Menu.Target>
-          <div>
-            <ChevronIcon size="sm" down label={jokesConfig[mode]?.title} />
-          </div>
-        </Menu.Target>
+        <Stack gap={0}>
+          <Menu.Target>
+            <div>
+              <ChevronIcon size="sm" down label={jokesConfig[mode]?.title} />
+            </div>
+          </Menu.Target>
+          <RefreshIcon
+            size="sm"
+            onClick={() => {
+              if (!loading) fetchJoke(mode)
+            }}
+          />
+        </Stack>
 
         <Menu.Dropdown>
           {jokesConfig.map(({ title }, i) => (
@@ -67,7 +75,7 @@ const Jokes: FC = () => {
               disabled={mode === i}
               style={{
                 backgroundColor:
-                  mode === i ? get(theme, "colors.blue[2]") : "inherit",
+                  mode === i ? get(theme, "colors.gray[1]") : "inherit",
                 fontWeight: mode === i ? 900 : "inherit",
               }}
               onClick={() => setMode(i)}
@@ -78,13 +86,6 @@ const Jokes: FC = () => {
         </Menu.Dropdown>
       </Menu>
       <Joke>{joke}</Joke>
-
-      <RefreshIcon
-        size="sm"
-        onClick={() => {
-          if (!loading) fetchJoke(mode)
-        }}
-      />
     </Base>
   )
 }

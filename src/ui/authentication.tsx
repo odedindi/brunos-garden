@@ -8,7 +8,7 @@ import {
   Loader as MantineLoader,
 } from "@mantine/core"
 import { signIn, signOut, useSession } from "next-auth/react"
-import Link from "next/link"
+// import Link from "next/link"
 import { ComponentPropsWithoutRef, FC } from "react"
 
 const Loader: FC = () => (
@@ -51,8 +51,8 @@ const Authentication: FC = () => {
           >
             <Menu.Target>
               <Avatar
-                component={Link}
-                href="/profile"
+                // component={Link}
+                // href="/profile"
                 src={me.image}
                 title={me.email}
                 radius="md"
