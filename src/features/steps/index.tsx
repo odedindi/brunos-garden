@@ -11,7 +11,7 @@ const SelectTitle = dynamic(() => import("./inputs/title"), { ssr: false })
 const SelectDate = dynamic(() => import("./inputs/date"), { ssr: false })
 const SelectWeight = dynamic(() => import("./inputs/weight"), { ssr: false })
 const SelectArea = dynamic(() => import("./inputs/area"), { ssr: false })
-const Overview = dynamic(() => import("./overview"), { ssr: false })
+const OverviewTable = dynamic(() => import("../overviewTable"), { ssr: false })
 
 type Query = ParsedUrlQuery & {
   title?: string
@@ -176,7 +176,7 @@ const Steps: FC = () => {
         ))}
         <Stepper.Completed>
           <Container>
-            <Overview query={query} />
+            <OverviewTable tasks={[query]} disableSelectRows />
             <Button component={"a"} href="/" bg="dark.3">
               Create New Entry
             </Button>
