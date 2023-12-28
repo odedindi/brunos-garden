@@ -1,8 +1,8 @@
 import Providers from "@/providers"
 import type { AppProps } from "next/app"
 
-import "@/config/general.css"
 import "@/config/dayjsExtentions"
+import "@/config/general.css"
 
 export default function App({
   Component,

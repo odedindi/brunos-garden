@@ -1,4 +1,12 @@
-import { FC, useEffect, useMemo, useRef, useState } from "react"
+import {
+  ChangeEvent,
+  FC,
+  KeyboardEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { useTasksQuery } from "@/hooks/useTasksQuery"
 import { Combobox, InputBase, useCombobox } from "@mantine/core"
 import ChevronIcon from "@/ui/icons/Chevron"
@@ -6,6 +14,14 @@ import { useRouter } from "next/router"
 import { ParsedUrlQuery } from "querystring"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
 import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
+import styled from "styled-components"
+
+const Input = styled(InputBase)`
+  :focus,
+  :focus-within {
+    border-color: var(--mantine-color-dark-3);
+  }
+`
 
 type Query = ParsedUrlQuery & {
   crop?: string
@@ -82,10 +98,10 @@ const SelectCrop: FC<{
       }}
     >
       <Combobox.Target>
-        <InputBase
+        <Input
           ref={ref}
           value={query.crop !== search ? search : query.crop}
-          onChange={(event) => {
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {
             combobox.openDropdown()
             combobox.updateSelectedOptionIndex()
             const val = event.currentTarget.value
@@ -106,7 +122,7 @@ const SelectCrop: FC<{
               }}
             />
           }
-          onKeyDown={(event) => {
+          onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
             if (event.key === "Enter") {
               onSubmit()
             }

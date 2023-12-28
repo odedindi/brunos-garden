@@ -1,9 +1,31 @@
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
 import { FC, useMemo, useState } from "react"
+import type { Task } from "@/types/Task"
+import IndeterminateCheckbox from "./indeterminateCheckbox"
 
-import { Checkbox, Table } from "@mantine/core"
-import { Task } from "@/types/Task"
+import {
+  Box,
+  Space,
+  TextInput as MantineTextInput,
+  Table,
+  Flex,
+} from "@mantine/core"
+import OverviewTableFooter from "./TableFooter"
+import styled from "styled-components"
 
-type TaskKey = keyof Task
+const TextInput = styled(MantineTextInput)`
+  :focus,
+  :focus-within {
+    border-color: var(--mantine-color-dark-3);
+  }
+`
 
 type OverviewProps = {
   tasks?: Partial<Task>[]
@@ -11,76 +33,161 @@ type OverviewProps = {
 }
 
 const OverviewTable: FC<OverviewProps> = ({ tasks, disableSelectRows }) => {
-  const [selectedRows, setSelectedRows] = useState<string[]>([])
+  const [rowSelection, setRowSelection] = useState({})
+  const [globalFilter, setGlobalFilter] = useState("")
 
-  const tasksKeys = useMemo(
-    () =>
-      (Object.keys(tasks?.[0] ?? {}) as TaskKey[]).filter(
-        (key) => key !== "id",
-      ),
-    [tasks],
+  const columns = useMemo<ColumnDef<Partial<Task>>[]>(
+    () => [
+      {
+        id: "overviewTable",
+        header: ({ table }) =>
+          disableSelectRows ? null : (
+            <IndeterminateCheckbox
+              {...{
+                checked: table.getIsAllRowsSelected(),
+                indeterminate: table.getIsSomeRowsSelected(),
+                onChange: table.getToggleAllRowsSelectedHandler(),
+                style: { marginLeft: "10px" },
+              }}
+            />
+          ),
+        cell: ({ row }) =>
+          disableSelectRows ? null : (
+            <Box px="xs">
+              <IndeterminateCheckbox
+                {...{
+                  checked: row.getIsSelected(),
+                  disabled: !row.getCanSelect(),
+                  indeterminate: row.getIsSomeSelected(),
+                  onChange: row.getToggleSelectedHandler(),
+                }}
+              />
+            </Box>
+          ),
+      },
+      {
+        header: "Crop",
+        accessorKey: "title",
+        cell: (info) => info.getValue(),
+        footer: (props) => props.column.id,
+      },
+      {
+        header: "Date",
+        accessorKey: "date",
+        cell: (info) => {
+          const value = info.getValue()
+          if (typeof value === "string") return value.replace("_", " ")
+          return value
+        },
+        footer: (props) => props.column.id,
+      },
+      {
+        header: "Weight",
+        accessorKey: "weight",
+        cell: (info) => {
+          const value = info.getValue()
+          if (typeof value === "string") return value.replace("_", " ")
+          return value
+        },
+        footer: (props) => props.column.id,
+      },
+      {
+        header: "Area",
+        accessorKey: "area",
+        cell: (info) => {
+          const value = info.getValue()
+          if (typeof value === "string") return value.replace("_", " ")
+          return value
+        },
+        footer: (props) => props.column.id,
+      },
+    ],
+    [disableSelectRows],
   )
+  const table = useReactTable({
+    data: tasks ?? [],
+    columns,
+    state: {
+      rowSelection,
+    },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    debugTable: true,
+  })
 
   return (
-    <Table striped highlightOnHover withTableBorder>
-      <Table.Thead>
-        <Table.Tr>
-          {tasksKeys.length ? (
-            <>
-              {disableSelectRows ? null : <Table.Th />}
-              {tasksKeys.map((key, i) => (
-                <Table.Th key={i} style={{ textTransform: "capitalize" }}>
-                  {key}
+    <Flex direction="column" p={"sm"} justify="center">
+      <Box>
+        <TextInput
+          value={globalFilter ?? ""}
+          onChange={(e) => {
+            setGlobalFilter(e.target.value)
+            table.setGlobalFilter(e.target.value)
+          }}
+          style={{ boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)" }}
+          onSubmit={(e) => {
+            setGlobalFilter(e.currentTarget.value)
+            table.setGlobalFilter(e.currentTarget.value)
+          }}
+          styles={{ input: { padding: "8px" } }}
+          placeholder="Search..."
+        />
+      </Box>
+      <Space h="lg" />
+
+      <Table
+        striped
+        highlightOnHover
+        withTableBorder
+        style={{ boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)" }}
+      >
+        <Table.Thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <Table.Tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <Table.Th key={header.id} colSpan={header.colSpan}>
+                  {header.isPlaceholder ? null : (
+                    <>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                      {/* {header.column.getCanFilter() ? (
+                        <Box>
+                          <Filter column={header.column} table={table} />
+                        </Box>
+                      ) : null} */}
+                    </>
+                  )}
                 </Table.Th>
               ))}
-            </>
-          ) : null}
-        </Table.Tr>
-      </Table.Thead>
-      <Table.Tbody>
-        {tasksKeys.length
-          ? tasks?.map((task, i) => {
-              const onClick = () => {
-                if (!disableSelectRows && task.id)
-                  setSelectedRows(
-                    !selectedRows.includes(task.id)
-                      ? [...selectedRows, task.id]
-                      : selectedRows.filter((id) => id !== task.id),
-                  )
-              }
-              return (
-                <Table.Tr
-                  key={i}
-                  bg={
-                    !!task.id && selectedRows.includes(task.id)
-                      ? "gray.3"
-                      : undefined
-                  }
-                  onClick={onClick}
-                >
-                  <>
-                    {disableSelectRows ? null : (
-                      <Table.Td>
-                        <Checkbox
-                          aria-label="Select row"
-                          checked={!!task.id && selectedRows.includes(task.id)}
-                          onChange={onClick}
-                          color="dark.3"
-                        />
-                      </Table.Td>
-                    )}
-                    {tasksKeys.map((key, i) => (
-                      <Table.Td key={i}>
-                        {(task[key as TaskKey] ?? "").replace("_", " ")}
-                      </Table.Td>
-                    ))}
-                  </>
-                </Table.Tr>
-              )
-            })
-          : null}
-      </Table.Tbody>
-    </Table>
+            </Table.Tr>
+          ))}
+        </Table.Thead>
+        <Table.Tbody>
+          {table.getRowModel().rows.map((row) => (
+            <Table.Tr
+              key={row.id}
+              onClick={() => row.toggleSelected()}
+              style={{ cursor: "pointer" }}
+            >
+              {row.getVisibleCells().map((cell) => (
+                <Table.Td key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </Table.Td>
+              ))}
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
+
+      <Space h="xl" />
+      <OverviewTableFooter table={table} rowSelection={rowSelection} />
+    </Flex>
   )
 }
+
 export default OverviewTable

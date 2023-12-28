@@ -2,9 +2,29 @@ import type { Table as TankstackTable } from "@tanstack/react-table"
 import type { FC } from "react"
 import type { Task } from "@/types/Task"
 
-import { Box, Text, NumberInput, Select, Flex } from "@mantine/core"
+import {
+  Box,
+  Text,
+  NumberInput as MantineNumberInput,
+  Select as MantineSelect,
+  Flex,
+} from "@mantine/core"
 import ChevronIcon from "@/ui/icons/Chevron"
 import ChevronsIcon from "@/ui/icons/Chevrons"
+import styled from "styled-components"
+
+const NumberInput = styled(MantineNumberInput)`
+  :focus,
+  :focus-within {
+    border-color: var(--mantine-color-dark-3);
+  }
+`
+const Select = styled(MantineSelect)`
+  :focus,
+  :focus-within {
+    border-color: var(--mantine-color-dark-3);
+  }
+`
 
 type OverviewTableFooterProps = {
   table: TankstackTable<Partial<Task>>
@@ -17,7 +37,7 @@ const OverviewTableFooter: FC<OverviewTableFooterProps> = ({
 }) => (
   <Box>
     <Flex>
-      <Flex align={"center"} gap={"xs"} style={{ flex: 1 }}>
+      <Flex align={"end"} style={{ flex: 1, gap: "4px" }}>
         <ChevronsIcon
           left
           size={36}
@@ -40,31 +60,27 @@ const OverviewTableFooter: FC<OverviewTableFooterProps> = ({
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}
         />
-        <Text>Page</Text>
-        <Text fw={700}>
-          <NumberInput
-            title="Go to page"
-            defaultValue={table.getState().pagination.pageIndex + 1}
-            onChange={(value) => {
-              const page = value ? Number(value) - 1 : 0
-              table.setPageIndex(page)
-            }}
-            w={75}
-            miw={50}
-            disabled={table.getPageCount() === 1}
-            styles={{
-              input: {
-                padding: "8px",
-              },
-            }}
-            min={table.getState().pagination.pageIndex + 1}
-            max={table.getPageCount()}
-          />
-        </Text>
+
+        <NumberInput
+          description="Page"
+          title="Select page number"
+          defaultValue={table.getState().pagination.pageIndex + 1}
+          onChange={(value) => {
+            const page = value ? Number(value) - 1 : 0
+            table.setPageIndex(page)
+          }}
+          w={75}
+          miw={50}
+          disabled={table.getPageCount() === 1}
+          styles={{ input: { padding: "8px", height: "37px" } }}
+          min={table.getState().pagination.pageIndex + 1}
+          max={table.getPageCount()}
+        />
       </Flex>
       <Select
         withCheckIcon={false}
-        title="Rows per page"
+        description="Results per page"
+        title="Results per page"
         w={150}
         miw={50}
         value={`${table.getState().pagination.pageSize}`}
@@ -72,12 +88,13 @@ const OverviewTableFooter: FC<OverviewTableFooterProps> = ({
           if (value) table.setPageSize(Number(value))
         }}
         data={[10, 20, 30, 40, 50].map((size) => `${size}`)}
+        styles={{ root: { borderColor: "red" } }}
       />
     </Flex>
-    <hr />
+    <hr style={{ boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)" }} />
     <Text>
       {Object.keys(rowSelection).length} of{" "}
-      {table.getPreFilteredRowModel().rows.length} Total Rows Selected
+      {table.getPreFilteredRowModel().rows.length} Selected
     </Text>
   </Box>
 )

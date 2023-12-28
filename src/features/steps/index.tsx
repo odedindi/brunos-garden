@@ -1,5 +1,5 @@
 import { FC, useCallback, useState } from "react"
-import { Stepper, Button, Box } from "@mantine/core"
+import { Stepper, Button, Box, Title } from "@mantine/core"
 import dynamic from "next/dynamic"
 import styled from "styled-components"
 import { get } from "lodash"
@@ -41,7 +41,10 @@ const StyledStepper = styled(Stepper)`
 
   .mantine-Stepper-separator {
     transition: all 0.3s ease;
-    background-color: ${({ theme }) => get(theme, "colors.dark[3]")};
+  }
+
+  .mantine-Stepper-stepDescription {
+    max-width: 100px;
   }
 `
 
@@ -55,7 +58,7 @@ const Container = styled(Box)`
 const steps = [
   {
     label: "crop",
-    description: "Create or select a crop",
+    description: "Select or create a new crop",
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
       <SelectCrop
         onSubmit={() => {
@@ -66,7 +69,7 @@ const steps = [
   },
   {
     label: "date",
-    description: "Select a date or a date range",
+    description: "Select a date or a range",
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
       <>
         <SelectDate
@@ -157,7 +160,15 @@ const Steps: FC = () => {
 
   return (
     <>
-      <StyledStepper active={active} onStepClick={setActive} size="xs">
+      <Title mb="xl" style={{ textAlign: "center" }}>
+        CropTracker Pro
+      </Title>
+      <StyledStepper
+        active={active}
+        onStepClick={setActive}
+        size="xs"
+        color="dark.3"
+      >
         {steps.map(({ label, description, Children }, i) => (
           <Stepper.Step
             key={i}
@@ -176,7 +187,10 @@ const Steps: FC = () => {
         ))}
         <Stepper.Completed>
           <Container>
-            <OverviewTable tasks={[query]} disableSelectRows />
+            <OverviewTable
+              tasks={[query].map(({ crop, ...q }) => ({ title: crop, ...q }))}
+              disableSelectRows
+            />
             <Button component={"a"} href="/" bg="dark.3">
               Create New Entry
             </Button>

@@ -1,14 +1,9 @@
-import { Checkbox as MantineCheckbox, CheckboxProps } from "@mantine/core"
+import { Checkbox, CheckboxProps } from "@mantine/core"
 import { FC, useEffect, useRef } from "react"
-import styled from "styled-components"
-
-const Checkbox = styled(MantineCheckbox)`
-  cursor: pointer;
-`
 
 const IndeterminateCheckbox: FC<
-  { indeterminate?: boolean } & CheckboxProps
-> = ({ indeterminate, className = "", ...rest }) => {
+  { indeterminate?: boolean } & Omit<CheckboxProps, "styles">
+> = ({ indeterminate, color = "dark.3", ...rest }) => {
   const ref = useRef<HTMLInputElement>(null!)
 
   useEffect(() => {
@@ -18,7 +13,14 @@ const IndeterminateCheckbox: FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ref, indeterminate])
 
-  return <Checkbox ref={ref} {...rest} />
+  return (
+    <Checkbox
+      ref={ref}
+      color={color}
+      styles={{ input: { cursor: "pointer" } }}
+      {...rest}
+    />
+  )
 }
 
 export default IndeterminateCheckbox

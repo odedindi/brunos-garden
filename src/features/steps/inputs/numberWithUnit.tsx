@@ -1,14 +1,33 @@
 import { FC, useMemo, useRef } from "react"
 
-import { Flex, NumberInput, Select, Text } from "@mantine/core"
+import {
+  Flex,
+  NumberInput as MantineNumberInput,
+  Select as MantineSelect,
+  Text,
+} from "@mantine/core"
 import ChevronIcon from "@/ui/icons/Chevron"
 import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
+import styled from "styled-components"
 
 const weight = ["g", "kg"] as const
 export type Weight = (typeof weight)[number]
 const area = ["m2"] as const
 export type Area = (typeof area)[number]
 export type Unit = Weight | Area
+
+const NumberInput = styled(MantineNumberInput)`
+  :focus,
+  :focus-within {
+    border-color: var(--mantine-color-dark-3);
+  }
+`
+const Select = styled(MantineSelect)`
+  :focus,
+  :focus-within {
+    border-color: var(--mantine-color-dark-3);
+  }
+`
 
 const SelectNumberWithUnit: FC<{
   value?: number
