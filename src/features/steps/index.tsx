@@ -190,6 +190,8 @@ const Steps: FC = () => {
             <OverviewTable
               tasks={[query].map(({ crop, ...q }) => ({ title: crop, ...q }))}
               disableSelectRows
+              hideOverviewTableFooter
+              hideTableFoot
             />
             <Button component={"a"} href="/" bg="dark.3">
               Create New Entry

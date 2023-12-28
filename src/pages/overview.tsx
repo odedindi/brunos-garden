@@ -13,7 +13,7 @@ const OverviewPage: NextPage = () => {
 
   return (
     <Layout headerProps={{ logoHref: "/" }} footer={<Jokes />}>
-      <OverviewTable tasks={tasks} />
+      <OverviewTable tasks={tasks} searchable />
     </Layout>
   )
 }
