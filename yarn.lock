@@ -2088,6 +2088,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/react-table@npm:^8.11.2":
+  version: 8.11.2
+  resolution: "@tanstack/react-table@npm:8.11.2"
+  dependencies:
+    "@tanstack/table-core": "npm:8.11.2"
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: a2e873beca3800add9852a610f82a84d0211b713c3ea3c66ad8cc1b5f87c03019a3982864c32740935782b1305bbbb95223025b82efc8eab2b2d989cc09499e0
+  languageName: node
+  linkType: hard
+
+"@tanstack/table-core@npm:8.11.2":
+  version: 8.11.2
+  resolution: "@tanstack/table-core@npm:8.11.2"
+  checksum: 2b06a431491971ea65ce7e96069266d639f5d57c04f799d9f17a6e277a333e2d43fda3ad11fc2ffa0b99dbd60b6becc77ec455327d45dc218b7246f66bd1bcef
+  languageName: node
+  linkType: hard
+
 "@tiptap/core@npm:^2.1.12":
   version: 2.1.12
   resolution: "@tiptap/core@npm:2.1.12"
@@ -3155,6 +3174,7 @@ __metadata:
     "@tanstack/eslint-plugin-query": "npm:^5.8.4"
     "@tanstack/react-query": "npm:^5.8.7"
     "@tanstack/react-query-devtools": "npm:^5.8.7"
+    "@tanstack/react-table": "npm:^8.11.2"
     "@tiptap/extension-link": "npm:^2.1.12"
     "@tiptap/react": "npm:^2.1.12"
     "@tiptap/starter-kit": "npm:^2.1.12"

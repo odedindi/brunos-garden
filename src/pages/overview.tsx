@@ -4,9 +4,10 @@ import { useTasksQuery } from "@/hooks/useTasksQuery"
 import Jokes from "@/features/jokes"
 
 const Layout = dynamic(() => import("../ui/layout"), { ssr: false })
-const OverviewTable = dynamic(() => import("@/features/overviewTable"), {
-  ssr: false,
-})
+const OverviewTable = dynamic(
+  () => import("@/features/overviewTable/tanstak"),
+  { ssr: false },
+)
 
 const OverviewPage: NextPage = () => {
   const { data: tasks } = useTasksQuery()

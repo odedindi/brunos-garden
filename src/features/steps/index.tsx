@@ -7,14 +7,14 @@ import { ParsedUrlQuery } from "querystring"
 import { useRouter } from "next/router"
 import { useTasks } from "@/hooks/useTasks"
 
-const SelectTitle = dynamic(() => import("./inputs/title"), { ssr: false })
+const SelectCrop = dynamic(() => import("./inputs/crop"), { ssr: false })
 const SelectDate = dynamic(() => import("./inputs/date"), { ssr: false })
 const SelectWeight = dynamic(() => import("./inputs/weight"), { ssr: false })
 const SelectArea = dynamic(() => import("./inputs/area"), { ssr: false })
 const OverviewTable = dynamic(() => import("../overviewTable"), { ssr: false })
 
 type Query = ParsedUrlQuery & {
-  title?: string
+  crop?: string
   date?: string
   weight?: string
   area?: string
@@ -54,10 +54,10 @@ const Container = styled(Box)`
 
 const steps = [
   {
-    label: "title",
-    description: "Create or select a title",
+    label: "crop",
+    description: "Create or select a crop",
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
-      <SelectTitle
+      <SelectCrop
         onSubmit={() => {
           if (onSubmit) onSubmit()
         }}
@@ -115,7 +115,7 @@ const Steps: FC = () => {
   const { createTask } = useTasks()
 
   const [active, setActive] = useState(() =>
-    !query || !query.title
+    !query || !query.crop
       ? 0
       : !query.date
         ? 1
@@ -138,19 +138,19 @@ const Steps: FC = () => {
     handleStepChange(active + 1)
     if (
       active === steps.length - 1 &&
-      !!query.title &&
+      !!query.crop &&
       !!query.date &&
       !!query.weight &&
       !!query.area
     ) {
       createTask({
-        title: query.title,
+        title: query.crop,
         date: query.date,
         weight: query.weight,
         area: query.area,
       })
     }
-  }, [active, createTask, query.area, query.date, query.title, query.weight])
+  }, [active, createTask, query.area, query.date, query.crop, query.weight])
 
   const shouldAllowSelectStep = (step: number) =>
     highestStepVisited >= step && active !== step && active !== steps.length

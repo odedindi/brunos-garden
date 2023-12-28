@@ -8,23 +8,23 @@ import { setQueryOnPage } from "@/utils/setQueryOnPage"
 import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
 
 type Query = ParsedUrlQuery & {
-  title?: string
+  crop?: string
 }
 
 const useTitleData = () => {
-  const { data: tasks } = useTasksQuery()
+  const { data: crops } = useTasksQuery()
   const [titleData, setTitleData] = useState<string[]>([])
 
   useEffect(() => {
-    const titles = tasks?.map(({ title }) => title)
+    const titles = crops?.map(({ title }) => title)
     if (titles) {
       setTitleData((prev) => Array.from(new Set(prev.concat(titles))))
     }
-  }, [tasks])
+  }, [crops])
 
   return [titleData, setTitleData] as const
 }
-const SelectTitle: FC<{
+const SelectCrop: FC<{
   value?: string | null
   onChange?: (value: string | null) => void
   onSubmit: () => void
@@ -39,10 +39,10 @@ const SelectTitle: FC<{
   const router = useRouter()
   const query = router.query as Query
 
-  const onChange = (title: string | null) => {
-    if (title) setQueryOnPage(router, { title })
+  const onChange = (crop: string | null) => {
+    if (crop) setQueryOnPage(router, { crop })
   }
-  const [search, setSearch] = useState(query.title ?? "")
+  const [search, setSearch] = useState(query.crop ?? "")
   const exactOptionMatch = useMemo(
     () => data.some((item) => item === search),
     [data, search],
@@ -84,7 +84,7 @@ const SelectTitle: FC<{
       <Combobox.Target>
         <InputBase
           ref={ref}
-          value={query.title !== search ? search : query.title}
+          value={query.crop !== search ? search : query.crop}
           onChange={(event) => {
             combobox.openDropdown()
             combobox.updateSelectedOptionIndex()
@@ -96,7 +96,7 @@ const SelectTitle: FC<{
           onFocus={() => combobox.openDropdown()}
           onBlur={() => {
             combobox.closeDropdown()
-            setSearch(query.title || "")
+            setSearch(query.crop || "")
           }}
           placeholder="Take your pick"
           rightSection={
@@ -126,4 +126,4 @@ const SelectTitle: FC<{
   )
 }
 
-export default SelectTitle
+export default SelectCrop

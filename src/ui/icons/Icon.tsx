@@ -18,6 +18,7 @@ export type IconProps = PropsWithChildren<{
   label?: string
   size?: ActionIconProps["size"]
   bg?: ActionIconProps["bg"]
+  disabled?: ActionIconProps["disabled"]
   style?: CSSProperties
 }>
 
