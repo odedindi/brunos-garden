@@ -1,7 +1,13 @@
 import { CSSProperties, FC, PropsWithChildren } from "react"
 
 import { styled } from "styled-components"
-import { ActionIcon, ActionIconProps, Tooltip } from "@mantine/core"
+import {
+  ActionIcon,
+  ActionIconProps,
+  Tooltip,
+  Loader,
+  DefaultMantineColor,
+} from "@mantine/core"
 
 import { get } from "lodash"
 
@@ -20,20 +26,29 @@ export type IconProps = PropsWithChildren<{
   bg?: ActionIconProps["bg"]
   disabled?: ActionIconProps["disabled"]
   style?: CSSProperties
+  loading?: boolean
 }>
 
 const Icon: FC<IconProps> = ({
   label,
   size = "xs",
   bg = "dark.3",
+  loading,
+  children,
   ...iconProps
 }) =>
   label ? (
     <Tooltip openDelay={500} label={label}>
-      <StyledActionIcon size={size} bg={bg} {...iconProps} />
+      <StyledActionIcon size={size} bg={bg} {...iconProps}>
+        {loading ? <Loader size={size} /> : children}
+      </StyledActionIcon>
     </Tooltip>
+  ) : loading ? (
+    <Loader size={size} color={bg as DefaultMantineColor} />
   ) : (
-    <StyledActionIcon size={size} bg={bg} {...iconProps} />
+    <StyledActionIcon size={size} bg={bg} {...iconProps}>
+      {children}
+    </StyledActionIcon>
   )
 
 export default Icon

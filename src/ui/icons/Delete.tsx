@@ -7,7 +7,7 @@ import { Button, Modal, Text } from "@mantine/core"
 
 const DeleteIcon: FC<
   Omit<IconProps, "label" | "bg"> & { verifyBeforeDelete?: boolean }
-> = ({ onClick, size, verifyBeforeDelete }) => {
+> = ({ onClick, size, verifyBeforeDelete, ...props }) => {
   const [opened, { open, close }] = useDisclosure(false)
 
   return (
@@ -36,6 +36,7 @@ const DeleteIcon: FC<
           else if (onClick) onClick()
         }}
         size={size}
+        {...props}
       >
         <IconTrash stroke={1.5} />
       </Icon>
