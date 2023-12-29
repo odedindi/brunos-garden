@@ -13,10 +13,14 @@ const Header = styled(AppShell.Header)`
   align-items: center;
   padding: 0 8px;
   background-color: ${({ theme }) => get(theme, "colors.gray[3]")};
+  min-width: 320px;
 `
 
-const Main = styled(AppShell.Main)``
+const Main = styled(AppShell.Main)`
+  min-width: 320px;
+`
 const Footer = styled(AppShell.Footer)`
+  min-width: 320px;
   background-color: ${({ theme }) => get(theme, "colors.gray[3]")};
   overflow: auto;
 `
@@ -58,7 +62,7 @@ const Layout: FC<LayoutProps> = ({
         <Group w="100%" wrap="nowrap" pr="xl">
           <Box w="100%" style={{ display: "flex", alignItems: "center" }}>
             <Authentication />
-            <Slogen $hideUpToSm />
+            <Slogen />
           </Box>
           <StrawberryLogo href={headerProps?.logoHref} />
         </Group>

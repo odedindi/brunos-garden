@@ -27,6 +27,7 @@ type Query = ParsedUrlQuery & {
 }
 
 const StyledStepper = styled(Stepper)`
+  max-width: 450px;
   .mantine-Stepper-stepIcon {
     transition: all 0.3s ease;
   }
@@ -160,48 +161,43 @@ const Steps: FC = () => {
     highestStepVisited >= step && active !== step && active !== steps.length
 
   return (
-    <>
-      <Title mb="xl" style={{ textAlign: "center" }}>
-        CropTracker Pro
-      </Title>
-      <StyledStepper
-        active={active}
-        onStepClick={setActive}
-        size="xs"
-        color="dark.3"
-      >
-        {steps.map(({ label, description, Children, icon }, i) => (
-          <Stepper.Step
-            key={i}
-            label={label}
-            description={description}
-            allowStepSelect={shouldAllowSelectStep(i)}
-            icon={icon}
-          >
-            <Container>
-              <Children
-                onSubmit={() => {
-                  if (query && query[label]) nextStep()
-                }}
-              />
-            </Container>
-          </Stepper.Step>
-        ))}
-        <Stepper.Completed>
+    <StyledStepper
+      active={active}
+      onStepClick={setActive}
+      size="xs"
+      color="dark.3"
+    >
+      {steps.map(({ label, description, Children, icon }, i) => (
+        <Stepper.Step
+          key={i}
+          label={label}
+          description={description}
+          allowStepSelect={shouldAllowSelectStep(i)}
+          icon={icon}
+        >
           <Container>
-            <OverviewTable
-              tasks={[query].map(({ crop, ...q }) => ({ title: crop, ...q }))}
-              disableSelectRows
-              hideOverviewTableFooter
-              hideTableFoot
+            <Children
+              onSubmit={() => {
+                if (query && query[label]) nextStep()
+              }}
             />
-            <Button component={"a"} href="/" bg="dark.3">
-              Create New Entry
-            </Button>
           </Container>
-        </Stepper.Completed>
-      </StyledStepper>
-    </>
+        </Stepper.Step>
+      ))}
+      <Stepper.Completed>
+        <Container>
+          <OverviewTable
+            tasks={[query].map(({ crop, ...q }) => ({ title: crop, ...q }))}
+            disableSelectRows
+            hideOverviewTableFooter
+            hideTableFoot
+          />
+          <Button component={"a"} href="/" bg="dark.3">
+            Create New Entry
+          </Button>
+        </Container>
+      </Stepper.Completed>
+    </StyledStepper>
   )
 }
 
