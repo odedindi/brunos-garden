@@ -1,6 +1,5 @@
 import { FC, PropsWithChildren, ReactNode } from "react"
 import { AppShell, Box, Group } from "@mantine/core"
-import { useLocalStorage } from "@mantine/hooks"
 import styled from "styled-components"
 import { get } from "lodash"
 import StrawberryLogo from "../StrawberryLogo"
@@ -26,55 +25,27 @@ const Footer = styled(AppShell.Footer)`
 `
 
 type LayoutProps = PropsWithChildren<{
-  headerProps?: {
-    logoHref?: string
-  }
-  sidebar?: ReactNode
+  headerProps?: { logoHref?: string }
   footer?: ReactNode
 }>
-const Layout: FC<LayoutProps> = ({
-  children,
-  sidebar,
-  footer,
-  headerProps,
-}) => {
-  const [navbarOpen, setNavbarOpen] = useLocalStorage({
-    key: "navbar",
-    defaultValue: true,
-  })
+const Layout: FC<LayoutProps> = ({ children, footer, headerProps }) => (
+  <AppShell header={{ height: 50 }} footer={{ height: 75 }} padding="md">
+    <Header>
+      <Group w="100%" wrap="nowrap" pr="xl">
+        <Box w="100%" style={{ display: "flex", alignItems: "center" }}>
+          <Authentication />
+          <Slogen />
+        </Box>
+        <StrawberryLogo href={headerProps?.logoHref} />
+      </Group>
+    </Header>
+    <Main>{children}</Main>
+    {footer ? (
+      <Footer p="md" zIndex={1000}>
+        {footer}
+      </Footer>
+    ) : null}
+  </AppShell>
+)
 
-  return (
-    <AppShell
-      header={{ height: 50 }}
-      navbar={
-        sidebar
-          ? {
-              width: 350,
-              breakpoint: "sm",
-              collapsed: { mobile: !navbarOpen },
-            }
-          : undefined
-      }
-      footer={{ height: 75 }}
-      padding="md"
-    >
-      <Header>
-        <Group w="100%" wrap="nowrap" pr="xl">
-          <Box w="100%" style={{ display: "flex", alignItems: "center" }}>
-            <Authentication />
-            <Slogen />
-          </Box>
-          <StrawberryLogo href={headerProps?.logoHref} />
-        </Group>
-      </Header>
-      {sidebar ? sidebar : null}
-      <Main>{children}</Main>
-      {footer ? (
-        <Footer p="md" zIndex={1000}>
-          {footer}
-        </Footer>
-      ) : null}
-    </AppShell>
-  )
-}
 export default Layout

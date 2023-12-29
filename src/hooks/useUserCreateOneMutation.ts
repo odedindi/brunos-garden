@@ -1,11 +1,12 @@
 import { invalidateQueries } from "@/providers/query"
 import { User } from "@/types/User"
 import { useMutation } from "@tanstack/react-query"
-export const useNewUserMutation = () =>
+
+export const useUserCreateOneMutation = () =>
   useMutation({
-    mutationKey: ["newUser"],
+    mutationKey: ["userCreateOne"],
     mutationFn: async (user: User) => {
-      const res = await fetch("api/newUser", {
+      const res = await fetch("api/userCreateOne", {
         method: "POST",
         body: JSON.stringify(user),
       })

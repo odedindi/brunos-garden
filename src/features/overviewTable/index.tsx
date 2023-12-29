@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 import { FC, memo, useEffect, useMemo, useState } from "react"
-import type { Task } from "@/types/Task"
+import type { Harvest } from "@/types/Harvest"
 import IndeterminateCheckbox from "./indeterminateCheckbox"
 
 import { Box, Space, Table, Flex, Text, Tooltip } from "@mantine/core"
@@ -18,7 +18,7 @@ import OverviewTableDeleteButton from "./overviewTableDeleteButton"
 import OverviewTableDownloadCSV from "./overviewTableDownloadCSVButton"
 
 type OverviewProps = {
-  tasks?: Partial<Task>[]
+  harvests?: Partial<Harvest>[]
   disableSelectRows?: boolean
   hideTableFoot?: boolean
   hideOverviewTableFooter?: boolean
@@ -27,7 +27,7 @@ type OverviewProps = {
 }
 
 const OverviewTable: FC<OverviewProps> = ({
-  tasks,
+  harvests,
   disableSelectRows,
   hideTableFoot,
   hideOverviewTableFooter,
@@ -37,7 +37,7 @@ const OverviewTable: FC<OverviewProps> = ({
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
 
-  const columns = useMemo<ColumnDef<Partial<Task>>[]>(
+  const columns = useMemo<ColumnDef<Partial<Harvest>>[]>(
     () => [
       {
         id: "overviewTable",
@@ -74,7 +74,7 @@ const OverviewTable: FC<OverviewProps> = ({
       },
       {
         header: "Crop",
-        accessorKey: "title",
+        accessorKey: "crop",
         cell: (info) => info.getValue(),
         footer: (props) => {
           const model = props.table.getFilteredRowModel()
@@ -82,7 +82,9 @@ const OverviewTable: FC<OverviewProps> = ({
           const cropCount = useMemo(
             () =>
               Array.from(
-                new Set(model.rows.map(({ original: { title } }) => title)),
+                new Set(
+                  model.rows.map(({ original: { crop: title } }) => title),
+                ),
               ).length,
             [model.rows],
           )
@@ -108,7 +110,16 @@ const OverviewTable: FC<OverviewProps> = ({
       {
         header: "Yield (Kg/m2)",
         cell: (info) => {
-          const { area = "", weight = "" } = info.row.original
+          const { area = "", weight = "", harvest } = info.row.original
+
+          if (harvest) {
+            const [harvestNum, harvestUnit] = harvest.split("_")
+            return (
+              <Tooltip openDelay={500} label={`${harvestNum} ${harvestUnit}`}>
+                <Text>{Number(harvestNum)}</Text>
+              </Tooltip>
+            )
+          }
           const [areaNum, areaUnit] = area.split("_")
           const [weightNum, weightUnit] = weight.split("_")
           const weightCorrected = weightNum
@@ -151,7 +162,7 @@ const OverviewTable: FC<OverviewProps> = ({
     [disableSelectRows],
   )
   const table = useReactTable({
-    data: tasks ?? [],
+    data: harvests ?? [],
     columns,
     state: {
       rowSelection,

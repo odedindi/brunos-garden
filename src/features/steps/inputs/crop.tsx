@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react"
-import { useTasksQuery } from "@/hooks/useTasksQuery"
+import { useHarvestsQuery } from "@/hooks/useHarvestsQuery"
 import { Combobox, InputBase, useCombobox } from "@mantine/core"
 import ChevronIcon from "@/ui/icons/Chevron"
 import { useRouter } from "next/router"
@@ -27,18 +27,18 @@ type Query = ParsedUrlQuery & {
   crop?: string
 }
 
-const useTitleData = () => {
-  const { data: crops } = useTasksQuery()
-  const [titleData, setTitleData] = useState<string[]>([])
+const useHarvestData = () => {
+  const { data: harvests } = useHarvestsQuery()
+  const [crops, setCrops] = useState<string[]>([])
 
   useEffect(() => {
-    const titles = crops?.map(({ title }) => title)
-    if (titles) {
-      setTitleData((prev) => Array.from(new Set(prev.concat(titles))))
+    const crops = harvests?.map(({ crop }) => crop)
+    if (crops) {
+      setCrops((prev) => Array.from(new Set(prev.concat(crops))))
     }
-  }, [crops])
+  }, [harvests])
 
-  return [titleData, setTitleData] as const
+  return [crops, setCrops] as const
 }
 const SelectCrop: FC<{
   value?: string | null
@@ -51,7 +51,7 @@ const SelectCrop: FC<{
   const ref = useRef<HTMLInputElement>(null)
   useFocusOnLoad(ref)
 
-  const [data, setData] = useTitleData()
+  const [crops, setCrops] = useHarvestData()
   const router = useRouter()
   const query = router.query as Query
 
@@ -60,19 +60,19 @@ const SelectCrop: FC<{
   }
   const [search, setSearch] = useState(query.crop ?? "")
   const exactOptionMatch = useMemo(
-    () => data.some((item) => item === search),
-    [data, search],
+    () => crops.some((item) => item === search),
+    [crops, search],
   )
   const filteredOptions = useMemo(
     () =>
       exactOptionMatch
-        ? data
-        : data
+        ? crops
+        : crops
             .filter((item) =>
               item.toLowerCase().includes(search.toLowerCase().trim()),
             )
             .sort((a, b) => a.localeCompare(b)),
-    [data, exactOptionMatch, search],
+    [crops, exactOptionMatch, search],
   )
 
   const options = filteredOptions.map((item) => (
@@ -87,7 +87,7 @@ const SelectCrop: FC<{
       withinPortal={false}
       onOptionSubmit={(val) => {
         if (val === "$create") {
-          setData((current) => [...current, search])
+          setCrops((current) => [...current, search])
           onChange(search)
         } else {
           onChange(val)
@@ -134,7 +134,7 @@ const SelectCrop: FC<{
         <Combobox.Options>
           {options}
           {!exactOptionMatch && search.trim().length > 0 && (
-            <Combobox.Option value="$create">{search}</Combobox.Option>
+            <Combobox.Option value="$create">+ {search}</Combobox.Option>
           )}
         </Combobox.Options>
       </Combobox.Dropdown>

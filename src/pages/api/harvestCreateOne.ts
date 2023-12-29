@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next"
 
 import { getGoogleSheetApi } from "@/utils/getGoogleSheetApi"
 import { getSheetId } from "@/utils/getSheetId"
-import { TaskSchema } from "@/types/Task"
+import { HarvestSchema } from "@/types/Harvest"
 
 type Data = string
 const { GOOGLE_SPREADSHEET_ID } = process.env
@@ -15,8 +15,8 @@ export default async function handler(
   const sheets = await getGoogleSheetApi()
 
   try {
-    const { email, task } = z
-      .object({ email: z.string(), task: TaskSchema })
+    const { email, harvest } = z
+      .object({ email: z.string(), harvest: HarvestSchema })
       .parse(JSON.parse(req.body))
 
     const range = getSheetId(email)
@@ -26,10 +26,10 @@ export default async function handler(
         spreadsheetId: GOOGLE_SPREADSHEET_ID,
         range: getSheetId(email),
         valueInputOption: "RAW",
-        requestBody: { values: [[JSON.stringify(task)]] },
+        requestBody: { values: [[JSON.stringify(harvest)]] },
       })
       if (response.data.updates?.updatedRange) {
-        const taskId = response.data.updates.updatedRange.replace(
+        const harvestId = response.data.updates.updatedRange.replace(
           `'${range}'`,
           "",
         )
@@ -37,17 +37,17 @@ export default async function handler(
         // update new id
         await sheets.spreadsheets.values.update({
           spreadsheetId: GOOGLE_SPREADSHEET_ID,
-          range: `${getSheetId(email)}${taskId}`,
+          range: `${getSheetId(email)}${harvestId}`,
           valueInputOption: "RAW",
           requestBody: {
-            values: [[JSON.stringify({ ...task, id: taskId })]],
+            values: [[JSON.stringify({ ...harvest, id: harvestId })]],
           },
         })
-        return res.status(200).send(taskId)
+        return res.status(200).send(harvestId)
       } else
         return res
           .status(503)
-          .send("Error: Cannot confirm creating new task success")
+          .send("Error: Cannot confirm creating new harvest success")
     } catch (e) {
       console.log(e)
       return res.status(503).send(JSON.stringify(e))

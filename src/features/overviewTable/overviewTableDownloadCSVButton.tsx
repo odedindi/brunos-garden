@@ -1,14 +1,14 @@
 import type { Table as TankstackTable } from "@tanstack/react-table"
 
 import { FC, useRef, useState } from "react"
-import type { Task } from "@/types/Task"
+import type { Harvest } from "@/types/Harvest"
 
 import { Button } from "@mantine/core"
 import { CSVLink } from "react-csv"
 import dayjs from "dayjs"
 
 type OverviewTableDownloadCSVProps = {
-  table: TankstackTable<Partial<Task>>
+  table: TankstackTable<Partial<Harvest>>
 }
 
 const OverviewTableDownloadCSV: FC<OverviewTableDownloadCSVProps> = ({
@@ -31,7 +31,7 @@ const OverviewTableDownloadCSV: FC<OverviewTableDownloadCSVProps> = ({
         const dataCsvFormat: string[][] = [
           colNames,
           ...data.map((crop) =>
-            colNames.map((colName) => crop[colName as keyof Task] ?? ""),
+            colNames.map((colName) => crop[colName as keyof Harvest] ?? ""),
           ),
         ]
         setCsvData(dataCsvFormat)

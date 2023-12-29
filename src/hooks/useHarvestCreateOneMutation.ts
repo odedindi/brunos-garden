@@ -1,12 +1,12 @@
 import { invalidateQueries } from "@/providers/query"
-import { Task } from "@/types/Task"
+import { Harvest } from "@/types/Harvest"
 import { useMutation } from "@tanstack/react-query"
 
-export const useNewTaskMutation = () => {
+export const useHarvestCreateOne = () => {
   return useMutation({
-    mutationKey: ["newTask"],
-    mutationFn: async (body: { email: string; task: Task }) => {
-      const res = await fetch("api/newTask", {
+    mutationKey: ["harvestCreateOne"],
+    mutationFn: async (body: { email: string; harvest: Harvest }) => {
+      const res = await fetch("api/harvestCreateOne", {
         method: "POST",
         body: JSON.stringify(body),
       })
@@ -18,8 +18,8 @@ export const useNewTaskMutation = () => {
         throw new Error(JSON.stringify(error))
       }
     },
-    onSuccess: (_data, _variables, _context) => {
-      invalidateQueries({ queryKey: ["tasks"] })
+    onSuccess: (_data, { email }, _context) => {
+      invalidateQueries({ queryKey: ["harvests", email] })
     },
   })
 }

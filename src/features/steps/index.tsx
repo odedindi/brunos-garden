@@ -5,7 +5,7 @@ import styled from "styled-components"
 import { get } from "lodash"
 import { ParsedUrlQuery } from "querystring"
 import { useRouter } from "next/router"
-import { useTasks } from "@/hooks/useTasks"
+import { useHarvests } from "@/hooks/useHarvests"
 import {
   IconCalendarEvent,
   IconPlant,
@@ -117,7 +117,7 @@ const steps = [
 const Steps: FC = () => {
   const router = useRouter()
   const query = router.query as Query
-  const { createTask } = useTasks()
+  const { createHarvest } = useHarvests()
 
   const [active, setActive] = useState(() =>
     !query || !query.crop
@@ -148,14 +148,14 @@ const Steps: FC = () => {
       !!query.weight &&
       !!query.area
     ) {
-      createTask({
-        title: query.crop,
+      createHarvest({
+        crop: query.crop,
         date: query.date,
         weight: query.weight,
         area: query.area,
       })
     }
-  }, [active, createTask, query.area, query.date, query.crop, query.weight])
+  }, [active, createHarvest, query.area, query.date, query.crop, query.weight])
 
   const shouldAllowSelectStep = (step: number) =>
     highestStepVisited >= step && active !== step && active !== steps.length
@@ -187,7 +187,7 @@ const Steps: FC = () => {
       <Stepper.Completed>
         <Container>
           <OverviewTable
-            tasks={[query].map(({ crop, ...q }) => ({ title: crop, ...q }))}
+            harvests={[query]}
             disableSelectRows
             hideOverviewTableFooter
             hideTableFoot

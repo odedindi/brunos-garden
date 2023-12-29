@@ -1,6 +1,6 @@
 import { NextPage } from "next"
 import dynamic from "next/dynamic"
-import { useTasksQuery } from "@/hooks/useTasksQuery"
+import { useHarvestsQuery } from "@/hooks/useHarvestsQuery"
 import Jokes from "@/features/jokes"
 
 const Layout = dynamic(() => import("../ui/layout"), { ssr: false })
@@ -9,11 +9,11 @@ const OverviewTable = dynamic(() => import("@/features/overviewTable"), {
 })
 
 const OverviewPage: NextPage = () => {
-  const { data: tasks } = useTasksQuery()
+  const { data: harvests } = useHarvestsQuery()
 
   return (
     <Layout headerProps={{ logoHref: "/" }} footer={<Jokes />}>
-      <OverviewTable tasks={tasks} searchable />
+      <OverviewTable harvests={harvests} searchable />
     </Layout>
   )
 }

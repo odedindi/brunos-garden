@@ -1,6 +1,6 @@
 import type { Table as TankstackTable } from "@tanstack/react-table"
 import type { FC } from "react"
-import type { Task } from "@/types/Task"
+import type { Harvest } from "@/types/Harvest"
 
 import {
   Box,
@@ -27,7 +27,7 @@ const Select = styled(MantineSelect)`
 `
 
 type OverviewTableFooterProps = {
-  table: TankstackTable<Partial<Task>>
+  table: TankstackTable<Partial<Harvest>>
   rowSelection: Object
 }
 

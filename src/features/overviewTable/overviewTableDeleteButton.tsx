@@ -1,14 +1,14 @@
 import type { Table as TankstackTable } from "@tanstack/react-table"
 
 import { FC } from "react"
-import type { Task } from "@/types/Task"
+import type { Harvest } from "@/types/Harvest"
 
 import TrashIcon from "@/ui/icons/Trash"
-import { useDeleteTaskMutation } from "@/hooks/useDeleteTaskMutation"
+import { useHarvestDeleteOnetMutation } from "@/hooks/useHarvesDeleteOnetMutation"
 import { useMeQuery } from "@/hooks/useMe"
 
 type OverviewTableDeleteButtonProps = {
-  table: TankstackTable<Partial<Task>>
+  table: TankstackTable<Partial<Harvest>>
   rowSelection: Object
 }
 
@@ -17,7 +17,7 @@ const OverviewTableDeleteButton: FC<OverviewTableDeleteButtonProps> = ({
   rowSelection,
 }) => {
   const { data: me } = useMeQuery()
-  const { mutate: deleteCrop, isPending } = useDeleteTaskMutation()
+  const { mutate: deleteHarvest, isPending } = useHarvestDeleteOnetMutation()
 
   return (
     <TrashIcon
@@ -30,7 +30,7 @@ const OverviewTableDeleteButton: FC<OverviewTableDeleteButtonProps> = ({
         for (const rowId of rowsSelected) {
           const row = rowsById[rowId]
           if (row.original.id)
-            deleteCrop({ email: me.email, taskId: row.original.id })
+            deleteHarvest({ email: me.email, harvestId: row.original.id })
         }
         rowsSelected.forEach((rowId) =>
           table.setRowSelection({ [rowId]: false }),

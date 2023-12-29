@@ -1,5 +1,5 @@
 import { useMeQuery } from "@/hooks/useMe"
-import { useNewUserMutation } from "@/hooks/useNewUserMutation"
+import { useUserCreateOneMutation } from "@/hooks/useUserCreateOneMutation"
 import {
   Avatar,
   Button,
@@ -25,7 +25,7 @@ const Authentication: FC = () => {
     mutate: createNewUser,
     data: createdUser,
     error: createdUserError,
-  } = useNewUserMutation()
+  } = useUserCreateOneMutation()
   if (createdUser) console.log({ createdUser })
   if (createdUserError) console.info({ createdUserError })
 
