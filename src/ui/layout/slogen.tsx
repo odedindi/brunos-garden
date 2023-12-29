@@ -1,10 +1,11 @@
+import { Title } from "@mantine/core"
 import styled from "styled-components"
 
 export const Slogen = styled.p.attrs({
   children: (
-    <>
-      {"Bruno's Garden"} <sub>BETA</sub>
-    </>
+    <Title size="xs" style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+      {"Bruno's Garden"} <sub> CropTracker Pro</sub>
+    </Title>
   ),
 })<{ $hideFromSm?: boolean; $hideUpToSm?: boolean }>`
   @media screen and (max-width: ${({ theme }) => theme.breakpoints!.sm!}) {
