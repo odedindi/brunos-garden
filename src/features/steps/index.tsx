@@ -6,6 +6,12 @@ import { get } from "lodash"
 import { ParsedUrlQuery } from "querystring"
 import { useRouter } from "next/router"
 import { useTasks } from "@/hooks/useTasks"
+import {
+  IconCalendarEvent,
+  IconPlant,
+  IconRulerMeasure,
+  IconScale,
+} from "@tabler/icons-react"
 
 const SelectCrop = dynamic(() => import("./inputs/crop"), { ssr: false })
 const SelectDate = dynamic(() => import("./inputs/date"), { ssr: false })
@@ -23,15 +29,6 @@ type Query = ParsedUrlQuery & {
 const StyledStepper = styled(Stepper)`
   .mantine-Stepper-stepIcon {
     transition: all 0.3s ease;
-    color: ${({ theme }) => get(theme, "colors.gray[3]")};
-    border-color: transparent;
-    background-color: ${({ theme }) => get(theme, "colors.dark[1]")};
-    border-width: 0;
-
-    &[data-completed] {
-      border-width: 0;
-      background-color: ${({ theme }) => get(theme, "colors.dark[3]")};
-    }
   }
   .mantine-Stepper-step {
     &[data-progress] {
@@ -59,6 +56,7 @@ const steps = [
   {
     label: "crop",
     description: "Select or create a new crop",
+    icon: <IconPlant />,
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
       <SelectCrop
         onSubmit={() => {
@@ -70,6 +68,7 @@ const steps = [
   {
     label: "date",
     description: "Select a date or a range",
+    icon: <IconCalendarEvent />,
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
       <>
         <SelectDate
@@ -91,6 +90,7 @@ const steps = [
   {
     label: "weight",
     description: "Enter the weight of the yield",
+    icon: <IconScale />,
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
       <SelectWeight
         onSubmit={() => {
@@ -102,6 +102,7 @@ const steps = [
   {
     label: "area",
     description: "Enter the area of the yield",
+    icon: <IconRulerMeasure />,
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
       <SelectArea
         onSubmit={() => {
@@ -169,12 +170,13 @@ const Steps: FC = () => {
         size="xs"
         color="dark.3"
       >
-        {steps.map(({ label, description, Children }, i) => (
+        {steps.map(({ label, description, Children, icon }, i) => (
           <Stepper.Step
             key={i}
             label={label}
             description={description}
             allowStepSelect={shouldAllowSelectStep(i)}
+            icon={icon}
           >
             <Container>
               <Children

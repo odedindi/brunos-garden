@@ -3,7 +3,7 @@ import { FC, useMemo, useRef } from "react"
 import {
   Flex,
   NumberInput as MantineNumberInput,
-  Select as MantineSelect,
+  Select,
   Text,
 } from "@mantine/core"
 import ChevronIcon from "@/ui/icons/Chevron"
@@ -17,12 +17,6 @@ export type Area = (typeof area)[number]
 export type Unit = Weight | Area
 
 const NumberInput = styled(MantineNumberInput)`
-  :focus,
-  :focus-within {
-    border-color: var(--mantine-color-dark-3);
-  }
-`
-const Select = styled(MantineSelect)`
   :focus,
   :focus-within {
     border-color: var(--mantine-color-dark-3);
@@ -81,6 +75,9 @@ const SelectNumberWithUnit: FC<{
             defaultValue={unit}
             rightSection={<Text>{unit}</Text>}
             withCheckIcon={false}
+            styles={{
+              input: { backgroundColor: "transparent", border: "none" },
+            }}
           />
           <ChevronIcon
             onClick={() => {
