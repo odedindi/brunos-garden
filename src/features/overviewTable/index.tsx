@@ -6,30 +6,16 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { FC, memo, useMemo, useRef, useState } from "react"
+import { FC, memo, useEffect, useMemo, useState } from "react"
 import type { Task } from "@/types/Task"
 import IndeterminateCheckbox from "./indeterminateCheckbox"
 
-import {
-  Box,
-  Space,
-  TextInput as MantineTextInput,
-  Table,
-  Flex,
-  Text,
-  Button,
-} from "@mantine/core"
+import { Box, Space, Table, Flex, Text, Tooltip } from "@mantine/core"
 import OverviewTableFooter from "./overviewTableFooter"
-import styled from "styled-components"
-import { CSVLink } from "react-csv"
-import dayjs from "dayjs"
 
-const TextInput = styled(MantineTextInput)`
-  :focus,
-  :focus-within {
-    border-color: var(--mantine-color-dark-3);
-  }
-`
+import OverviewTableSeach from "./overviewTableSeach"
+import OverviewTableDeleteButton from "./overviewTableDeleteButton"
+import OverviewTableDownloadCSV from "./overviewTableDownloadCSVButton"
 
 type OverviewProps = {
   tasks?: Partial<Task>[]
@@ -81,6 +67,12 @@ const OverviewTable: FC<OverviewProps> = ({
           ),
       },
       {
+        header: "Id",
+        accessorKey: "id",
+        cell: (info) => info.getValue(),
+        footer: (props) => null,
+      },
+      {
         header: "Crop",
         accessorKey: "title",
         cell: (info) => info.getValue(),
@@ -112,114 +104,47 @@ const OverviewTable: FC<OverviewProps> = ({
         },
         footer: (props) => <>{/* props.column.id */}</>,
       },
+
       {
-        header: "Weight",
-        accessorKey: "weight",
+        header: "Yield (Kg/m2)",
         cell: (info) => {
-          const value = info.getValue()
-          if (typeof value === "string") return value.replace("_", " ")
-          return value
-        },
-        footer: (props) => {
-          const model = props.table.getFilteredRowModel()
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const { sum, ave, unit } = useMemo(
-            () =>
-              model.rows.reduce<{
-                sum: number
-                ave: number
-                unit?: string
-              }>(
-                ({ sum, unit }, { original: { weight } }, i) => {
-                  const [weightNum, splittedUnit] = (weight ?? "").split("_")
-                  const adjustedWeight = !weightNum
-                    ? 0
-                    : !unit || unit === splittedUnit
-                      ? Number(weightNum)
-                      : Number(
-                          splittedUnit === "g"
-                            ? Number(weightNum) * 1000
-                            : Number(weightNum) / 1000,
-                        )
-                  const newSum = sum + adjustedWeight
-                  return {
-                    sum: newSum,
-                    ave: Number((newSum / (i + 1)).toFixed(2)),
-                    unit: unit ?? splittedUnit,
-                  }
-                },
-                { sum: 0, ave: 0 },
-              ),
-            [model.rows],
-          )
+          const { area = "", weight = "" } = info.row.original
+          const [areaNum, areaUnit] = area.split("_")
+          const [weightNum, weightUnit] = weight.split("_")
+          const weightCorrected = weightNum
+            ? weightUnit === "g"
+              ? Number(weightNum) / 1000
+              : Number(weightNum)
+            : 0
 
           return (
-            <Flex direction="column">
-              <Text size="xs">
-                Sum:{" "}
-                <strong>
-                  {sum} {unit}
-                </strong>
-              </Text>
-              <Text size="xs">
-                Ave:{" "}
-                <strong>
-                  {ave} {unit}
-                </strong>
-              </Text>
-            </Flex>
+            <Tooltip
+              openDelay={500}
+              label={`${weightCorrected} kg / ${areaNum} ${areaUnit}`}
+            >
+              <Text>{weightCorrected / Number(areaNum)}</Text>
+            </Tooltip>
           )
-        },
-      },
-      {
-        header: "Area",
-        accessorKey: "area",
-        cell: (info) => {
-          const value = info.getValue()
-          if (typeof value === "string") return value.replace("_", " ")
-          return value
         },
         footer: (props) => {
-          const model = props.table.getFilteredRowModel()
+          const { rows } = props.table.getFilteredSelectedRowModel()
 
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const { sum, ave, unit } = useMemo(
-            () =>
-              model.rows.reduce<{
-                sum: number
-                ave: number
-                unit?: string
-              }>(
-                ({ sum, unit }, { original: { area } }, i) => {
-                  const [areaNum, splittedUnit] = (area ?? "").split("_")
-                  const newSum = sum + (areaNum ? Number(areaNum) : 0)
-                  return {
-                    sum: newSum,
-                    ave: newSum / (i + 1),
-                    unit: unit ?? splittedUnit,
-                  }
-                },
-                { sum: 0, ave: 0 },
-              ),
-            [model.rows],
-          )
+          console.log(rows)
+          const totalYield = rows.reduce<number>(
+            (acc, { original: { area = "", weight = "" } }) => {
+              const [areaNum] = area.split("_")
+              const [weightNum, weightUnit] = weight.split("_")
+              const weightCorrected = weightNum
+                ? weightUnit === "g"
+                  ? Number(weightNum) / 1000
+                  : Number(weightNum)
+                : 0
 
-          return (
-            <Flex direction="column">
-              <Text size="xs">
-                Sum:{" "}
-                <strong>
-                  {sum} {unit}
-                </strong>
-              </Text>
-              <Text size="xs">
-                Ave:{" "}
-                <strong>
-                  {ave} {unit}
-                </strong>
-              </Text>
-            </Flex>
+              return acc + weightCorrected / Number(areaNum)
+            },
+            0,
           )
+          return totalYield ? <>{totalYield}</> : null
         },
       },
     ],
@@ -238,64 +163,36 @@ const OverviewTable: FC<OverviewProps> = ({
     getPaginationRowModel: getPaginationRowModel(),
     debugTable: true,
   })
-  const [csvData, setCsvData] = useState<string[][]>([])
-  const ref = useRef<CSVLink & HTMLAnchorElement>(null!)
+
+  useEffect(() => {
+    table.getColumn("id")?.toggleVisibility(false)
+  }, [table])
 
   return (
     <Flex direction="column" p={"sm"} justify="center">
       {searchable ? (
-        <Box>
-          <TextInput
-            value={globalFilter ?? ""}
-            onChange={(e) => {
-              setGlobalFilter(e.target.value)
-              table.setGlobalFilter(e.target.value)
-            }}
-            style={{ boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)" }}
-            onSubmit={(e) => {
-              setGlobalFilter(e.currentTarget.value)
-              table.setGlobalFilter(e.currentTarget.value)
-            }}
-            styles={{ input: { padding: "8px" } }}
-            placeholder="Search..."
-          />
-        </Box>
+        <OverviewTableSeach
+          value={globalFilter ?? ""}
+          onChange={(value) => {
+            setGlobalFilter(value)
+            table.setGlobalFilter(value)
+          }}
+          onSubmit={(value) => {
+            setGlobalFilter(value)
+            table.setGlobalFilter(value)
+          }}
+        />
       ) : null}
       <Space h="lg" />
-      {noDownloadCSV ? null : (
-        <Box>
-          <Button
-            size="xs"
-            color="dark.3"
-            onClick={() => {
-              const [{ headers }] = table.getHeaderGroups()
-              const colNames = headers.slice(1).map(({ id }) => id)
-
-              const { rows } = table.getRowModel()
-              const data = rows.map(({ original }) => original)
-              const dataCsvFormat: string[][] = [
-                colNames,
-                ...data.map((crop) =>
-                  colNames.map((colName) => crop[colName as keyof Task] ?? ""),
-                ),
-              ]
-              setCsvData(dataCsvFormat)
-              setTimeout(() => {
-                if (ref.current.click) ref.current.click() // a hack to make the CSVLink download the updated date
-              })
-            }}
-          >
-            <CSVLink
-              ref={ref}
-              data={csvData}
-              filename={`brunos-garden${dayjs().format("MMHHDDMMYY")}.csv`}
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              Download CSV
-            </CSVLink>
-          </Button>
-        </Box>
-      )}
+      <Flex w="100%" align="center" gap={2}>
+        {Object.keys(rowSelection).length ? (
+          <OverviewTableDeleteButton
+            table={table}
+            rowSelection={rowSelection}
+          />
+        ) : null}
+        {noDownloadCSV ? null : <OverviewTableDownloadCSV table={table} />}
+      </Flex>
       <Table
         striped
         highlightOnHover
@@ -313,11 +210,6 @@ const OverviewTable: FC<OverviewProps> = ({
                         header.column.columnDef.header,
                         header.getContext(),
                       )}
-                      {/* {header.column.getCanFilter() ? (
-                        <Box>
-                          <Filter column={header.column} table={table} />
-                        </Box>
-                      ) : null} */}
                     </>
                   )}
                 </Table.Th>
