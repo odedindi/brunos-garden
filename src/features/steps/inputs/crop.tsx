@@ -49,7 +49,7 @@ const SelectCrop: FC<{
     onDropdownClose: () => combobox.resetSelectedOption(),
   })
   const ref = useRef<HTMLInputElement>(null)
-  useFocusOnLoad(ref)
+  useFocusOnLoad<"input">(ref)
 
   const [crops, setCrops] = useHarvestData()
   const router = useRouter()

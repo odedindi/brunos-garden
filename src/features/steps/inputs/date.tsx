@@ -16,7 +16,16 @@ const SelectDate: FC<{
   onSubmit?: () => void
 }> = ({ onSubmit }) => {
   const ref = useRef<HTMLDivElement>(null)
-  useFocusOnLoad(ref)
+  useFocusOnLoad(ref, (ref) => {
+    if (ref?.current) {
+      const datePicketEl = Array.from(
+        ref.current.querySelectorAll<HTMLDivElement>(".mantine-DatePicker-day"),
+      ).find((el) => el.getAttribute("data-selected") === "true")
+      if (datePicketEl) {
+        datePicketEl.focus()
+      }
+    }
+  })
 
   const router = useRouter()
   const query = router.query as Query

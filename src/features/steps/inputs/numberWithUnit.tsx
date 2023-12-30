@@ -45,7 +45,7 @@ const SelectNumberWithUnit: FC<{
     [unit],
   )
   const ref = useRef<HTMLInputElement>(null)
-  useFocusOnLoad(focusOnLoad ? ref : undefined)
+  useFocusOnLoad<"input">(focusOnLoad ? ref : undefined)
 
   return (
     <NumberInput
