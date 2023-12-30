@@ -1,7 +1,4 @@
-import { FC, useMemo, useState } from "react"
-
-import { Flex, NumberInput, Select, Text } from "@mantine/core"
-import ChevronIcon from "@/ui/icons/Chevron"
+import { FC, useMemo } from "react"
 import { useRouter } from "next/router"
 import { ParsedUrlQuery } from "querystring"
 import SelectNumberWithUnit, { Weight } from "./numberWithUnit"
@@ -24,7 +21,7 @@ const SelectWeight: FC<{
           if (Number(snippet)) return { ...acc, value: Number(snippet) }
           return snippet ? { ...acc, unit: snippet as Weight } : acc
         },
-        { unit: "g" },
+        { unit: "kg" },
       ),
     [query.weight],
   )
@@ -41,7 +38,7 @@ const SelectWeight: FC<{
     <SelectNumberWithUnit
       value={weight?.value}
       onChange={(value) => onChange({ value })}
-      unit={weight.unit ?? "g"}
+      unit={weight.unit ?? "kg"}
       onUnitChange={(unit) => onChange({ unit: unit as Weight })}
       onSubmit={onSubmit}
       placeholder="Weight"
