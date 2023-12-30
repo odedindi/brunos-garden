@@ -3497,6 +3497,7 @@ __metadata:
     react: "npm:^18"
     react-csv: "npm:^2.2.2"
     react-dom: "npm:^18"
+    resize-observer-polyfill: "npm:^1.5.1"
     styled-components: "npm:^6.1.1"
     typescript: "npm:^5"
     yarn: "npm:^1.22.21"
@@ -7561,6 +7562,13 @@ __metadata:
   version: 2.0.2
   resolution: "require-from-string@npm:2.0.2"
   checksum: aaa267e0c5b022fc5fd4eef49d8285086b15f2a1c54b28240fdf03599cbd9c26049fee3eab894f2e1f6ca65e513b030a7c264201e3f005601e80c49fb2937ce2
+  languageName: node
+  linkType: hard
+
+"resize-observer-polyfill@npm:^1.5.1":
+  version: 1.5.1
+  resolution: "resize-observer-polyfill@npm:1.5.1"
+  checksum: 5e882475067f0b97dc07e0f37c3e335ac5bc3520d463f777cec7e894bb273eddbfecb857ae668e6fb6881fd6f6bb7148246967172139302da50fa12ea3a15d95
   languageName: node
   linkType: hard
 

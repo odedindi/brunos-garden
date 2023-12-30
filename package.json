@@ -43,6 +43,7 @@
     "react": "^18",
     "react-csv": "^2.2.2",
     "react-dom": "^18",
+    "resize-observer-polyfill": "^1.5.1",
     "styled-components": "^6.1.1",
     "yarn": "^1.22.21",
     "zod": "^3.22.4"
