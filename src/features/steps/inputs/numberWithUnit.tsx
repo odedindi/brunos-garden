@@ -70,6 +70,7 @@ const SelectNumberWithUnit: FC<{
             data={data}
             onChange={(unit) => {
               if (unit) onUnitChange(unit as Unit)
+              if (ref.current) ref.current.focus()
             }}
             allowDeselect={false}
             defaultValue={unit}
@@ -77,6 +78,9 @@ const SelectNumberWithUnit: FC<{
             withCheckIcon={false}
             styles={{
               input: { backgroundColor: "transparent", border: "none" },
+            }}
+            onBlur={() => {
+              if (ref.current) ref.current.focus()
             }}
           />
           <ChevronIcon
