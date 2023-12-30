@@ -1,5 +1,5 @@
 import { FC, useRef, useState } from "react"
-import { DatePicker } from "@mantine/dates"
+import { DatePicker, DatesRangeValue } from "@mantine/dates"
 import { ParsedUrlQuery } from "querystring"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
 import dayjs from "dayjs"
@@ -10,7 +10,7 @@ type Query = ParsedUrlQuery & {
   date?: string
 }
 
-const dateFormat = "DD-MM-YYYY"
+export const dateFormat = "DD-MM-YYYY"
 
 const SelectDate: FC<{
   onSubmit?: () => void
@@ -26,13 +26,9 @@ const SelectDate: FC<{
     return [
       date1 ? dayjs(date1, dateFormat).toDate() : null,
       date2 ? dayjs(date2, dateFormat).toDate() : null,
-    ] as [Date | null, Date | null]
+    ] as DatesRangeValue
   }
-  const [state, setState] = useState<[Date | null, Date | null]>(() =>
-    query.date ? queryToState(query.date) : [null, null],
-  )
-
-  const onChange = (date: [Date | null, Date | null]) => {
+  const onChange = (date: DatesRangeValue) => {
     const [date1, date2] = date.filter(Boolean)
     setQueryOnPage(router, {
       date:
@@ -53,6 +49,15 @@ const SelectDate: FC<{
               : [],
     })
   }
+  const [state, setState] = useState<DatesRangeValue>(() => {
+    if (!query.date) {
+      const newState = [new Date(), null] as DatesRangeValue
+      onChange(newState)
+      return newState
+    }
+    return queryToState(query.date)
+  })
+
   return (
     <DatePicker
       ref={ref}
