@@ -5,6 +5,7 @@ import { useMemo } from "react"
 import { useHarvestUpdateOneMutation } from "./useHarvestUpdateOneMutation"
 import { useHarvestCreateOne } from "./useHarvestCreateOneMutation"
 import { useHarvestDeleteOnetMutation } from "./useHarvesDeleteOnetMutation"
+import { useHarvestsQuery } from "@/hooks/useHarvestsQuery"
 
 export const harvestsLocalStorageKey = "harvests"
 
@@ -33,22 +34,31 @@ const newHarvest = ({
 
 export const useHarvests = () => {
   const userEmail = useSession().data?.user?.email
+  const { data: queriedHarvests, isPending: queriedHarvestsIsPending } =
+    useHarvestsQuery()
 
-  const [harvestsRaw] = useLocalStorage({
+  const [harvestsRaw, setHarvestRaw] = useLocalStorage({
     key: harvestsLocalStorageKey,
     defaultValue: JSON.stringify([]),
   })
-  const Harvests: Harvest[] = useMemo(
-    () => (!userEmail || !harvestsRaw ? [] : JSON.parse(harvestsRaw)),
+  const harvests: Harvest[] = useMemo(
+    () => (!userEmail ? (!harvestsRaw ? [] : JSON.parse(harvestsRaw)) : []),
     [harvestsRaw, userEmail],
   )
   const { mutate: harvestCreateOne, isPending: newHarvestIsPending } =
     useHarvestCreateOne()
-  const { mutate: harvestDeleteOne } = useHarvestDeleteOnetMutation()
-  const { mutate: harvestUpdateOne } = useHarvestUpdateOneMutation()
+  const { mutate: harvestDeleteOne, isPending: deleteHarvestIsPending } =
+    useHarvestDeleteOnetMutation()
+  const { mutate: harvestUpdateOne, isPending: updateHarvestIsPending } =
+    useHarvestUpdateOneMutation()
 
   const createHarvest = async (harvest: Omit<Harvest, "id" | "harvest">) => {
-    if (!userEmail || newHarvestIsPending) return
+    if (newHarvestIsPending) return
+    if (!userEmail)
+      return setHarvestRaw((prev) => {
+        const prevHarvests = JSON.parse(prev)
+        return JSON.stringify([...prevHarvests, newHarvest(harvest)])
+      })
     harvestCreateOne({ email: userEmail, harvest: newHarvest(harvest) })
   }
   const updateHarvest = (harvest: Harvest) => {
@@ -56,9 +66,24 @@ export const useHarvests = () => {
     harvestUpdateOne({ email: userEmail, harvest })
   }
   const deleteHarvest = (harvestId: string) => {
-    if (!userEmail) return
+    if (!userEmail)
+      return setHarvestRaw((prev) => {
+        const prevHarvests: Harvest[] = JSON.parse(prev)
+        return JSON.stringify(prevHarvests.filter((h) => h.id !== harvestId))
+      })
     harvestDeleteOne({ email: userEmail, harvestId })
   }
 
-  return { Harvests, createHarvest, updateHarvest, deleteHarvest }
+  return {
+    harvests: queriedHarvests || harvests,
+    createHarvest,
+    updateHarvest,
+    deleteHarvest,
+    isPending:
+      !!userEmail &&
+      (!!queriedHarvestsIsPending ||
+        !!newHarvestIsPending ||
+        !!deleteHarvestIsPending ||
+        !!updateHarvestIsPending),
+  }
 }
