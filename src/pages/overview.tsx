@@ -7,11 +7,15 @@ const Layout = dynamic(() => import("../ui/layout"), { ssr: false })
 const OverviewTable = dynamic(() => import("@/features/overviewTable"), {
   ssr: false,
 })
+const OverviewChart = dynamic(() => import("@/features/overviewChart"), {
+  ssr: false,
+})
 
 const OverviewPage: NextPage = () => {
   const { harvests } = useHarvests()
   return (
     <Layout headerProps={{ logoHref: "/" }} footer={<Jokes />}>
+      {harvests ? <OverviewChart harvests={harvests} /> : null}
       <OverviewTable harvests={harvests} searchable />
     </Layout>
   )
