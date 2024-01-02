@@ -1,5 +1,5 @@
 import { FC, useRef, useState } from "react"
-import { DatePicker, DatesRangeValue } from "@mantine/dates"
+import { DatePicker, DateValue } from "@mantine/dates"
 import { ParsedUrlQuery } from "querystring"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
 import dayjs from "dayjs"
@@ -18,11 +18,20 @@ const SelectDate: FC<{
   const ref = useRef<HTMLDivElement>(null)
   useFocusOnLoad(ref, (ref) => {
     if (ref?.current) {
-      const datePicketEl = Array.from(
+      const levelGroup = ref.current.querySelector<HTMLDivElement>(
+        ".mantine-DatePicker-levelsGroup",
+      )
+
+      if (levelGroup) {
+        levelGroup.scrollTop = levelGroup.scrollHeight
+      }
+
+      const selectedEl = Array.from(
         ref.current.querySelectorAll<HTMLDivElement>(".mantine-DatePicker-day"),
       ).find((el) => el.getAttribute("data-selected") === "true")
-      if (datePicketEl) {
-        datePicketEl.focus()
+
+      if (selectedEl) {
+        selectedEl.focus()
       }
     }
   })
@@ -30,37 +39,17 @@ const SelectDate: FC<{
   const router = useRouter()
   const query = router.query as Query
 
-  const queryToState = (dateStr: string) => {
-    const [date1, date2] = dateStr.split("_")
-    return [
-      date1 ? dayjs(date1, dateFormat).toDate() : null,
-      date2 ? dayjs(date2, dateFormat).toDate() : null,
-    ] as DatesRangeValue
-  }
-  const onChange = (date: DatesRangeValue) => {
-    const [date1, date2] = date.filter(Boolean)
+  const queryToState = (date: string) =>
+    dayjs(date).isValid() ? dayjs(date, dateFormat).toDate() : null
+
+  const onChange = (date: DateValue) =>
     setQueryOnPage(router, {
-      date:
-        date1 && date2
-          ? dayjs(date1).isSame(dayjs(date2), "day")
-            ? dayjs(date1).format(dateFormat)
-            : dayjs(date1).isBefore(dayjs(date2), "day")
-              ? `${dayjs(date1).format(dateFormat)}${
-                  date2 ? `_${dayjs(date2).format(dateFormat)}` : ""
-                }`
-              : `${dayjs(date2).format(dateFormat)}_${dayjs(date1).format(
-                  dateFormat,
-                )}`
-          : date1
-            ? dayjs(date1).format(dateFormat)
-            : date2
-              ? dayjs(date2).format(dateFormat)
-              : [],
+      date: date ? dayjs(date).format(dateFormat) : [],
     })
-  }
-  const [state, setState] = useState<DatesRangeValue>(() => {
+
+  const [state, setState] = useState<DateValue>(() => {
     if (!query.date) {
-      const newState = [new Date(), null] as DatesRangeValue
+      const newState = new Date() //[new Date(), null] as DateValue
       onChange(newState)
       return newState
     }
@@ -70,14 +59,16 @@ const SelectDate: FC<{
   return (
     <DatePicker
       ref={ref}
-      type="range"
+      type="default"
       value={state}
       onChange={(date) => {
         setState(date)
         onChange(date)
       }}
-      allowSingleDateInRange
       size="lg"
+      onSubmit={() => {
+        if (onSubmit) onSubmit()
+      }}
       onKeyDown={(event) => {
         if (event.key === "Enter") {
           if (onSubmit) onSubmit()
