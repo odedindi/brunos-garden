@@ -89,6 +89,7 @@ const SelectCrop: FC<{
         if (val === "$create") {
           setCrops((current) => [...current, search])
           onChange(search)
+          onSubmit()
         } else {
           onChange(val)
           setSearch(val)
