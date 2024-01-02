@@ -9,7 +9,7 @@ import {
 } from "react"
 import { useHarvestsQuery } from "@/hooks/useHarvestsQuery"
 import { Combobox, InputBase, useCombobox } from "@mantine/core"
-import ChevronIcon from "@/ui/icons/Chevron"
+import SubmitButton from "./submitButton"
 import { useRouter } from "next/router"
 import { ParsedUrlQuery } from "querystring"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
@@ -95,9 +95,9 @@ const SelectCrop: FC<{
           onChange(val)
           setSearch(val)
         }
+        onSubmit()
 
         combobox.closeDropdown()
-        onSubmit()
       }}
     >
       <Combobox.Target>
@@ -119,14 +119,7 @@ const SelectCrop: FC<{
             setSearch(query.crop || "")
           }}
           placeholder="Take your pick"
-          rightSection={
-            <ChevronIcon
-              size="md"
-              onClick={() => {
-                onSubmit()
-              }}
-            />
-          }
+          rightSection={<SubmitButton onClick={onSubmit} />}
           onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
             if (event.key === "Enter") {
               onSubmit()

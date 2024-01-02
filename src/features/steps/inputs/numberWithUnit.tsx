@@ -6,7 +6,7 @@ import {
   Select,
   Text,
 } from "@mantine/core"
-import ChevronIcon from "@/ui/icons/Chevron"
+import SubmitButton from "./submitButton"
 import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
 import styled from "styled-components"
 
@@ -65,7 +65,7 @@ const SelectNumberWithUnit: FC<{
           direction="row"
           wrap="nowrap"
           pos="relative"
-          right={32}
+          right={27.5}
         >
           <Select
             data={data}
@@ -88,12 +88,7 @@ const SelectNumberWithUnit: FC<{
               if (ref.current) ref.current.focus()
             }}
           />
-          <ChevronIcon
-            onClick={() => {
-              if (onSubmit) onSubmit()
-            }}
-            size="md"
-          />
+          <SubmitButton onClick={onSubmit} />
         </Flex>
       }
       onKeyDown={(event) => {

@@ -30,23 +30,41 @@ export type IconProps = PropsWithChildren<{
 }>
 
 const Icon: FC<IconProps> = ({
+  onClick,
   label,
   size = "xs",
   bg = "dark.3",
+  disabled,
+  style,
   loading,
   children,
-  ...iconProps
 }) =>
   label ? (
     <Tooltip openDelay={500} label={label}>
-      <StyledActionIcon size={size} bg={bg} {...iconProps}>
+      <StyledActionIcon
+        onClick={() => {
+          if (onClick) onClick()
+        }}
+        size={size}
+        bg={bg}
+        disabled={disabled}
+        style={style}
+      >
         {loading ? <Loader size={size} /> : children}
       </StyledActionIcon>
     </Tooltip>
   ) : loading ? (
     <Loader size={size} color={bg as DefaultMantineColor} />
   ) : (
-    <StyledActionIcon size={size} bg={bg} {...iconProps}>
+    <StyledActionIcon
+      onClick={() => {
+        if (onClick) onClick()
+      }}
+      size={size}
+      bg={bg}
+      disabled={disabled}
+      style={style}
+    >
       {children}
     </StyledActionIcon>
   )

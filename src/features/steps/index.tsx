@@ -26,7 +26,6 @@ type Query = ParsedUrlQuery & {
 }
 
 const StyledStepper = styled(Stepper)`
-  max-width: 450px;
   .mantine-Stepper-stepIcon {
     transition: all 0.3s ease;
   }
@@ -111,7 +110,7 @@ const steps = [
       />
     ),
   },
-]
+] as const
 
 const Steps: FC = () => {
   const router = useRouter()

@@ -116,7 +116,7 @@ const OverviewTable: FC<OverviewProps> = ({
             const [harvestNum, harvestUnit] = harvest.split("_")
             return (
               <Tooltip openDelay={500} label={`${harvestNum} ${harvestUnit}`}>
-                <Text>{Number(harvestNum)}</Text>
+                <Text>{Number(harvestNum).toFixed(3)}</Text>
               </Tooltip>
             )
           }
@@ -133,7 +133,7 @@ const OverviewTable: FC<OverviewProps> = ({
               openDelay={500}
               label={`${weightCorrected} kg / ${areaNum} ${areaUnit}`}
             >
-              <Text>{weightCorrected / Number(areaNum)}</Text>
+              <Text>{(weightCorrected / Number(areaNum)).toFixed(3)}</Text>
             </Tooltip>
           )
         },

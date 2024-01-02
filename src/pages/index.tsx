@@ -10,11 +10,8 @@ const HomePage: NextPage = () => {
     <Layout headerProps={{ logoHref: "/overview" }}>
       <Box
         style={{
-          width: "clamp(300px, 50%, 600px)",
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
+          width: "clamp(320px, 50vw, 800px)",
+          margin: "auto",
         }}
       >
         <Steps />
