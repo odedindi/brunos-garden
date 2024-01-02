@@ -1,10 +1,8 @@
 export const colorsNames = [
-  "Black",
   "Blue",
   "Green",
   "Red",
   "Yellow",
-  "White",
   "Brown",
   "BurlyWood",
   "Chocolate",
@@ -144,5 +142,4 @@ export const colorsNames = [
   "PaleGoldenRod",
   "PeachPuff",
   "Snow",
-  "White",
 ]
