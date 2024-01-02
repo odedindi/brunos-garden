@@ -164,7 +164,7 @@ const Steps: FC = () => {
       active={active}
       onStepClick={setActive}
       size="xs"
-      color="dark.3"
+      color="green.7"
     >
       {steps.map(({ label, description, Children, icon }, i) => (
         <Stepper.Step
