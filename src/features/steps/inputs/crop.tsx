@@ -15,6 +15,7 @@ import { ParsedUrlQuery } from "querystring"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
 import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
 import styled from "styled-components"
+import { useHarvests } from "@/hooks/useHarvests"
 
 const Input = styled(InputBase)`
   :focus,
@@ -28,12 +29,14 @@ type Query = ParsedUrlQuery & {
 }
 
 const useHarvestData = () => {
-  const { data: harvests } = useHarvestsQuery()
-  const [crops, setCrops] = useState<string[]>([])
+  const { harvests } = useHarvests()
+  const [crops, setCrops] = useState<string[]>(
+    () => harvests?.map(({ crop }) => crop) ?? [],
+  )
 
   useEffect(() => {
-    const crops = harvests?.map(({ crop }) => crop)
-    if (crops) {
+    const crops = harvests.map(({ crop }) => crop)
+    if (crops.length) {
       setCrops((prev) => Array.from(new Set(prev.concat(crops))))
     }
   }, [harvests])
@@ -50,7 +53,6 @@ const SelectCrop: FC<{
   })
   const ref = useRef<HTMLInputElement>(null)
   useFocusOnLoad<"input">(ref)
-
   const [crops, setCrops] = useHarvestData()
   const router = useRouter()
   const query = router.query as Query
@@ -89,17 +91,18 @@ const SelectCrop: FC<{
         if (val === "$create") {
           setCrops((current) => [...current, search])
           onChange(search)
-          onSubmit()
         } else {
           onChange(val)
           setSearch(val)
         }
 
         combobox.closeDropdown()
+        onSubmit()
       }}
     >
       <Combobox.Target>
         <Input
+          styles={{ input: { height: "75px" } }}
           ref={ref}
           value={query.crop !== search ? search : query.crop}
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
@@ -118,6 +121,7 @@ const SelectCrop: FC<{
           placeholder="Take your pick"
           rightSection={
             <ChevronIcon
+              size="md"
               onClick={() => {
                 onSubmit()
               }}

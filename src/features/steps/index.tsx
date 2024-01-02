@@ -190,9 +190,13 @@ const Steps: FC = () => {
             disableSelectRows
             hideOverviewTableFooter
             hideTableFoot
+            noDownloadCSV
           />
           <Button component={"a"} href="/" bg="dark.3">
             Create New Entry
+          </Button>
+          <Button component={"a"} href="/overview" bg="dark.3" mt={"xs"}>
+            Overview page
           </Button>
         </Container>
       </Stepper.Completed>

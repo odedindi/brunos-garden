@@ -56,6 +56,7 @@ const SelectNumberWithUnit: FC<{
       }}
       rightSectionWidth={40}
       placeholder={placeholder}
+      styles={{ input: { height: "75px", fontSize: "18px" } }}
       rightSection={
         <Flex
           gap="xs"
@@ -77,7 +78,11 @@ const SelectNumberWithUnit: FC<{
             rightSection={<Text>{unit}</Text>}
             withCheckIcon={false}
             styles={{
-              input: { backgroundColor: "transparent", border: "none" },
+              input: {
+                backgroundColor: "transparent",
+                border: "none",
+                fontSize: "18px",
+              },
             }}
             onBlur={() => {
               if (ref.current) ref.current.focus()
@@ -87,6 +92,7 @@ const SelectNumberWithUnit: FC<{
             onClick={() => {
               if (onSubmit) onSubmit()
             }}
+            size="md"
           />
         </Flex>
       }
