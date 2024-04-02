@@ -1,6 +1,4 @@
 import { CSSProperties, FC, PropsWithChildren } from "react"
-
-import { styled } from "styled-components"
 import {
   ActionIcon,
   ActionIconProps,
@@ -8,16 +6,7 @@ import {
   Loader,
   DefaultMantineColor,
 } from "@mantine/core"
-
-import { get } from "lodash"
-
-const StyledActionIcon = styled(ActionIcon)`
-  color: ${({ theme }) => get(theme, "colors.gray[3]")};
-  transition: color 0.3s ease-out;
-  :hover {
-    color: ${({ theme }) => get(theme, "colors.gray[1]")};
-  }
-`
+import classes from "./Icon.module.css"
 
 export type IconProps = PropsWithChildren<{
   onClick?: () => void
@@ -41,7 +30,8 @@ const Icon: FC<IconProps> = ({
 }) =>
   label ? (
     <Tooltip openDelay={500} label={label}>
-      <StyledActionIcon
+      <ActionIcon
+        className={classes.icon}
         onClick={() => {
           if (onClick) onClick()
         }}
@@ -51,12 +41,13 @@ const Icon: FC<IconProps> = ({
         style={style}
       >
         {loading ? <Loader size={size} /> : children}
-      </StyledActionIcon>
+      </ActionIcon>
     </Tooltip>
   ) : loading ? (
     <Loader size={size} color={bg as DefaultMantineColor} />
   ) : (
-    <StyledActionIcon
+    <ActionIcon
+      className={classes.icon}
       onClick={() => {
         if (onClick) onClick()
       }}
@@ -66,7 +57,7 @@ const Icon: FC<IconProps> = ({
       style={style}
     >
       {children}
-    </StyledActionIcon>
+    </ActionIcon>
   )
 
 export default Icon

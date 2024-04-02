@@ -1,0 +1,7 @@
+.icon {
+  color: var(--mantine-color-gray-3);
+  transition: color 0.3s ease-out;
+  :hover {
+    color: var(--mantine-color-gray-1);
+  }
+}

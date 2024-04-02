@@ -6,7 +6,7 @@ import dayjs from "dayjs"
 import { useRouter } from "next/router"
 import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
 
-type Query = ParsedUrlQuery & {
+interface Query extends ParsedUrlQuery {
   date?: string
 }
 

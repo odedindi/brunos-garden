@@ -26,6 +26,8 @@ type OverviewProps = {
   noDownloadCSV?: boolean
 }
 
+const wideColumns = ["crop", "yield"]
+
 const OverviewTable: FC<OverviewProps> = ({
   harvests,
   disableSelectRows,
@@ -40,7 +42,7 @@ const OverviewTable: FC<OverviewProps> = ({
   const columns = useMemo<ColumnDef<Partial<Harvest>>[]>(
     () => [
       {
-        id: "overviewTable",
+        id: "select",
         header: ({ table }) =>
           disableSelectRows ? null : (
             <IndeterminateCheckbox
@@ -54,7 +56,7 @@ const OverviewTable: FC<OverviewProps> = ({
           ),
         cell: ({ row }) =>
           disableSelectRows ? null : (
-            <Box px="xs">
+            <Box px="lg">
               <IndeterminateCheckbox
                 {...{
                   checked: row.getIsSelected(),
@@ -73,6 +75,17 @@ const OverviewTable: FC<OverviewProps> = ({
         footer: (props) => null,
       },
       {
+        header: "Date",
+        accessorKey: "date",
+        cell: (info) => {
+          const value = info.getValue()
+          if (typeof value === "string") return value.replace("_", " ")
+          return value
+        },
+        footer: (props) => <>{/* props.column.id */}</>,
+      },
+      {
+        id: "crop",
         header: "Crop",
         accessorKey: "crop",
         cell: (info) => info.getValue(),
@@ -96,18 +109,9 @@ const OverviewTable: FC<OverviewProps> = ({
           )
         },
       },
-      {
-        header: "Date",
-        accessorKey: "date",
-        cell: (info) => {
-          const value = info.getValue()
-          if (typeof value === "string") return value.replace("_", " ")
-          return value
-        },
-        footer: (props) => <>{/* props.column.id */}</>,
-      },
 
       {
+        id: "yield",
         header: "Yield (Kg/m2)",
         cell: (info) => {
           const { area = "", weight = "", harvest } = info.row.original
@@ -194,8 +198,8 @@ const OverviewTable: FC<OverviewProps> = ({
           }}
         />
       ) : null}
-      <Space h="lg" />
-      <Flex w="100%" align="center" gap={2}>
+
+      <Flex w="100%" align="center" gap={2} py={"md"}>
         {Object.keys(rowSelection).length ? (
           <OverviewTableDeleteButton
             table={table}
@@ -214,7 +218,15 @@ const OverviewTable: FC<OverviewProps> = ({
           {table.getHeaderGroups().map((headerGroup) => (
             <Table.Tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <Table.Th key={header.id} colSpan={header.colSpan}>
+                <Table.Th
+                  key={header.id}
+                  // colSpan={wideColumns.includes(header.column.id) ? 3 : 1}
+                  style={{
+                    width: !wideColumns.includes(header.column.id)
+                      ? "10%"
+                      : "auto",
+                  }}
+                >
                   {header.isPlaceholder ? null : (
                     <>
                       {flexRender(
@@ -236,7 +248,15 @@ const OverviewTable: FC<OverviewProps> = ({
               style={{ cursor: "pointer" }}
             >
               {row.getVisibleCells().map((cell) => (
-                <Table.Td key={cell.id}>
+                <Table.Td
+                  key={cell.id}
+                  // colSpan={wideColumns.includes(cell.column.id) ? 3 : 1}
+                  style={{
+                    width: !wideColumns.includes(cell.column.id)
+                      ? "10%"
+                      : "auto",
+                  }}
+                >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </Table.Td>
               ))}
@@ -263,9 +283,12 @@ const OverviewTable: FC<OverviewProps> = ({
         )}
       </Table>
 
-      <Space h="xl" />
       {hideOverviewTableFooter ? null : (
-        <OverviewTableFooter table={table} rowSelection={rowSelection} />
+        <OverviewTableFooter
+          pt="xl"
+          table={table}
+          rowSelection={rowSelection}
+        />
       )}
     </Flex>
   )

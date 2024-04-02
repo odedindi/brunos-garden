@@ -4,7 +4,7 @@ import { ParsedUrlQuery } from "querystring"
 import SelectNumberWithUnit, { Weight } from "./numberWithUnit"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
 
-type Query = ParsedUrlQuery & {
+interface Query extends ParsedUrlQuery {
   weight?: string
 }
 

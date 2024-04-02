@@ -1,0 +1,16 @@
+.base {
+  position: relative;
+  cursor: pointer;
+}
+
+.strawberry {
+  z-index: 2;
+}
+.shadow {
+  position: absolute;
+  z-index: 1;
+  top: 2px;
+  left: 8px;
+  rotate: 35deg;
+  opacity: 0.7;
+}

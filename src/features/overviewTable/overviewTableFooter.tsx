@@ -4,6 +4,7 @@ import type { Harvest } from "@/types/Harvest"
 
 import {
   Box,
+  BoxProps,
   Text,
   NumberInput as MantineNumberInput,
   Select as MantineSelect,
@@ -26,7 +27,7 @@ const Select = styled(MantineSelect)`
   }
 `
 
-type OverviewTableFooterProps = {
+interface OverviewTableFooterProps extends BoxProps {
   table: TankstackTable<Partial<Harvest>>
   rowSelection: Object
 }
@@ -34,8 +35,9 @@ type OverviewTableFooterProps = {
 const OverviewTableFooter: FC<OverviewTableFooterProps> = ({
   table,
   rowSelection,
+  ...props
 }) => (
-  <Box>
+  <Box {...props}>
     <Flex>
       <Flex align={"end"} style={{ flex: 1, gap: "4px" }}>
         <ChevronsIcon

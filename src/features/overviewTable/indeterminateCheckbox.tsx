@@ -1,9 +1,11 @@
 import { Checkbox, CheckboxProps } from "@mantine/core"
 import { FC, useEffect, useRef } from "react"
 
-const IndeterminateCheckbox: FC<
-  { indeterminate?: boolean } & Omit<CheckboxProps, "styles">
-> = ({ indeterminate, color = "dark.3", ...rest }) => {
+const IndeterminateCheckbox: FC<Omit<CheckboxProps, "styles">> = ({
+  indeterminate,
+  color = "dark.3",
+  ...rest
+}) => {
   const ref = useRef<HTMLInputElement>(null!)
 
   useEffect(() => {

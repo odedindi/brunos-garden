@@ -1,0 +1,17 @@
+.header {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  background-color: var(--mantine-color-gray-3);
+  min-width: 320px;
+}
+
+.main {
+  min-width: 320px;
+}
+
+.footer {
+  min-width: 320px;
+  background-color: var(--mantine-color-gray-3);
+  overflow: auto;
+}

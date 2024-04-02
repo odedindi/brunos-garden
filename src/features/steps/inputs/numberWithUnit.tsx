@@ -56,7 +56,6 @@ const SelectNumberWithUnit: FC<{
       }}
       rightSectionWidth={40}
       placeholder={placeholder}
-      styles={{ input: { height: "75px", fontSize: "18px" } }}
       rightSection={
         <Flex
           gap="xs"

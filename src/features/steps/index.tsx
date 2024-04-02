@@ -1,7 +1,6 @@
 import { FC, useCallback, useState } from "react"
-import { Stepper, Button, Box, Title } from "@mantine/core"
+import { Stepper, Button, Box } from "@mantine/core"
 import dynamic from "next/dynamic"
-import styled from "styled-components"
 import { ParsedUrlQuery } from "querystring"
 import { useRouter } from "next/router"
 import { useHarvests } from "@/hooks/useHarvests"
@@ -11,6 +10,7 @@ import {
   IconRulerMeasure,
   IconScale,
 } from "@tabler/icons-react"
+import classes from "./steps.module.css"
 
 const SelectCrop = dynamic(() => import("./inputs/crop"), { ssr: false })
 const SelectDate = dynamic(() => import("./inputs/date"), { ssr: false })
@@ -18,38 +18,12 @@ const SelectWeight = dynamic(() => import("./inputs/weight"), { ssr: false })
 const SelectArea = dynamic(() => import("./inputs/area"), { ssr: false })
 const OverviewTable = dynamic(() => import("../overviewTable"), { ssr: false })
 
-type Query = ParsedUrlQuery & {
+interface Query extends ParsedUrlQuery {
   crop?: string
   date?: string
   weight?: string
   area?: string
 }
-
-const StyledStepper = styled(Stepper)`
-  .mantine-Stepper-stepIcon {
-    transition: all 0.3s ease;
-  }
-  .mantine-Stepper-step {
-    &[data-progress] {
-      transform: scale(1.05);
-    }
-  }
-
-  .mantine-Stepper-separator {
-    transition: all 0.3s ease;
-  }
-
-  .mantine-Stepper-stepDescription {
-    max-width: 100px;
-  }
-`
-
-const Container = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  gap: 20;
-  min-height: 400px;
-`
 
 const steps = [
   {
@@ -57,11 +31,7 @@ const steps = [
     description: "Select or create a new crop",
     icon: <IconPlant />,
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
-      <SelectCrop
-        onSubmit={() => {
-          if (onSubmit) onSubmit()
-        }}
-      />
+      <SelectCrop onSubmit={() => onSubmit?.()} />
     ),
   },
   {
@@ -70,17 +40,8 @@ const steps = [
     icon: <IconCalendarEvent />,
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
       <>
-        <SelectDate
-          onSubmit={() => {
-            if (onSubmit) onSubmit()
-          }}
-        />
-        <Button
-          bg="dark.3"
-          onClick={() => {
-            if (onSubmit) onSubmit()
-          }}
-        >
+        <SelectDate onSubmit={() => onSubmit?.()} />
+        <Button bg="dark.3" onClick={() => onSubmit?.()}>
           Next step
         </Button>
       </>
@@ -91,11 +52,7 @@ const steps = [
     description: "Enter the weight of the yield",
     icon: <IconScale />,
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
-      <SelectWeight
-        onSubmit={() => {
-          if (onSubmit) onSubmit()
-        }}
-      />
+      <SelectWeight onSubmit={() => onSubmit?.()} />
     ),
   },
   {
@@ -103,11 +60,7 @@ const steps = [
     description: "Enter the area of the yield",
     icon: <IconRulerMeasure />,
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
-      <SelectArea
-        onSubmit={() => {
-          if (onSubmit) onSubmit()
-        }}
-      />
+      <SelectArea onSubmit={() => onSubmit?.()} />
     ),
   },
 ] as const
@@ -159,7 +112,8 @@ const Steps: FC = () => {
     highestStepVisited >= step && active !== step && active !== steps.length
 
   return (
-    <StyledStepper
+    <Stepper
+      className={classes.base}
       active={active}
       onStepClick={setActive}
       size="xs"
@@ -173,17 +127,17 @@ const Steps: FC = () => {
           allowStepSelect={shouldAllowSelectStep(i)}
           icon={icon}
         >
-          <Container>
+          <Box className={classes.wrapper}>
             <Children
               onSubmit={() => {
                 if (query && query[label]) nextStep()
               }}
             />
-          </Container>
+          </Box>
         </Stepper.Step>
       ))}
       <Stepper.Completed>
-        <Container>
+        <Box className={classes.wrapper}>
           <OverviewTable
             harvests={[query]}
             disableSelectRows
@@ -197,9 +151,9 @@ const Steps: FC = () => {
           <Button component={"a"} href="/overview" bg="dark.3" mt={"xs"}>
             Overview page
           </Button>
-        </Container>
+        </Box>
       </Stepper.Completed>
-    </StyledStepper>
+    </Stepper>
   )
 }
 

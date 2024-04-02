@@ -7,24 +7,17 @@ import {
   useRef,
   useState,
 } from "react"
-import { useHarvestsQuery } from "@/hooks/useHarvestsQuery"
+
 import { Combobox, InputBase, useCombobox } from "@mantine/core"
 import SubmitButton from "./submitButton"
 import { useRouter } from "next/router"
 import { ParsedUrlQuery } from "querystring"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
 import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
-import styled from "styled-components"
 import { useHarvests } from "@/hooks/useHarvests"
+import classes from "./input.module.css"
 
-const Input = styled(InputBase)`
-  :focus,
-  :focus-within {
-    border-color: var(--mantine-color-dark-3);
-  }
-`
-
-type Query = ParsedUrlQuery & {
+interface Query extends ParsedUrlQuery {
   crop?: string
 }
 
@@ -44,8 +37,6 @@ const useHarvestData = () => {
   return [crops, setCrops] as const
 }
 const SelectCrop: FC<{
-  value?: string | null
-  onChange?: (value: string | null) => void
   onSubmit: () => void
 }> = ({ onSubmit }) => {
   const combobox = useCombobox({
@@ -101,8 +92,8 @@ const SelectCrop: FC<{
       }}
     >
       <Combobox.Target>
-        <Input
-          styles={{ input: { height: "75px" } }}
+        <InputBase
+          className={classes.input}
           ref={ref}
           value={query.crop !== search ? search : query.crop}
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
@@ -121,9 +112,7 @@ const SelectCrop: FC<{
           placeholder="Take your pick"
           rightSection={<SubmitButton onClick={onSubmit} />}
           onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
-            if (event.key === "Enter") {
-              onSubmit()
-            }
+            if (event.key === "Enter") onSubmit()
           }}
         />
       </Combobox.Target>

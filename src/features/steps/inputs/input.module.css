@@ -1,0 +1,6 @@
+.input {
+  :focus,
+  :focus-within {
+    border-color: var(--mantine-color-dark-3);
+  }
+}

@@ -5,14 +5,7 @@ import ChevronIcon from "@/ui/icons/Chevron"
 const SubmitButton: FC<{
   onClick?: () => void
 }> = ({ onClick }) => (
-  <ChevronIcon
-    size="md"
-    onClick={() => {
-      if (onClick) onClick()
-    }}
-    style={{ height: "70px" }}
-    label="Submit"
-  />
+  <ChevronIcon size="md" onClick={() => onClick?.()} label="Submit" />
 )
 
 export default SubmitButton

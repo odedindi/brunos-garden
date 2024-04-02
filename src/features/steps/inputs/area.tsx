@@ -5,7 +5,7 @@ import { ParsedUrlQuery } from "querystring"
 import SelectNumberWithUnit, { Area } from "./numberWithUnit"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
 
-type Query = ParsedUrlQuery & {
+interface Query extends ParsedUrlQuery {
   area?: string
 }
 
