@@ -68,7 +68,7 @@ const SelectCrop: FC<{
     [crops, exactOptionMatch, search],
   )
 
-  const options = filteredOptions.map((item) => (
+  const options = Array.from(new Set(filteredOptions)).map((item) => (
     <Combobox.Option value={item} key={item}>
       {item}
     </Combobox.Option>
