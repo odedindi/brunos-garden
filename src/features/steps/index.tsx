@@ -28,7 +28,7 @@ interface Query extends ParsedUrlQuery {
 const steps = [
   {
     label: "crop",
-    description: "Select or create a new crop",
+    description: "Select a crop or create a new one",
     icon: <IconPlant />,
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
       <SelectCrop onSubmit={() => onSubmit?.()} />
@@ -36,7 +36,7 @@ const steps = [
   },
   {
     label: "date",
-    description: "Select a date or a range",
+    description: "Select a date of harvest",
     icon: <IconCalendarEvent />,
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
       <>
@@ -49,7 +49,7 @@ const steps = [
   },
   {
     label: "weight",
-    description: "Enter the weight of the yield",
+    description: "Enter the yield's weight, how much did you harvest",
     icon: <IconScale />,
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
       <SelectWeight onSubmit={() => onSubmit?.()} />
@@ -57,7 +57,8 @@ const steps = [
   },
   {
     label: "area",
-    description: "Enter the area of the yield",
+    description:
+      "Enter the area of harvest, over how big of an area did you harvest",
     icon: <IconRulerMeasure />,
     Children: ({ onSubmit }: { onSubmit?: () => void }) => (
       <SelectArea onSubmit={() => onSubmit?.()} />
