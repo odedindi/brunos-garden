@@ -15,3 +15,4 @@ export const Slogen = styled.p.attrs({
     display: ${({ $hideFromSm }) => ($hideFromSm ? "none" : "inherit")};
   }
 `
+export default Slogen

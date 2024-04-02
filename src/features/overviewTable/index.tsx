@@ -10,12 +10,14 @@ import { FC, memo, useEffect, useMemo, useState } from "react"
 import type { Harvest } from "@/types/Harvest"
 import IndeterminateCheckbox from "./indeterminateCheckbox"
 
-import { Box, Space, Table, Flex, Text, Tooltip } from "@mantine/core"
+import { Box, Table, Flex, Text, Tooltip } from "@mantine/core"
 import OverviewTableFooter from "./overviewTableFooter"
 
 import OverviewTableSeach from "./overviewTableSeach"
 import OverviewTableDeleteButton from "./overviewTableDeleteButton"
 import OverviewTableDownloadCSV from "./overviewTableDownloadCSVButton"
+
+import classes from "./overviewTable.module.css"
 
 type OverviewProps = {
   harvests?: Partial<Harvest>[]
@@ -75,6 +77,7 @@ const OverviewTable: FC<OverviewProps> = ({
         footer: (props) => null,
       },
       {
+        id: "date",
         header: "Date",
         accessorKey: "date",
         cell: (info) => {
@@ -220,12 +223,17 @@ const OverviewTable: FC<OverviewProps> = ({
               {headerGroup.headers.map((header) => (
                 <Table.Th
                   key={header.id}
+                  className={
+                    !wideColumns.includes(header.column.id)
+                      ? classes[header.column.id as keyof typeof classes]
+                      : undefined
+                  }
                   // colSpan={wideColumns.includes(header.column.id) ? 3 : 1}
-                  style={{
-                    width: !wideColumns.includes(header.column.id)
-                      ? "10%"
-                      : "auto",
-                  }}
+                  // style={{
+                  //   width: !wideColumns.includes(header.column.id)
+                  //     ? "clamp(10px, 15%, 30px)"
+                  //     : "auto",
+                  // }}
                 >
                   {header.isPlaceholder ? null : (
                     <>
@@ -250,12 +258,17 @@ const OverviewTable: FC<OverviewProps> = ({
               {row.getVisibleCells().map((cell) => (
                 <Table.Td
                   key={cell.id}
+                  className={
+                    !wideColumns.includes(cell.column.id)
+                      ? classes[cell.column.id as keyof typeof classes]
+                      : undefined
+                  }
                   // colSpan={wideColumns.includes(cell.column.id) ? 3 : 1}
-                  style={{
-                    width: !wideColumns.includes(cell.column.id)
-                      ? "10%"
-                      : "auto",
-                  }}
+                  // style={{
+                  //   width: !wideColumns.includes(cell.column.id)
+                  //     ? "clamp(10px, 15%, 30px)"
+                  //     : "auto",
+                  // }}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </Table.Td>

@@ -1,6 +1,9 @@
 .base {
   position: relative;
-  cursor: pointer;
+
+  @media (max-width: $mantine-breakpoint-xs) {
+    display: none;
+  }
 }
 
 .strawberry {

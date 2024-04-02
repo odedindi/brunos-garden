@@ -6,19 +6,28 @@ import {
   Box,
   Menu,
   Loader as MantineLoader,
+  UnstyledButton,
+  Group,
+  Text,
+  rem,
 } from "@mantine/core"
 import { signIn, signOut, useSession } from "next-auth/react"
-// import Link from "next/link"
-import { ComponentPropsWithoutRef, FC } from "react"
+import { ComponentPropsWithoutRef, FC, useState } from "react"
+import classes from "./authentication.module.css"
+import cx from "clsx"
+
+import { IconLogout, IconChevronDown } from "@tabler/icons-react"
 
 const Loader: FC = () => (
   <Box mr={5}>
-    <Button>
-      <MantineLoader color="white" size="sm" />
+    <Button variant="default">
+      <MantineLoader color="gray" size="sm" />
     </Button>
   </Box>
 )
 const Authentication: FC = () => {
+  const [userMenuOpened, setUserMenuOpened] = useState(false)
+
   const { data: session, status: sessionStatus } = useSession()
   const { data: me, isLoading: meIsLoading } = useMeQuery()
   const {
@@ -31,12 +40,12 @@ const Authentication: FC = () => {
 
   if (sessionStatus === "loading" || meIsLoading) return <Loader />
   if (session?.user?.email && !me) {
-    const user = createNewUser({
+    createNewUser({
       email: session.user.email,
       name: session.user.name ?? null,
       image: session.user.image ?? null,
     })
-    return <MantineLoader color="white" size="sm" />
+    return <Loader />
   }
   if (me)
     return (
@@ -44,28 +53,65 @@ const Authentication: FC = () => {
         {me.image ? (
           <Menu
             shadow="sm"
-            position="right"
-            trigger="hover"
+            position="bottom-end"
+            transitionProps={{ transition: "pop-top-right" }}
             openDelay={500}
             closeDelay={500}
+            onClose={() => setUserMenuOpened(false)}
+            onOpen={() => setUserMenuOpened(true)}
           >
             <Menu.Target>
-              <Avatar
-                // component={Link}
-                // href="/profile"
-                src={me.image}
-                title={me.email}
-                radius="md"
-                style={{ cursor: "pointer" }}
-                color="cyan"
-              />
+              <UnstyledButton
+                className={cx(classes.user, {
+                  [classes.userActive]: userMenuOpened,
+                })}
+              >
+                <Group gap={7}>
+                  <Avatar
+                    src={me.image}
+                    alt={me.name ?? ""}
+                    radius="xl"
+                    size={20}
+                  />
+                  <Text fw={500} size="sm" lh={1} mr={3}>
+                    {me.name}
+                  </Text>
+                  <IconChevronDown
+                    stroke={1.5}
+                    className={cx(classes.icon, {
+                      [classes.iconActive]: userMenuOpened,
+                    })}
+                  />
+                </Group>
+              </UnstyledButton>
             </Menu.Target>
             <Menu.Dropdown>
-              <Menu.Item onClick={() => signOut()}>Sign Out</Menu.Item>
+              <Menu.Item
+                onClick={() => signOut()}
+                leftSection={
+                  <IconLogout
+                    style={{ width: rem(16), height: rem(16) }}
+                    stroke={1.5}
+                  />
+                }
+              >
+                Logout
+              </Menu.Item>
             </Menu.Dropdown>
           </Menu>
         ) : (
-          <Button onClick={() => signOut()}>Sign out</Button>
+          <Button
+            variant="default"
+            leftSection={
+              <IconLogout
+                style={{ width: rem(16), height: rem(16) }}
+                stroke={1.5}
+              />
+            }
+            onClick={() => signOut()}
+          >
+            Logout
+          </Button>
         )}
       </Box>
     )

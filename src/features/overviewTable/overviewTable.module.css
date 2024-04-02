@@ -1,0 +1,12 @@
+.clamped {
+  width: clamp(60px, 15vw, 120px);
+}
+
+.select {
+  width: 0px;
+  
+}
+
+.date {
+  width: 120px;
+}
