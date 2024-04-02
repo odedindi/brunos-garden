@@ -42,30 +42,20 @@ const HomePage: NextPage = () => {
     },
   ]
   return (
-    // <Layout headerProps={{ logoHref: "/overview" }}>
-    // <Box
-    //   style={{
-    //     width: "clamp(320px, 50vw, 800px)",
-    //     margin: "auto",
-    //   }}
-    // >
-    //   <Steps />
-    // </Box>
-    // </Layout>
     <AppShell header={{ height: 115 }} footer={{ height: 75 }} padding="md">
       <AppShell.Header className={classes.header}>
-        <Container pb="sm">
-          <Group wrap="nowrap" justify="space-between">
-            <Group wrap="nowrap">
-              <Authentication />
-              <Slogen />
-            </Group>
+        <Container pb="lg">
+          <Group wrap="nowrap" justify="flex-end">
             <StrawberryLogo />
+            <Slogen />
           </Group>
         </Container>
         <Container>
           <MantineTabs
-            value={tabs[activeTab]?.label}
+            value={activeTab.toString()}
+            onChange={(value) => {
+              console.log(value)
+            }}
             variant="outline"
             classNames={{
               root: classes.tabs,
@@ -74,17 +64,22 @@ const HomePage: NextPage = () => {
             }}
           >
             <MantineTabs.List>
-              {tabs.map((tab, i) => (
-                <MantineTabs.Tab
-                  value={tab.label}
-                  key={i}
-                  onClick={() => {
-                    setActiveTab(i)
-                  }}
-                >
-                  {tab.label}
-                </MantineTabs.Tab>
-              ))}
+              <Group w="100%" wrap="nowrap">
+                <Group flex={1} wrap="nowrap">
+                  {tabs.map((tab, i) => (
+                    <MantineTabs.Tab
+                      value={`${i}`}
+                      key={i}
+                      onClick={() => {
+                        setActiveTab(i)
+                      }}
+                    >
+                      {tab.label}
+                    </MantineTabs.Tab>
+                  ))}
+                </Group>
+                <Authentication />
+              </Group>
             </MantineTabs.List>
           </MantineTabs>
         </Container>

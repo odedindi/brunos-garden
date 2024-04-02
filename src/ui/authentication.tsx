@@ -10,6 +10,7 @@ import {
   Group,
   Text,
   rem,
+  BoxProps,
 } from "@mantine/core"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { ComponentPropsWithoutRef, FC, useState } from "react"
@@ -25,7 +26,7 @@ const Loader: FC = () => (
     </Button>
   </Box>
 )
-const Authentication: FC = () => {
+const Authentication: FC<BoxProps> = (props) => {
   const [userMenuOpened, setUserMenuOpened] = useState(false)
 
   const { data: session, status: sessionStatus } = useSession()
@@ -47,10 +48,11 @@ const Authentication: FC = () => {
     })
     return <Loader />
   }
-  if (me)
-    return (
-      <Box mx="sm">
-        {me.image ? (
+
+  return (
+    <Box {...props}>
+      {me ? (
+        me.image ? (
           <Menu
             shadow="sm"
             position="bottom-end"
@@ -66,14 +68,20 @@ const Authentication: FC = () => {
                   [classes.userActive]: userMenuOpened,
                 })}
               >
-                <Group gap={7}>
+                <Group gap={7} wrap="nowrap">
                   <Avatar
                     src={me.image}
                     alt={me.name ?? ""}
                     radius="xl"
                     size={20}
                   />
-                  <Text fw={500} size="sm" lh={1} mr={3}>
+                  <Text
+                    fw={500}
+                    size="sm"
+                    lh={1}
+                    mr={3}
+                    style={{ whiteSpace: "nowrap" }}
+                  >
                     {me.name}
                   </Text>
                   <IconChevronDown
@@ -112,19 +120,19 @@ const Authentication: FC = () => {
           >
             Logout
           </Button>
-        )}
-      </Box>
-    )
-  return (
-    <Button
-      leftSection={<GoogleIcon />}
-      variant="default"
-      onClick={() => signIn("google")}
-      mx="sm"
-      style={{ cursor: "pointer" }}
-    >
-      Sign In
-    </Button>
+        )
+      ) : (
+        <Button
+          leftSection={<GoogleIcon />}
+          variant="default"
+          onClick={() => signIn("google")}
+          mx="sm"
+          style={{ cursor: "pointer" }}
+        >
+          Sign In
+        </Button>
+      )}
+    </Box>
   )
 }
 

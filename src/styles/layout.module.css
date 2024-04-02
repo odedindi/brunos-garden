@@ -1,18 +1,18 @@
 .main {
-  min-width: 320px;
-  width: clamp(320px, 100vw, 800px);
+  min-width: 400px;
+  width: clamp(400px, 100vw, 800px);
   margin: auto;
 }
 
 .footer {
-  min-width: 320px;
+  min-width: 400px;
   background-color: var(--mantine-color-gray-3);
   overflow: auto;
 }
 
 .header {
-  min-width: 540px;
-  padding-top: var(--mantine-spacing-sm);
+  min-width: 400px;
+  padding-top: var(--mantine-spacing-md);
   background-color: light-dark(
     var(--mantine-color-gray-0),
     var(--mantine-color-dark-6)

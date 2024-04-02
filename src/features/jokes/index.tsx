@@ -1,11 +1,11 @@
 import { Box, Menu, Stack, Text } from "@mantine/core"
 import { FC, useCallback, useEffect, useMemo, useState } from "react"
 import { styled, useTheme } from "styled-components"
-import { useLocalStorage } from "@mantine/hooks"
 import { get } from "lodash"
 import { jokesConfig } from "./config"
 import ChevronIcon from "@/ui/icons/Chevron"
 import RefreshIcon from "@/ui/icons/Refresh"
+import useLocalStorage from "@/hooks/useLocalStorage"
 
 const Base = styled(Box)`
   display: flex;
@@ -21,15 +21,11 @@ const Joke = styled(Text).attrs({ size: "sm", px: "sm", pb: "sm" })`
 `
 
 const Jokes: FC = () => {
-  const [storage, setState] = useLocalStorage({
-    key: "jokes",
-    defaultValue: { mode: 0, joke: "" },
-  })
+  const [storage, setState] = useLocalStorage("jokes", { mode: 0, joke: "" })
   const [loading, setLoading] = useState(false)
-  const { mode, joke } = useMemo(
-    () => ({ mode: storage?.mode, joke: storage?.joke }),
-    [storage],
-  )
+
+  const mode = storage?.mode
+  const joke = storage?.joke
 
   const setMode = (mode: number) => {
     setState((prev) => ({ ...prev, mode }))
@@ -38,17 +34,18 @@ const Jokes: FC = () => {
 
   const fetchJoke = useCallback(
     async (index: number) => {
+      if (loading) return
       setLoading(true)
       const joke = await jokesConfig[index]?.fetcher()
       setState((prev) => ({ ...prev, joke }))
       setLoading(false)
     },
-    [setState],
+    [loading, setState],
   )
 
   useEffect(() => {
-    if (!joke) fetchJoke(mode)
-  }, [joke, fetchJoke, mode])
+    if (!joke && !loading) fetchJoke(mode)
+  }, [joke, fetchJoke, mode, loading])
 
   const theme = useTheme()
   return (
