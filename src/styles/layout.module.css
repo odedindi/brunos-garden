@@ -28,11 +28,11 @@
 }
 
 .tab {
+  transition: all 0.2s ease;
   font-weight: 500;
-  height: rem(38);
   background-color: transparent;
   position: relative;
-  bottom: -1px;
+  bottom: -2px;
 
   &::before,
   &::after {
