@@ -1,13 +1,7 @@
 import { FC } from "react"
-import { Box, TextInput as MantineTextInput } from "@mantine/core"
-import styled from "styled-components"
-
-const TextInput = styled(MantineTextInput)`
-  :focus,
-  :focus-within {
-    border-color: var(--mantine-color-dark-3);
-  }
-`
+import { Box, TextInput } from "@mantine/core"
+import classes from "./overviewTable.module.css"
+import cx from "clsx"
 
 type OverviewProps = {
   value: string
@@ -22,15 +16,10 @@ const OverviewTableSeach: FC<OverviewProps> = ({
 }) => (
   <Box>
     <TextInput
+      className={cx(classes.input, classes.searchInput)}
       value={value}
-      onChange={({ target: { value } }) => {
-        if (onChange) onChange(value)
-      }}
-      style={{ boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)" }}
-      onSubmit={({ currentTarget: { value } }) => {
-        if (onSubmit) onSubmit(value)
-      }}
-      styles={{ input: { padding: "8px" } }}
+      onChange={({ target: { value } }) => onChange?.(value)}
+      onSubmit={({ currentTarget: { value } }) => onSubmit?.(value)}
       placeholder="Search..."
     />
   </Box>

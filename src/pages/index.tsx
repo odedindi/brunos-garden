@@ -42,7 +42,7 @@ const HomePage: NextPage = () => {
     },
   ]
   return (
-    <AppShell header={{ height: 115 }} footer={{ height: 75 }} padding="md">
+    <AppShell header={{ height: 115 }} footer={{ height: 90 }} padding="md">
       <AppShell.Header className={classes.header}>
         <Container pb="lg">
           <Group wrap="nowrap" justify="flex-end">

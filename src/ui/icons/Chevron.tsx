@@ -1,14 +1,14 @@
-import { CSSProperties, FC } from "react"
-
+import type { FC } from "react"
 import { IconChevronRight } from "@tabler/icons-react"
-
 import Icon, { IconProps } from "./Icon"
 
-const ChevronIcon: FC<
-  IconProps & { up?: boolean; down?: boolean; left?: boolean } & {
-    style?: CSSProperties & { transform?: never }
-  }
-> = ({ up, down, left, ...props }) => (
+interface ChevronIconProps extends IconProps {
+  up?: boolean
+  down?: boolean
+  left?: boolean
+}
+
+const ChevronIcon: FC<ChevronIconProps> = ({ up, down, left, ...props }) => (
   <Icon {...props}>
     <IconChevronRight
       stroke={1.5}

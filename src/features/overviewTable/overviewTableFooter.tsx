@@ -2,30 +2,10 @@ import type { Table as TankstackTable } from "@tanstack/react-table"
 import type { FC } from "react"
 import type { Harvest } from "@/types/Harvest"
 
-import {
-  Box,
-  BoxProps,
-  Text,
-  NumberInput as MantineNumberInput,
-  Select as MantineSelect,
-  Flex,
-} from "@mantine/core"
+import { Box, BoxProps, Text, NumberInput, Select, Flex } from "@mantine/core"
 import ChevronIcon from "@/ui/icons/Chevron"
 import ChevronsIcon from "@/ui/icons/Chevrons"
-import styled from "styled-components"
-
-const NumberInput = styled(MantineNumberInput)`
-  :focus,
-  :focus-within {
-    border-color: var(--mantine-color-dark-3);
-  }
-`
-const Select = styled(MantineSelect)`
-  :focus,
-  :focus-within {
-    border-color: var(--mantine-color-dark-3);
-  }
-`
+import classes from "./overviewTable.module.css"
 
 interface OverviewTableFooterProps extends BoxProps {
   table: TankstackTable<Partial<Harvest>>
@@ -39,7 +19,7 @@ const OverviewTableFooter: FC<OverviewTableFooterProps> = ({
 }) => (
   <Box {...props}>
     <Flex>
-      <Flex align={"end"} style={{ flex: 1, gap: "4px" }}>
+      <Box className={classes.footerInner}>
         <ChevronsIcon
           left
           size={36}
@@ -64,9 +44,10 @@ const OverviewTableFooter: FC<OverviewTableFooterProps> = ({
         />
 
         <NumberInput
+          className={classes.input}
           description="Page"
           title="Select page number"
-          defaultValue={table.getState().pagination.pageIndex + 1}
+          value={table.getState().pagination.pageIndex + 1}
           onChange={(value) => {
             const page = value ? Number(value) - 1 : 0
             table.setPageIndex(page)
@@ -74,12 +55,12 @@ const OverviewTableFooter: FC<OverviewTableFooterProps> = ({
           w={75}
           miw={50}
           disabled={table.getPageCount() === 1}
-          styles={{ input: { padding: "8px", height: "37px" } }}
-          min={table.getState().pagination.pageIndex + 1}
+          min={table.getState().pagination.pageIndex}
           max={table.getPageCount()}
         />
-      </Flex>
+      </Box>
       <Select
+        className={classes.input}
         withCheckIcon={false}
         description="Results per page"
         title="Results per page"
@@ -90,10 +71,9 @@ const OverviewTableFooter: FC<OverviewTableFooterProps> = ({
           if (value) table.setPageSize(Number(value))
         }}
         data={[10, 20, 30, 40, 50].map((size) => `${size}`)}
-        styles={{ root: { borderColor: "red" } }}
       />
     </Flex>
-    <hr style={{ boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)" }} />
+    <hr className={classes.spacer} />
     <Text>
       {Object.keys(rowSelection).length} of{" "}
       {table.getPreFilteredRowModel().rows.length} Selected

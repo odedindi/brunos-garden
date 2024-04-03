@@ -1,11 +1,9 @@
-import { FC } from "react"
-
+import type { FC, CSSProperties } from "react"
 import ChevronIcon from "@/ui/icons/Chevron"
 
 const SubmitButton: FC<{
+  style?: CSSProperties
   onClick?: () => void
-}> = ({ onClick }) => (
-  <ChevronIcon size="md" onClick={() => onClick?.()} label="Submit" />
-)
+}> = (props) => <ChevronIcon size="md" label="Submit" {...props} />
 
 export default SubmitButton

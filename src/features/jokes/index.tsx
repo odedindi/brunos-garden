@@ -1,24 +1,10 @@
 import { Box, Menu, Stack, Text } from "@mantine/core"
-import { FC, useCallback, useEffect, useMemo, useState } from "react"
-import { styled, useTheme } from "styled-components"
-import { get } from "lodash"
+import { FC, useCallback, useEffect, useState } from "react"
 import { jokesConfig } from "./config"
 import ChevronIcon from "@/ui/icons/Chevron"
 import RefreshIcon from "@/ui/icons/Refresh"
 import useLocalStorage from "@/hooks/useLocalStorage"
-
-const Base = styled(Box)`
-  display: flex;
-  align-items: start;
-  height: 100%;
-  width: 100%;
-`
-
-const Joke = styled(Text).attrs({ size: "sm", px: "sm", pb: "sm" })`
-  white-space: break-spaces;
-  line-height: 1;
-  flex: 1;
-`
+import classes from "./jokes.module.css"
 
 const Jokes: FC = () => {
   const [storage, setState] = useLocalStorage("jokes", { mode: 0, joke: "" })
@@ -47,9 +33,8 @@ const Jokes: FC = () => {
     if (!joke && !loading) fetchJoke(mode)
   }, [joke, fetchJoke, mode, loading])
 
-  const theme = useTheme()
   return (
-    <Base>
+    <Box className={classes.base}>
       <Menu>
         <Stack gap={0}>
           <Menu.Target>
@@ -57,24 +42,14 @@ const Jokes: FC = () => {
               <ChevronIcon size="sm" down label={jokesConfig[mode]?.title} />
             </div>
           </Menu.Target>
-          <RefreshIcon
-            size="sm"
-            onClick={() => {
-              if (!loading) fetchJoke(mode)
-            }}
-          />
+          <RefreshIcon size="sm" onClick={() => fetchJoke(mode)} />
         </Stack>
 
         <Menu.Dropdown>
           {jokesConfig.map(({ title }, i) => (
             <Menu.Item
               key={i}
-              disabled={mode === i}
-              style={{
-                backgroundColor:
-                  mode === i ? get(theme, "colors.gray[1]") : "inherit",
-                fontWeight: mode === i ? 900 : "inherit",
-              }}
+              className={mode === i ? classes.selectedMode : ""}
               onClick={() => setMode(i)}
             >
               {title}
@@ -82,8 +57,10 @@ const Jokes: FC = () => {
           ))}
         </Menu.Dropdown>
       </Menu>
-      <Joke>{joke}</Joke>
-    </Base>
+      <Text size={"md"} px={"sm"} className={classes.joke}>
+        {joke}
+      </Text>
+    </Box>
   )
 }
 

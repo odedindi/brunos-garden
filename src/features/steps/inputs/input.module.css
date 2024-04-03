@@ -4,3 +4,23 @@
     border-color: var(--mantine-color-dark-3);
   }
 }
+
+.selectUnitWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: var(--mantine-spacing-xs);
+  position: relative;
+  right: calc(var(--mantine-spacing-xl) - 0.25rem);
+}
+
+.selectUnitInput {
+  background-color: transparent;
+  border: none;
+  font-size: 18px;
+}
+.selectUnitDropdown {
+  width: 4rem !important;
+}

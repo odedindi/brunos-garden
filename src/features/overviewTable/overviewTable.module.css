@@ -1,12 +1,31 @@
-.clamped {
-  width: clamp(60px, 15vw, 120px);
-}
-
 .select {
-  width: 0px;
-  
+  width: 10px;
 }
 
 .date {
   width: 120px;
+}
+
+.input {
+  :focus,
+  :focus-within {
+    border-color: var(--mantine-color-dark-3);
+  }
+}
+
+.searchInput {
+  box-shadow: var(--mantine-shadow-sm);
+}
+
+.footerInner {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  flex: 1;
+  gap: 0.25rem;
+}
+
+.spacer {
+  box-shadow: var(--mantine-shadow-sm);
+  border-left: none;
 }

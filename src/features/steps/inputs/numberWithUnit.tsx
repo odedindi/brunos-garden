@@ -1,27 +1,15 @@
 import { FC, useMemo, useRef } from "react"
 
-import {
-  Flex,
-  NumberInput as MantineNumberInput,
-  Select,
-  Text,
-} from "@mantine/core"
+import { NumberInput, Select, Text, Box } from "@mantine/core"
 import SubmitButton from "./submitButton"
 import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
-import styled from "styled-components"
+import classes from "./input.module.css"
 
 const weight = ["g", "kg"] as const
 export type Weight = (typeof weight)[number]
 const area = ["m2"] as const
 export type Area = (typeof area)[number]
 export type Unit = Weight | Area
-
-const NumberInput = styled(MantineNumberInput)`
-  :focus,
-  :focus-within {
-    border-color: var(--mantine-color-dark-3);
-  }
-`
 
 const SelectNumberWithUnit: FC<{
   value?: number
@@ -49,51 +37,38 @@ const SelectNumberWithUnit: FC<{
 
   return (
     <NumberInput
+      className={classes.input}
       ref={ref}
       value={value}
       onChange={(value) => {
-        if (Number(value)) onChange(Number(value))
+        const num = Number(value)
+        if (num) onChange(num)
       }}
       rightSectionWidth={40}
       placeholder={placeholder}
       rightSection={
-        <Flex
-          gap="xs"
-          justify="center"
-          align="center"
-          direction="row"
-          wrap="nowrap"
-          pos="relative"
-          right={27.5}
-        >
+        <Box className={classes.selectUnitWrapper}>
           <Select
             data={data}
             onChange={(unit) => {
               if (unit) onUnitChange(unit as Unit)
-              if (ref.current) ref.current.focus()
+              ref.current?.focus()
             }}
             allowDeselect={false}
             defaultValue={unit}
             rightSection={<Text>{unit}</Text>}
             withCheckIcon={false}
-            styles={{
-              input: {
-                backgroundColor: "transparent",
-                border: "none",
-                fontSize: "18px",
-              },
+            classNames={{
+              input: classes.selectUnitInput,
+              dropdown: classes.selectUnitDropdown,
             }}
-            onBlur={() => {
-              if (ref.current) ref.current.focus()
-            }}
+            onBlur={() => ref.current?.focus()}
           />
           <SubmitButton onClick={onSubmit} />
-        </Flex>
+        </Box>
       }
       onKeyDown={(event) => {
-        if (event.key === "Enter") {
-          if (onSubmit) onSubmit()
-        }
+        if (event.key === "Enter") onSubmit?.()
       }}
     />
   )
