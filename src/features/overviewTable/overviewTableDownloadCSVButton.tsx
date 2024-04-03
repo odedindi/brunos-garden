@@ -6,6 +6,7 @@ import type { Harvest } from "@/types/Harvest"
 import { Button } from "@mantine/core"
 import { CSVLink } from "react-csv"
 import dayjs from "dayjs"
+import classes from "./overviewTable.module.css"
 
 type OverviewTableDownloadCSVProps = {
   table: TankstackTable<Partial<Harvest>>
@@ -14,6 +15,7 @@ type OverviewTableDownloadCSVProps = {
 const OverviewTableDownloadCSV: FC<OverviewTableDownloadCSVProps> = ({
   table,
 }) => {
+  const [loading, setLoading] = useState<boolean>(false)
   const [csvData, setCsvData] = useState<string[][]>([])
   const ref = useRef<CSVLink & HTMLAnchorElement>(null!)
 
@@ -21,30 +23,41 @@ const OverviewTableDownloadCSV: FC<OverviewTableDownloadCSVProps> = ({
     <Button
       size="xs"
       color="dark.3"
-      h={28}
       onClick={() => {
-        const [{ headers }] = table.getHeaderGroups()
-        const colNames = headers.slice(1).map(({ id }) => id)
-
+        if (loading) return
+        setLoading(true)
         const { rows } = table.getRowModel()
-        const data = rows.map(({ original }) => original)
+
+        const columns = new Set<string>()
+        const data = rows.map(({ original }) => {
+          Object.keys(original).forEach((key) => columns.add(key))
+          return original
+        })
+
+        const cols = Array.from(columns)
         const dataCsvFormat: string[][] = [
-          colNames,
+          cols,
           ...data.map((crop) =>
-            colNames.map((colName) => crop[colName as keyof Harvest] ?? ""),
+            cols.map((colName) => crop[colName as keyof Harvest] ?? ""),
           ),
         ]
+
         setCsvData(dataCsvFormat)
-        setTimeout(() => {
-          if (ref.current.click) ref.current.click() // a hack to make the CSVLink download the updated date
-        })
+        setTimeout(
+          () => {
+            ref.current?.click?.()
+          }, // a hack to make the CSVLink download the updated date
+        )
+        setLoading(false)
       }}
+      disabled={loading}
+      loading={loading}
     >
       <CSVLink
         ref={ref}
         data={csvData}
         filename={`brunos-garden${dayjs().format("MMHHDDMMYY")}.csv`}
-        style={{ textDecoration: "none", color: "inherit" }}
+        className={classes.csvLink}
       >
         Download CSV
       </CSVLink>

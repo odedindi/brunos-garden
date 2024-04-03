@@ -29,3 +29,8 @@
   box-shadow: var(--mantine-shadow-sm);
   border-left: none;
 }
+
+.csvLink {
+  text-decoration: none;
+  color: inherit;
+}
