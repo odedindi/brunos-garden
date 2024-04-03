@@ -53,9 +53,6 @@ const HomePage: NextPage = () => {
         <Container>
           <MantineTabs
             value={activeTab.toString()}
-            onChange={(value) => {
-              console.log(value)
-            }}
             variant="outline"
             classNames={{
               root: classes.tabs,

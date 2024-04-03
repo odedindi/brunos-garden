@@ -158,8 +158,6 @@ const OverviewTable: FC<OverviewProps> = ({
         },
         footer: (props) => {
           const { rows } = props.table.getFilteredSelectedRowModel()
-
-          console.log(rows)
           const totalYield = rows.reduce<number>(
             (acc, { original: { area = "", weight = "" } }) => {
               const [areaNum] = area.split("_")
