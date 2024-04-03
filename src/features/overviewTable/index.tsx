@@ -8,16 +8,23 @@ import {
 } from "@tanstack/react-table"
 import { FC, memo, useEffect, useMemo, useState } from "react"
 import type { Harvest } from "@/types/Harvest"
-import IndeterminateCheckbox from "./indeterminateCheckbox"
-
-import { Box, Table, Flex, Text, Tooltip } from "@mantine/core"
+import {
+  Box,
+  Table,
+  Flex,
+  Text,
+  Tooltip as MantineTooltip,
+  Checkbox,
+} from "@mantine/core"
 import OverviewTableFooter from "./overviewTableFooter"
-
 import OverviewTableSeach from "./overviewTableSeach"
 import OverviewTableDeleteButton from "./overviewTableDeleteButton"
 import OverviewTableDownloadCSV from "./overviewTableDownloadCSVButton"
-
 import classes from "./overviewTable.module.css"
+import dayjs from "dayjs"
+import customParseFormat from "dayjs/plugin/customParseFormat"
+
+dayjs.extend(customParseFormat)
 
 type OverviewProps = {
   harvests?: Partial<Harvest>[]
@@ -47,35 +54,37 @@ const OverviewTable: FC<OverviewProps> = ({
         id: "select",
         header: ({ table }) =>
           disableSelectRows ? null : (
-            <IndeterminateCheckbox
+            <Checkbox
               {...{
                 checked: table.getIsAllRowsSelected(),
                 indeterminate: table.getIsSomeRowsSelected(),
                 onChange: table.getToggleAllRowsSelectedHandler(),
-                style: { marginLeft: "10px" },
+                pl: "sm",
+                color: "dark.3",
               }}
             />
           ),
         cell: ({ row }) =>
           disableSelectRows ? null : (
             <Box px="lg">
-              <IndeterminateCheckbox
+              <Checkbox
                 {...{
                   checked: row.getIsSelected(),
                   disabled: !row.getCanSelect(),
                   indeterminate: row.getIsSomeSelected(),
                   onChange: row.getToggleSelectedHandler(),
+                  color: "dark.3",
                 }}
               />
             </Box>
           ),
       },
-      {
-        header: "Id",
-        accessorKey: "id",
-        cell: (info) => info.getValue(),
-        footer: (props) => null,
-      },
+      // {
+      //   header: "Id",
+      //   accessorKey: "id",
+      //   cell: (info) => info.getValue(),
+      //   footer: (props) => null,
+      // },
       {
         id: "date",
         header: "Date",
@@ -122,9 +131,12 @@ const OverviewTable: FC<OverviewProps> = ({
           if (harvest) {
             const [harvestNum, harvestUnit] = harvest.split("_")
             return (
-              <Tooltip openDelay={500} label={`${harvestNum} ${harvestUnit}`}>
+              <MantineTooltip
+                openDelay={500}
+                label={`${harvestNum} ${harvestUnit}`}
+              >
                 <Text>{Number(harvestNum).toFixed(3)}</Text>
-              </Tooltip>
+              </MantineTooltip>
             )
           }
           const [areaNum, areaUnit] = area.split("_")
@@ -136,12 +148,12 @@ const OverviewTable: FC<OverviewProps> = ({
             : 0
 
           return (
-            <Tooltip
+            <MantineTooltip
               openDelay={500}
               label={`${weightCorrected} kg / ${areaNum} ${areaUnit}`}
             >
               <Text>{(weightCorrected / Number(areaNum)).toFixed(3)}</Text>
-            </Tooltip>
+            </MantineTooltip>
           )
         },
         footer: (props) => {
@@ -182,9 +194,9 @@ const OverviewTable: FC<OverviewProps> = ({
     debugTable: true,
   })
 
-  useEffect(() => {
-    table.getColumn("id")?.toggleVisibility(false)
-  }, [table])
+  // useEffect(() => {
+  //   table.getColumn("id")?.toggleVisibility(false)
+  // }, [table])
 
   return (
     <Flex direction="column" p={"sm"} justify="center">
@@ -228,12 +240,6 @@ const OverviewTable: FC<OverviewProps> = ({
                       ? classes[header.column.id as keyof typeof classes]
                       : undefined
                   }
-                  // colSpan={wideColumns.includes(header.column.id) ? 3 : 1}
-                  // style={{
-                  //   width: !wideColumns.includes(header.column.id)
-                  //     ? "clamp(10px, 15%, 30px)"
-                  //     : "auto",
-                  // }}
                 >
                   {header.isPlaceholder ? null : (
                     <>
@@ -263,12 +269,6 @@ const OverviewTable: FC<OverviewProps> = ({
                       ? classes[cell.column.id as keyof typeof classes]
                       : undefined
                   }
-                  // colSpan={wideColumns.includes(cell.column.id) ? 3 : 1}
-                  // style={{
-                  //   width: !wideColumns.includes(cell.column.id)
-                  //     ? "clamp(10px, 15%, 30px)"
-                  //     : "auto",
-                  // }}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </Table.Td>
