@@ -1,4 +1,4 @@
-import type { Table as TankstackTable } from "@tanstack/react-table"
+import type { Table as TanstackTable } from "@tanstack/react-table"
 
 import type { FC } from "react"
 import type { Harvest } from "@/types/Harvest"
@@ -8,7 +8,7 @@ import { useMeQuery } from "@/hooks/useMe"
 import { useHarvests } from "@/hooks/useHarvests"
 
 type OverviewTableDeleteButtonProps = {
-  table: TankstackTable<Harvest>
+  table: TanstackTable<Harvest>
   disabled?: boolean
 }
 

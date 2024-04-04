@@ -1,4 +1,4 @@
-import type { Table as TankstackTable } from "@tanstack/react-table"
+import type { Table as TanstackTable } from "@tanstack/react-table"
 
 import { FC, useRef, useState } from "react"
 import type { Harvest } from "@/types/Harvest"
@@ -9,7 +9,7 @@ import dayjs from "dayjs"
 import classes from "./overviewTable.module.css"
 
 type OverviewTableDownloadCSVProps = {
-  table: TankstackTable<Harvest>
+  table: TanstackTable<Harvest>
   disabled?: boolean
 }
 
@@ -50,7 +50,6 @@ const OverviewTableDownloadCSV: FC<OverviewTableDownloadCSVProps> = (props) => {
         )
         setLoading(false)
       }}
-      disabled={loading}
       loading={loading}
     >
       <CSVLink

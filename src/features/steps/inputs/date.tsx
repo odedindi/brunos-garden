@@ -5,12 +5,11 @@ import { setQueryOnPage } from "@/utils/setQueryOnPage"
 import dayjs from "dayjs"
 import { useRouter } from "next/router"
 import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
+import { dateFormat, parseDateStr } from "@/utils/parseDateStr"
 
 interface Query extends ParsedUrlQuery {
   date?: string
 }
-
-export const dateFormat = "DD-MM-YYYY"
 
 const SelectDate: FC<{
   onSubmit?: () => void
@@ -39,8 +38,8 @@ const SelectDate: FC<{
   const router = useRouter()
   const query = router.query as Query
 
-  const queryToState = (date: string) =>
-    dayjs(date).isValid() ? dayjs(date, dateFormat).toDate() : null
+  const queryToState = (dateStr: string) =>
+    dayjs(dateStr).isValid() ? parseDateStr(dateStr) : null
 
   const onChange = (date: DateValue) =>
     setQueryOnPage(router, {

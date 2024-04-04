@@ -1,9 +1,10 @@
 import {
   ColumnDef,
-  flexRender,
+  SortingState,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
 import { FC, memo, useMemo, useState } from "react"
@@ -12,6 +13,7 @@ import {
   Box,
   Table,
   Flex,
+  Grid,
   Text,
   Tooltip as MantineTooltip,
   Checkbox,
@@ -21,10 +23,13 @@ import OverviewTableFooter from "./overviewTableFooter"
 import OverviewTableSeach from "./overviewTableSeach"
 import OverviewTableDeleteButton from "./overviewTableDeleteButton"
 import OverviewTableDownloadCSV from "./overviewTableDownloadCSVButton"
-import classes from "./overviewTable.module.css"
 import { parseRawHarvest, useHarvests } from "@/hooks/useHarvests"
 import { StringCell, NumberCell, DateCell } from "./overviewTableCells"
-import cx from "clsx"
+import { parseDateStr } from "@/utils/parseDateStr"
+import OverviewTableColumnsMenu from "./overviewTableColumnsMenu"
+import TableTfoot from "./TableTfoot"
+import TableTbody from "./TableTbody"
+import TableThead from "./TableThead"
 
 type OverviewProps = {
   harvests?: Harvest[]
@@ -36,7 +41,7 @@ type OverviewProps = {
   isLoading?: boolean
 }
 
-const wideColumns = ["crop", "yield"]
+export const wideColumns = ["crop", "yield"]
 
 const OverviewTable: FC<OverviewProps> = ({
   harvests: defaultHarvests,
@@ -54,6 +59,8 @@ const OverviewTable: FC<OverviewProps> = ({
   } = useHarvests()
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnVisibility, setColumnVisibility] = useState({})
 
   const columns = useMemo<ColumnDef<Harvest>[]>(
     () => [
@@ -106,6 +113,7 @@ const OverviewTable: FC<OverviewProps> = ({
         id: "date",
         header: "Date",
         accessorKey: "date",
+        accessorFn: (row) => parseDateStr(row.date),
         cell: (info) => <DateCell {...info} />,
       },
       {
@@ -193,12 +201,18 @@ const OverviewTable: FC<OverviewProps> = ({
     columns,
     state: {
       rowSelection,
+      sorting,
+      columnVisibility,
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+
     debugTable: true,
     meta: {
       updateData: (rowIndex, columnId, value) => {
@@ -231,20 +245,27 @@ const OverviewTable: FC<OverviewProps> = ({
         />
       ) : null}
 
-      <Flex w="100%" align="center" gap={2} py={"md"}>
-        {disableSelectRows ? null : (
-          <OverviewTableDeleteButton
-            disabled={!defaultHarvests && harvestsIsLoading}
-            table={table}
-          />
-        )}
-        {noDownloadCSV ? null : (
-          <OverviewTableDownloadCSV
-            disabled={!defaultHarvests && harvestsIsLoading}
-            table={table}
-          />
-        )}
-      </Flex>
+      <Grid w="100%" align="center" py={"md"}>
+        <Grid.Col span={11}>
+          <Flex align="center" gap={"xs"} pl={"xs"}>
+            {disableSelectRows ? null : (
+              <OverviewTableDeleteButton
+                disabled={!defaultHarvests && harvestsIsLoading}
+                table={table}
+              />
+            )}
+            {noDownloadCSV ? null : (
+              <OverviewTableDownloadCSV
+                disabled={!defaultHarvests && harvestsIsLoading}
+                table={table}
+              />
+            )}
+          </Flex>
+        </Grid.Col>
+        <Grid.Col span={1}>
+          <OverviewTableColumnsMenu table={table} />
+        </Grid.Col>
+      </Grid>
 
       {isLoading || (!defaultHarvests && harvestsIsLoading) ? (
         <Box style={{ margin: "auto", flex: 1, height: "100%" }}>
@@ -257,71 +278,9 @@ const OverviewTable: FC<OverviewProps> = ({
           withTableBorder
           style={{ boxShadow: "var(--mantine-shadow-sm)" }}
         >
-          <Table.Thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <Table.Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <Table.Th
-                    key={header.id}
-                    className={cx(classes.textAlignCenter, {
-                      [classes[
-                        `column-${header.column.id}` as keyof typeof classes
-                      ]]: !wideColumns.includes(header.column.id),
-                    })}
-                  >
-                    {header.isPlaceholder ? null : (
-                      <>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                      </>
-                    )}
-                  </Table.Th>
-                ))}
-              </Table.Tr>
-            ))}
-          </Table.Thead>
-          <Table.Tbody>
-            {table.getRowModel().rows.map((row) => (
-              <Table.Tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <Table.Td
-                    key={cell.id}
-                    className={cx(classes.textAlignCenter, {
-                      [classes[
-                        `column-${cell.column.id}` as keyof typeof classes
-                      ]]: !wideColumns.includes(cell.column.id),
-                    })}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </Table.Td>
-                ))}
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-          {hideTableFoot ? null : (
-            <Table.Tfoot>
-              {table.getFooterGroups().map((footerGroup) => (
-                <Table.Tr key={footerGroup.id}>
-                  {footerGroup.headers.map((header) => (
-                    <Table.Th
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      className={classes.textAlignCenter}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.footer,
-                            header.getContext(),
-                          )}
-                    </Table.Th>
-                  ))}
-                </Table.Tr>
-              ))}
-            </Table.Tfoot>
-          )}
+          <TableThead table={table} />
+          <TableTbody table={table} />
+          {hideTableFoot ? null : <TableTfoot table={table} />}
         </Table>
       )}
       {hideOverviewTableFooter ? null : (

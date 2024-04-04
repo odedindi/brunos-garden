@@ -6,7 +6,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat"
 import { DateInput } from "@mantine/dates"
 import dayjs from "dayjs"
 import classes from "./overviewTable.module.css"
-import { dateFormat } from "../steps/inputs/date"
+import { dateFormat } from "@/utils/parseDateStr"
 
 // It is required to extend dayjs with customParseFormat plugin
 // in order to parse dates with custom format
@@ -91,25 +91,29 @@ export const NumberCell: FC<
   )
 }
 
-const parseDateStr = (dateStr: string) => dayjs(dateStr, dateFormat).toDate()
-
 export const DateCell: FC<CellContext<Harvest, unknown>> = ({
   getValue,
   row,
   column,
   table: { options },
 }) => {
-  const dateValue = parseDateStr(getValue<string>())
+  const initialValue = getValue<Date>()
   const ref = useRef<HTMLInputElement>(null)
+  const [value, setValue] = useState(initialValue)
 
+  useEffect(() => {
+    setValue(initialValue)
+  }, [initialValue])
   return (
     <DateInput
       ref={ref}
+      className={classes.cellDateInput}
       variant="unstyled"
-      title={dayjs(dateValue).format("DD MMM YYYY")}
+      title={dayjs(value).format("DD MMM YYYY")}
       valueFormat={dateFormat}
-      value={dateValue}
+      value={value}
       onChange={(date) => {
+        setValue(dayjs(date).toDate())
         options.meta?.updateData(
           row.index,
           column.id,

@@ -1,4 +1,4 @@
-import type { Table as TankstackTable } from "@tanstack/react-table"
+import type { Table as TanstackTable } from "@tanstack/react-table"
 import type { FC } from "react"
 import type { Harvest } from "@/types/Harvest"
 
@@ -16,7 +16,7 @@ import ChevronsIcon from "@/ui/icons/Chevrons"
 import classes from "./overviewTable.module.css"
 
 interface OverviewTableFooterProps extends FlexProps {
-  table: TankstackTable<Harvest>
+  table: TanstackTable<Harvest>
 }
 
 const OverviewTableFooter: FC<OverviewTableFooterProps> = ({
