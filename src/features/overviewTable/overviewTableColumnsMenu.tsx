@@ -29,7 +29,7 @@ const OverviewTableColumnsMenu: FC<OverviewTableColumnsMenuProps> = ({
     {...props}
   >
     <Menu.Target>
-      <Button variant="subtle" h="100%" p={0}>
+      <Button variant="subtle" h="100%" p={0} component="span">
         <SettingsIcon disabled={disabled} size="md" />
       </Button>
     </Menu.Target>
