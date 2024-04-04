@@ -44,7 +44,7 @@ const SelectDate: FC<{
 
   const onChange = (date: DateValue) =>
     setQueryOnPage(router, {
-      date: date ? dayjs(date).format(dateFormat) : [],
+      date: date ? dayjs(date).format(dateFormat) : null,
     })
 
   const [state, setState] = useState<DateValue>(() => {

@@ -30,7 +30,7 @@ const SelectArea: FC<{
   const onChange = ({ value, unit }: { value?: number; unit?: Area }) =>
     setQueryOnPage(router, {
       area:
-        value || unit ? `${value ?? area?.value}_${unit ?? area?.unit}` : [],
+        value || unit ? `${value ?? area?.value}_${unit ?? area?.unit}` : null,
     })
 
   return (

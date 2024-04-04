@@ -3,7 +3,7 @@ import { Stepper, Button, Box } from "@mantine/core"
 import dynamic from "next/dynamic"
 import { ParsedUrlQuery } from "querystring"
 import { useRouter } from "next/router"
-import { useHarvests } from "@/hooks/useHarvests"
+import { parseRawHarvest, useHarvests } from "@/hooks/useHarvests"
 import {
   IconCalendarEvent,
   IconPlant,
@@ -11,7 +11,8 @@ import {
   IconScale,
 } from "@tabler/icons-react"
 import classes from "./steps.module.css"
-import { Harvest } from "@/types/Harvest"
+import { Harvest, RawHarvest } from "@/types/Harvest"
+import { setQueryOnPage } from "@/utils/setQueryOnPage"
 
 const SelectCrop = dynamic(() => import("./inputs/crop"), { ssr: false })
 const SelectDate = dynamic(() => import("./inputs/date"), { ssr: false })
@@ -26,7 +27,7 @@ interface Query extends ParsedUrlQuery {
   area?: string
 }
 
-const parseQuery = (query: Query): Omit<Harvest, "id"> => {
+const parseQuery = (query: Query): RawHarvest => {
   const [weightStr, weightUnit] = (query.weight ?? "").split("_")
   const weightNum = Number(weightStr)
   const weight_g = weightUnit === "g" ? weightNum : weightNum * 1000
@@ -37,7 +38,6 @@ const parseQuery = (query: Query): Omit<Harvest, "id"> => {
     date: query.date ?? "",
     weight_g,
     area_m2,
-    yield_Kg_m2: area_m2 > 0 ? weight_g / 1000 / area_m2 : 0,
   }
 }
 
@@ -85,52 +85,65 @@ const steps = [
 const Steps: FC = () => {
   const router = useRouter()
   const query = router.query as Query
-  const { createHarvest } = useHarvests()
+  const { createHarvest, isPending } = useHarvests()
 
-  const [active, setActive] = useState(() =>
-    !query || !query.crop
-      ? 0
-      : !query.date
-        ? 1
-        : !query.weight
-          ? 2
-          : !query.area
-            ? 3
-            : 4,
-  )
-  const [highestStepVisited, setHighestStepVisited] = useState(active)
-
+  const [newHarvest, setNewHarvest] = useState<Harvest[]>([])
+  const [currentStep, setCurrentStep] = useState(() => {
+    const currentStep =
+      !query || !query.crop
+        ? 0
+        : !query.date
+          ? 1
+          : !query.weight
+            ? 2
+            : !query.area
+              ? 3
+              : 4
+    if (currentStep === 4 && !newHarvest.length) {
+      setQueryOnPage(router, {
+        crop: null,
+        date: null,
+        weight: null,
+        area: null,
+      })
+      return 0
+    }
+    return currentStep
+  })
+  const [highestStepVisited, setHighestStepVisited] = useState(currentStep)
   const handleStepChange = (nextStep: number) => {
     const isOutOfBounds = nextStep > 4 || nextStep < 0
     if (isOutOfBounds) return
 
-    setActive(nextStep)
+    setCurrentStep(nextStep)
     setHighestStepVisited((prev) => Math.max(prev, nextStep))
   }
-  const nextStep = useCallback(() => {
-    handleStepChange(active + 1)
+  const nextStep = useCallback(async () => {
+    handleStepChange(currentStep + 1)
 
     if (
-      active === steps.length - 1 &&
+      currentStep === steps.length - 1 &&
       !!query.crop &&
       !!query.date &&
       !!query.weight &&
       !!query.area
     ) {
-      const harvest = parseQuery(query)
-      createHarvest(harvest)
+      const parsedRawHarvest = parseRawHarvest(parseQuery(query))
+      const newHarvest = await createHarvest(parsedRawHarvest)
+      setNewHarvest([newHarvest ?? parsedRawHarvest])
     }
-  }, [active, query, createHarvest])
+  }, [currentStep, query, createHarvest])
 
   const shouldAllowSelectStep = (step: number) =>
-    highestStepVisited >= step && active !== step && active !== steps.length
+    highestStepVisited >= step &&
+    currentStep !== step &&
+    currentStep !== steps.length
 
-  const parsedQuery = parseQuery(query) as Harvest
   return (
     <Stepper
       className={classes.base}
-      active={active}
-      onStepClick={setActive}
+      active={currentStep}
+      onStepClick={setCurrentStep}
       size="xs"
     >
       {steps.map(({ label, description, Children, icon }, i) => (
@@ -153,18 +166,12 @@ const Steps: FC = () => {
       <Stepper.Completed>
         <Box className={classes.wrapper}>
           <OverviewTable
-            harvests={[
-              {
-                ...parsedQuery,
-                yield_Kg_m2: parsedQuery.area_m2
-                  ? (parsedQuery.weight_g ?? 0) / 1000 / parsedQuery.area_m2
-                  : 0,
-              },
-            ]}
+            harvests={newHarvest}
             disableSelectRows
             hideOverviewTableFooter
             hideTableFoot
             noDownloadCSV
+            isLoading={isPending}
           />
           <Button component={"a"} href="/" bg="dark.3">
             Create New Entry

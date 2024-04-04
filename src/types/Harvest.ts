@@ -12,3 +12,4 @@ export const HarvestSchema = z.object({
 })
 
 export type Harvest = z.infer<typeof HarvestSchema>
+export type RawHarvest = Omit<Harvest, "id" | "yield_Kg_m2"> & { id?: string }

@@ -31,7 +31,7 @@ const SelectWeight: FC<{
       weight:
         value || unit
           ? `${value ?? weight?.value}_${unit ?? weight?.unit}`
-          : [],
+          : null,
     })
 
   return (

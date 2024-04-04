@@ -1,8 +1,11 @@
-.select {
+.textAlignCenter {
+  text-align: center;
+}
+.column-select {
   width: 10px;
 }
 
-.date {
+.column-date {
   width: 120px;
 }
 
@@ -28,4 +31,36 @@
 .csvLink {
   text-decoration: none;
   color: inherit;
+}
+
+.cellStringInput {
+  input {
+    padding-inline-start: 0.5rem;
+    transition: background-color 0.2s ease;
+    border: none;
+    text-align: center;
+  }
+  :focus,
+  :focus-within {
+    padding: 0;
+    padding-inline-start: 0.5rem;
+    background-color: var(--mantine-color-gray-3);
+  }
+}
+
+.cellNumberInput {
+  input {
+    padding-inline-start: 0.5rem;
+    transition: background-color 0.2s ease;
+    border: none;
+    text-align: center;
+  }
+  :focus,
+  :focus-within {
+    input {
+      padding: 0;
+      padding-inline-start: 0.5rem;
+      background-color: var(--mantine-color-gray-3);
+    }
+  }
 }

@@ -19,18 +19,17 @@ export default async function handler(
       .object({ email: z.string(), harvest: HarvestSchema })
       .parse(JSON.parse(req.body))
 
-    const range = `${getSheetId(email)}${harvest.id}`
-
     try {
       const response = await sheets.spreadsheets.values.update({
         spreadsheetId: GOOGLE_SPREADSHEET_ID,
-        range,
+        range: `${getSheetId(email)}${harvest.id}`,
         valueInputOption: "RAW",
         requestBody: { values: [[JSON.stringify(harvest)]] },
       })
 
-      if (response.data) return res.status(200).json(JSON.stringify(harvest.id))
-      else return res.status(503).send("Error: Cannot confirm update success")
+      if (response.data) return res.status(200).send(harvest.id)
+
+      return res.status(503).send("Error: Cannot confirm update success")
     } catch (e) {
       console.log({ error: e })
       return res.status(503).send(JSON.stringify(e))

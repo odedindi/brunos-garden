@@ -48,9 +48,8 @@ const SelectCrop: FC<{
   const router = useRouter()
   const query = router.query as Query
 
-  const onChange = (crop: string | null) => {
-    if (crop) setQueryOnPage(router, { crop })
-  }
+  const onChange = (crop: string | null) => setQueryOnPage(router, { crop })
+
   const [search, setSearch] = useState(query.crop ?? "")
   const exactOptionMatch = useMemo(
     () => crops.some((item) => item === search),

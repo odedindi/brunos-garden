@@ -6,19 +6,17 @@ export const useHarvestUpdateOneMutation = () =>
   useMutation({
     mutationKey: ["harvestUpdateOne"],
     mutationFn: async (body: { email: string; harvest: Harvest }) => {
-      console.log("updateing harvest", body)
-
       const res = await fetch("api/harvestUpdateOne", {
         method: "POST",
         body: JSON.stringify(body),
       })
-      if (res.ok) {
-        const data = await res.json()
-        return data
-      } else {
+      if (!res.ok) {
         const error = await res.json()
         throw new Error(JSON.stringify(error))
       }
+
+      const id = await res.text()
+      return id
     },
     onSuccess: (_data, { email }, _context) => {
       invalidateQueries({ queryKey: ["harvests", email] })

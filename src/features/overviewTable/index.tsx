@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 import { FC, memo, useMemo, useState } from "react"
-import type { Harvest } from "@/types/Harvest"
+import { HarvestSchema, type Harvest } from "@/types/Harvest"
 import {
   Box,
   Table,
@@ -22,11 +22,9 @@ import OverviewTableSeach from "./overviewTableSeach"
 import OverviewTableDeleteButton from "./overviewTableDeleteButton"
 import OverviewTableDownloadCSV from "./overviewTableDownloadCSVButton"
 import classes from "./overviewTable.module.css"
-import dayjs from "dayjs"
-import customParseFormat from "dayjs/plugin/customParseFormat"
-import { useHarvests } from "@/hooks/useHarvests"
-
-dayjs.extend(customParseFormat)
+import { parseRawHarvest, useHarvests } from "@/hooks/useHarvests"
+import { StringCell, NumberCell, DateCell } from "./overviewTableCells"
+import cx from "clsx"
 
 type OverviewProps = {
   harvests?: Harvest[]
@@ -35,6 +33,7 @@ type OverviewProps = {
   hideOverviewTableFooter?: boolean
   searchable?: boolean
   noDownloadCSV?: boolean
+  isLoading?: boolean
 }
 
 const wideColumns = ["crop", "yield"]
@@ -46,8 +45,13 @@ const OverviewTable: FC<OverviewProps> = ({
   hideOverviewTableFooter,
   searchable,
   noDownloadCSV,
+  isLoading,
 }) => {
-  const { harvests, isLoading: harvestsIsLoading } = useHarvests()
+  const {
+    harvests,
+    isLoading: harvestsIsLoading,
+    updateHarvest,
+  } = useHarvests()
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
 
@@ -68,7 +72,7 @@ const OverviewTable: FC<OverviewProps> = ({
                 indeterminate: !!selectedRows.length && !allRowsInPageSelected,
                 onChange: () => {
                   pageRows.forEach((row) =>
-                    row.toggleSelected(allRowsInPageSelected ? false : true),
+                    row.toggleSelected(!allRowsInPageSelected),
                   )
                 },
                 color: "dark.3",
@@ -102,17 +106,13 @@ const OverviewTable: FC<OverviewProps> = ({
         id: "date",
         header: "Date",
         accessorKey: "date",
-        cell: (info) => {
-          const value = info.getValue()
-          if (typeof value === "string") return value.replace("_", " ")
-          return value
-        },
+        cell: (info) => <DateCell {...info} />,
       },
       {
         id: "crop",
         header: "Crop",
         accessorKey: "crop",
-        cell: (info) => info.getValue(),
+        cell: StringCell,
         footer: ({ table }) => {
           const { rows: selectedRows } = table.getFilteredSelectedRowModel()
           const { rows: modelRows } = table.getFilteredRowModel()
@@ -128,47 +128,11 @@ const OverviewTable: FC<OverviewProps> = ({
           )
         },
       },
-
       {
-        id: "area",
-        header: "Area (m2)",
-        accessorKey: "area_m2",
-        cell: (info) => {
-          const value = info.getValue<number>()
-          return (
-            <MantineTooltip openDelay={250} label={`${value} (m2)`}>
-              <Text>{value}</Text>
-            </MantineTooltip>
-          )
-        },
-        footer: (props) => {
-          const { rows: selectedRows } =
-            props.table.getFilteredSelectedRowModel()
-          const { rows: modelRows } = props.table.getFilteredRowModel()
-          const rows = selectedRows.length ? selectedRows : modelRows
-          const totalArea = rows.reduce<number>(
-            (acc, { original: { area_m2 } }) => acc + area_m2,
-            0,
-          )
-          return <>{totalArea}</>
-        },
-      },
-
-      {
-        id: "weight",
         header: "weight (g)",
         accessorKey: "weight_g",
-        cell: (info) => {
-          const value = info.getValue<number>()
-          return (
-            <MantineTooltip
-              openDelay={250}
-              label={`${value} (g) / ${value / 1000} (Kg)`}
-            >
-              <Text>{value}</Text>
-            </MantineTooltip>
-          )
-        },
+        cell: (info) => <NumberCell unit="g" {...info} />,
+
         footer: (props) => {
           const { rows: selectedRows } =
             props.table.getFilteredSelectedRowModel()
@@ -181,7 +145,22 @@ const OverviewTable: FC<OverviewProps> = ({
           return <>{totalWeight / 1000} (Kg)</>
         },
       },
-
+      {
+        header: "Area (m2)",
+        accessorKey: "area_m2",
+        cell: (info) => <NumberCell unit="m2" {...info} />,
+        footer: (props) => {
+          const { rows: selectedRows } =
+            props.table.getFilteredSelectedRowModel()
+          const { rows: modelRows } = props.table.getFilteredRowModel()
+          const rows = selectedRows.length ? selectedRows : modelRows
+          const totalArea = rows.reduce<number>(
+            (acc, { original: { area_m2 } }) => acc + area_m2,
+            0,
+          )
+          return <>{totalArea}</>
+        },
+      },
       {
         id: "yield",
         accessorKey: "yield_Kg_m2",
@@ -221,6 +200,19 @@ const OverviewTable: FC<OverviewProps> = ({
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     debugTable: true,
+    meta: {
+      updateData: (rowIndex, columnId, value) => {
+        const row = table.getCoreRowModel().rows[rowIndex]
+
+        const parsedHarvest = parseRawHarvest(
+          HarvestSchema.parse({
+            ...row.original,
+            [columnId]: value,
+          }),
+        )
+        updateHarvest(parsedHarvest)
+      },
+    },
   })
 
   return (
@@ -254,7 +246,7 @@ const OverviewTable: FC<OverviewProps> = ({
         )}
       </Flex>
 
-      {!defaultHarvests && harvestsIsLoading ? (
+      {isLoading || (!defaultHarvests && harvestsIsLoading) ? (
         <Box style={{ margin: "auto", flex: 1, height: "100%" }}>
           <Loader color="dark.3" />
         </Box>
@@ -263,7 +255,7 @@ const OverviewTable: FC<OverviewProps> = ({
           striped
           highlightOnHover
           withTableBorder
-          style={{ boxShadow: "var(--mantine-spacing-sm)" }}
+          style={{ boxShadow: "var(--mantine-shadow-sm)" }}
         >
           <Table.Thead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -271,11 +263,11 @@ const OverviewTable: FC<OverviewProps> = ({
                 {headerGroup.headers.map((header) => (
                   <Table.Th
                     key={header.id}
-                    className={
-                      !wideColumns.includes(header.column.id)
-                        ? classes[header.column.id as keyof typeof classes]
-                        : undefined
-                    }
+                    className={cx(classes.textAlignCenter, {
+                      [classes[
+                        `column-${header.column.id}` as keyof typeof classes
+                      ]]: !wideColumns.includes(header.column.id),
+                    })}
                   >
                     {header.isPlaceholder ? null : (
                       <>
@@ -292,19 +284,15 @@ const OverviewTable: FC<OverviewProps> = ({
           </Table.Thead>
           <Table.Tbody>
             {table.getRowModel().rows.map((row) => (
-              <Table.Tr
-                key={row.id}
-                onClick={() => row.toggleSelected()}
-                style={{ cursor: "pointer" }}
-              >
+              <Table.Tr key={row.id}>
                 {row.getVisibleCells().map((cell) => (
                   <Table.Td
                     key={cell.id}
-                    className={
-                      !wideColumns.includes(cell.column.id)
-                        ? classes[cell.column.id as keyof typeof classes]
-                        : undefined
-                    }
+                    className={cx(classes.textAlignCenter, {
+                      [classes[
+                        `column-${cell.column.id}` as keyof typeof classes
+                      ]]: !wideColumns.includes(cell.column.id),
+                    })}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </Table.Td>
@@ -317,7 +305,11 @@ const OverviewTable: FC<OverviewProps> = ({
               {table.getFooterGroups().map((footerGroup) => (
                 <Table.Tr key={footerGroup.id}>
                   {footerGroup.headers.map((header) => (
-                    <Table.Th key={header.id} colSpan={header.colSpan}>
+                    <Table.Th
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      className={classes.textAlignCenter}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
