@@ -11,6 +11,7 @@ import {
   IconScale,
 } from "@tabler/icons-react"
 import classes from "./steps.module.css"
+import { Harvest } from "@/types/Harvest"
 
 const SelectCrop = dynamic(() => import("./inputs/crop"), { ssr: false })
 const SelectDate = dynamic(() => import("./inputs/date"), { ssr: false })
@@ -23,6 +24,21 @@ interface Query extends ParsedUrlQuery {
   date?: string
   weight?: string
   area?: string
+}
+
+const parseQuery = (query: Query): Omit<Harvest, "id"> => {
+  const [weightStr, weightUnit] = (query.weight ?? "").split("_")
+  const weightNum = Number(weightStr)
+  const weight_g = weightUnit === "g" ? weightNum : weightNum * 1000
+  const [area_m2Str, _areaUnit] = (query.area ?? "").split("_")
+  const area_m2 = Number(area_m2Str)
+  return {
+    crop: query.crop ?? "",
+    date: query.date ?? "",
+    weight_g,
+    area_m2,
+    yield_Kg_m2: area_m2 > 0 ? weight_g / 1000 / area_m2 : 0,
+  }
 }
 
 const steps = [
@@ -93,6 +109,7 @@ const Steps: FC = () => {
   }
   const nextStep = useCallback(() => {
     handleStepChange(active + 1)
+
     if (
       active === steps.length - 1 &&
       !!query.crop &&
@@ -100,18 +117,15 @@ const Steps: FC = () => {
       !!query.weight &&
       !!query.area
     ) {
-      createHarvest({
-        crop: query.crop,
-        date: query.date,
-        weight: query.weight,
-        area: query.area,
-      })
+      const harvest = parseQuery(query)
+      createHarvest(harvest)
     }
-  }, [active, createHarvest, query.area, query.date, query.crop, query.weight])
+  }, [active, query, createHarvest])
 
   const shouldAllowSelectStep = (step: number) =>
     highestStepVisited >= step && active !== step && active !== steps.length
 
+  const parsedQuery = parseQuery(query) as Harvest
   return (
     <Stepper
       className={classes.base}
@@ -139,7 +153,14 @@ const Steps: FC = () => {
       <Stepper.Completed>
         <Box className={classes.wrapper}>
           <OverviewTable
-            harvests={[query]}
+            harvests={[
+              {
+                ...parsedQuery,
+                yield_Kg_m2: parsedQuery.area_m2
+                  ? (parsedQuery.weight_g ?? 0) / 1000 / parsedQuery.area_m2
+                  : 0,
+              },
+            ]}
             disableSelectRows
             hideOverviewTableFooter
             hideTableFoot
@@ -147,9 +168,6 @@ const Steps: FC = () => {
           />
           <Button component={"a"} href="/" bg="dark.3">
             Create New Entry
-          </Button>
-          <Button component={"a"} href="/overview" bg="dark.3" mt={"xs"}>
-            Overview page
           </Button>
         </Box>
       </Stepper.Completed>

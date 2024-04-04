@@ -1,11 +1,12 @@
 import { NextPage } from "next"
 import dynamic from "next/dynamic"
-import { Box } from "@mantine/core"
-import { ReactNode, useState } from "react"
+import { ReactNode } from "react"
 import { AppShell, Group, Tabs as MantineTabs, Container } from "@mantine/core"
 import classes from "../styles/layout.module.css"
 
-import { useHarvests } from "@/hooks/useHarvests"
+import { ParsedUrlQuery } from "querystring"
+import { useRouter } from "next/router"
+import { setQueryOnPage } from "@/utils/setQueryOnPage"
 
 const Steps = dynamic(() => import("@/features/steps"), { ssr: false })
 const OverviewTable = dynamic(() => import("@/features/overviewTable"), {
@@ -20,27 +21,41 @@ const StrawberryLogo = dynamic(() => import("@/ui/StrawberryLogo"), {
 const Slogen = dynamic(() => import("@/ui/slogen"), { ssr: false })
 const Jokes = dynamic(() => import("@/features/jokes"), { ssr: false })
 
+interface Query extends ParsedUrlQuery {
+  tab?: string
+}
+
 type Tab = {
+  id: string
   label: string
   view: ReactNode
   footer?: ReactNode
 }
 
-const HomePage: NextPage = () => {
-  const [activeTab, setActiveTab] = useState(0)
-  const { harvests } = useHarvests()
+const tabs: Tab[] = [
+  {
+    id: "0",
+    label: "Home",
+    view: <Steps />,
+  },
+  {
+    id: "1",
+    label: "Overview",
+    view: <OverviewTable searchable />,
+    footer: <Jokes />,
+  },
+]
 
-  const tabs: Tab[] = [
-    {
-      label: "Home",
-      view: <Steps />,
-    },
-    {
-      label: "Overview",
-      view: <OverviewTable harvests={harvests} searchable />,
-      footer: <Jokes />,
-    },
-  ]
+const HomePage: NextPage = () => {
+  const router = useRouter()
+  const query = router.query as Query
+
+  const activeTabID =
+    !!query.tab && tabs.map(({ id }) => id).includes(query.tab)
+      ? query.tab
+      : tabs[0].id
+
+  const activeTab = tabs.find((t) => t.id === activeTabID)
   return (
     <AppShell header={{ height: 115 }} footer={{ height: 90 }} padding="md">
       <AppShell.Header className={classes.header}>
@@ -52,7 +67,7 @@ const HomePage: NextPage = () => {
         </Container>
         <Container>
           <MantineTabs
-            value={activeTab.toString()}
+            value={activeTabID}
             variant="outline"
             classNames={{
               root: classes.tabs,
@@ -65,11 +80,9 @@ const HomePage: NextPage = () => {
                 <Group flex={1} wrap="nowrap">
                   {tabs.map((tab, i) => (
                     <MantineTabs.Tab
-                      value={`${i}`}
-                      key={i}
-                      onClick={() => {
-                        setActiveTab(i)
-                      }}
+                      value={tab.id}
+                      key={tab.id}
+                      onClick={() => setQueryOnPage(router, { tab: tab.id })}
                     >
                       {tab.label}
                     </MantineTabs.Tab>
@@ -81,12 +94,10 @@ const HomePage: NextPage = () => {
           </MantineTabs>
         </Container>
       </AppShell.Header>
-      <AppShell.Main className={classes.main}>
-        {tabs[activeTab]?.view}
-      </AppShell.Main>
-      {tabs[activeTab]?.footer ? (
+      <AppShell.Main className={classes.main}>{activeTab?.view}</AppShell.Main>
+      {activeTab?.footer ? (
         <AppShell.Footer className={classes.footer} p="md" zIndex={1000}>
-          {tabs[activeTab].footer}
+          {activeTab?.footer}
         </AppShell.Footer>
       ) : null}
     </AppShell>

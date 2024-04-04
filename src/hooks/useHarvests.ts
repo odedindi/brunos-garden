@@ -9,41 +9,36 @@ import { useHarvestsQuery } from "@/hooks/useHarvestsQuery"
 
 export const harvestsLocalStorageKey = "harvests"
 
-const newHarvest = ({
-  crop: title,
+type RawHarvest = Omit<Harvest, "id" | "yield_kg_m2">
+const parseRawHarvest = ({
+  crop,
   date,
-  weight,
-  area,
-}: Omit<Harvest, "id" | "harvest">): Harvest => {
-  const [areaNum, areaUnit] = area.split("_")
-  const [weightNum, weightUnit] = weight.split("_")
-  const weightCorrected = weightNum
-    ? weightUnit === "g"
-      ? Number(weightNum) / 1000
-      : Number(weightNum)
-    : 0
-  return {
-    id: Math.random().toString(),
-    crop: title,
-    date,
-    weight,
-    area,
-    harvest: `${weightCorrected / Number(areaNum)}_Kg/${areaUnit}`,
-  }
-}
+  weight_g,
+  area_m2,
+}: RawHarvest): Harvest => ({
+  id: Math.random().toString(), // temporary id
+  crop,
+  date,
+  weight_g,
+  area_m2,
+  yield_Kg_m2: area_m2 > 0 ? weight_g / 1000 / area_m2 : 0,
+})
 
 export const useHarvests = () => {
-  const userEmail = useSession().data?.user?.email
-  const { data: queriedHarvests, isPending: queriedHarvestsIsPending } =
-    useHarvestsQuery()
+  const myEmail = useSession().data?.user?.email
+  const {
+    data: queriedHarvests,
+    isPending: queriedHarvestsIsPending,
+    isLoading: queriedHarvestsIsLoading,
+  } = useHarvestsQuery()
 
   const [harvestsRaw, setHarvestRaw] = useLocalStorage({
     key: harvestsLocalStorageKey,
     defaultValue: JSON.stringify([]),
   })
   const harvests: Harvest[] = useMemo(
-    () => (!userEmail ? (!harvestsRaw ? [] : JSON.parse(harvestsRaw)) : []),
-    [harvestsRaw, userEmail],
+    () => (!myEmail ? (!harvestsRaw ? [] : JSON.parse(harvestsRaw)) : []),
+    [harvestsRaw, myEmail],
   )
   const { mutate: harvestCreateOne, isPending: newHarvestIsPending } =
     useHarvestCreateOne()
@@ -52,38 +47,37 @@ export const useHarvests = () => {
   const { mutate: harvestUpdateOne, isPending: updateHarvestIsPending } =
     useHarvestUpdateOneMutation()
 
-  const createHarvest = async (harvest: Omit<Harvest, "id" | "harvest">) => {
-    if (newHarvestIsPending) return
-    if (!userEmail)
-      return setHarvestRaw((prev) => {
-        const prevHarvests = JSON.parse(prev)
-        return JSON.stringify([...prevHarvests, newHarvest(harvest)])
-      })
-    harvestCreateOne({ email: userEmail, harvest: newHarvest(harvest) })
-  }
-  const updateHarvest = (harvest: Harvest) => {
-    if (!userEmail) return
-    harvestUpdateOne({ email: userEmail, harvest })
-  }
-  const deleteHarvest = (harvestId: string) => {
-    if (!userEmail)
-      return setHarvestRaw((prev) => {
-        const prevHarvests: Harvest[] = JSON.parse(prev)
-        return JSON.stringify(prevHarvests.filter((h) => h.id !== harvestId))
-      })
-    harvestDeleteOne({ email: userEmail, harvestId })
-  }
-
   return {
     harvests: queriedHarvests || harvests,
-    createHarvest,
-    updateHarvest,
-    deleteHarvest,
+    createHarvest: (rawHarvest: RawHarvest) => {
+      if (newHarvestIsPending) return
+      const harvest = parseRawHarvest(rawHarvest)
+      return myEmail
+        ? harvestCreateOne({ email: myEmail, harvest })
+        : setHarvestRaw((prev) => {
+            const prevHarvests: Harvest[] = JSON.parse(prev)
+            return JSON.stringify([...prevHarvests, harvest])
+          })
+    },
+    updateHarvest: (harvest: RawHarvest) => {
+      if (myEmail)
+        harvestUpdateOne({ email: myEmail, harvest: parseRawHarvest(harvest) })
+    },
+    deleteHarvest: (harvestId: string) =>
+      myEmail
+        ? harvestDeleteOne({ email: myEmail, harvestId })
+        : setHarvestRaw((prev) => {
+            const prevHarvests: Harvest[] = JSON.parse(prev)
+            return JSON.stringify(
+              prevHarvests.filter((h) => h.id !== harvestId),
+            )
+          }),
     isPending:
-      !!userEmail &&
+      !!myEmail &&
       (!!queriedHarvestsIsPending ||
         !!newHarvestIsPending ||
         !!deleteHarvestIsPending ||
         !!updateHarvestIsPending),
+    isLoading: queriedHarvestsIsLoading,
   }
 }

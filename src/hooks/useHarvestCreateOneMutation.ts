@@ -10,13 +10,12 @@ export const useHarvestCreateOne = () => {
         method: "POST",
         body: JSON.stringify(body),
       })
-      if (res.ok) {
-        const id = await res.text()
-        return id
-      } else {
+      if (!res.ok) {
         const error = await res.json()
         throw new Error(JSON.stringify(error))
       }
+      const id = await res.text()
+      return id
     },
     onSuccess: (_data, { email }, _context) => {
       invalidateQueries({ queryKey: ["harvests", email] })

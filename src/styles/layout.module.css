@@ -29,10 +29,9 @@
 
 .tab {
   transition: all 0.2s ease;
-  font-weight: 500;
   background-color: transparent;
   position: relative;
-  bottom: -2px;
+  bottom: -4px;
 
   &::before,
   &::after {
@@ -50,6 +49,8 @@
   }
 
   &[data-active] {
+    font-weight: 700;
+    border-bottom-color: transparent;
     background-color: light-dark(
       var(--mantine-color-white),
       var(--mantine-color-dark-7)
@@ -58,6 +59,5 @@
       var(--mantine-color-gray-2),
       var(--mantine-color-dark-7)
     );
-    border-bottom-color: transparent;
   }
 }

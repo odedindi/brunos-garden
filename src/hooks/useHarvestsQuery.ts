@@ -25,9 +25,10 @@ export const useHarvestsQuery = () => {
       const harvestsStr: string[] =
         data.length > 1 ? dataIndex.harvests(data) : []
       try {
-        const harvests = harvestsStr.map((str: string) =>
-          HarvestSchema.parse(JSON.parse(str)),
-        )
+        const harvests = harvestsStr.map((str: string) => {
+          const parsed = JSON.parse(str)
+          return HarvestSchema.parse(parsed)
+        })
 
         setHarvests(JSON.stringify(harvests))
         return harvests
