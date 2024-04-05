@@ -4,7 +4,7 @@ import type { FC } from "react"
 import type { Harvest } from "@/types/Harvest"
 
 import TrashIcon from "@/ui/icons/Trash"
-import { useMeQuery } from "@/hooks/useMe"
+import { useMe } from "@/hooks/useMe"
 import { useHarvests } from "@/hooks/useHarvests"
 
 type OverviewTableDeleteButtonProps = {
@@ -15,7 +15,7 @@ type OverviewTableDeleteButtonProps = {
 const OverviewTableDeleteButton: FC<OverviewTableDeleteButtonProps> = (
   props,
 ) => {
-  const { data: me } = useMeQuery()
+  const { me } = useMe()
   const { deleteHarvest, isPending } = useHarvests()
 
   const selectedRows = props.table.getFilteredSelectedRowModel().rows

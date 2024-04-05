@@ -12,6 +12,7 @@ const Steps = dynamic(() => import("@/features/steps"), { ssr: false })
 const OverviewTable = dynamic(() => import("@/features/overviewTable"), {
   ssr: false,
 })
+const Map = dynamic(() => import("@/features/map"), { ssr: false })
 const Authentication = dynamic(() => import("@/ui/authentication"), {
   ssr: false,
 })
@@ -44,6 +45,7 @@ const tabs: Tab[] = [
     view: <OverviewTable searchable />,
     footer: <Jokes />,
   },
+  { id: "2", label: "Map", view: <Map /> },
 ]
 
 const HomePage: NextPage = () => {
