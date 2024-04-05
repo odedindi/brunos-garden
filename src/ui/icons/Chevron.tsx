@@ -1,8 +1,8 @@
 import type { FC } from "react"
 import { IconChevronRight } from "@tabler/icons-react"
-import Icon, { IconProps } from "./Icon"
+import Icon, { type IconProps } from "./Icon"
 
-interface ChevronIconProps extends IconProps {
+export interface ChevronIconProps extends IconProps {
   up?: boolean
   down?: boolean
   left?: boolean
