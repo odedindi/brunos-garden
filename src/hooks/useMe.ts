@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query"
 
 import * as dataIndex from "./utils/dataIndexes"
 import { useUserUpdateOneMutation } from "./useUserUpdateOneMutation"
-import { useEffect } from "react"
 
 export const useMe = () => {
   const { data: session } = useSession()
@@ -28,13 +27,12 @@ export const useMe = () => {
     enabled: !!email,
   })
 
-  const { mutateAsync: updateMe, isPending: isUpdateMeLoading } =
-    useUserUpdateOneMutation()
+  const { mutateAsync: updateMe, isPending } = useUserUpdateOneMutation()
 
   return {
     me: data,
     isLoading,
     updateMe,
-    isUpdateMeLoading,
+    isPending,
   }
 }

@@ -1,0 +1,22 @@
+.base {
+  width: 100vw;
+  padding-top: calc(var(--app-shell-navbar-offset, 0px) + 7rem);
+  height: calc(100vh - var(--app-shell-navbar-offset, 0px));
+}
+
+.button {
+  color: var(--mantine-color-gray-3);
+  transition: color 0.3s ease-out;
+  :hover {
+    color: var(--mantine-color-gray-1);
+  }
+}
+
+.popup {
+  min-width: fit-content;
+  :last-child {
+    div {
+      padding-inline: 0.5rem;
+    }
+  }
+}

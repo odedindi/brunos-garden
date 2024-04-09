@@ -3,10 +3,10 @@ import MapboxDraw, {
   type DrawUpdateEvent,
   type DrawDeleteEvent,
 } from "@mapbox/mapbox-gl-draw"
-import { memo, type FC } from "react"
-import { useControl } from "react-map-gl"
+import type { FC } from "react"
+import { useControl, type ControlPosition } from "react-map-gl"
 
-import type { ControlPosition } from "react-map-gl"
+export type Feature = DrawCreateEvent["features"][number]
 
 type DrawControlProps = ConstructorParameters<typeof MapboxDraw>[0] & {
   position?: ControlPosition

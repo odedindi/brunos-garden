@@ -1,60 +1,64 @@
-import { map, set } from "lodash"
-import {
-  FC,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import MapGl, {
-  Marker,
   ScaleControl,
+  FullscreenControl,
   NavigationControl,
   GeolocateControl,
-  Popup,
   MapRef,
   useControl,
   useMap,
+  Layer,
 } from "react-map-gl"
+import {
+  IconGardenCart,
+  IconShovel,
+  IconFlower,
+  IconTree,
+  IconSeeding,
+  IconPlant,
+} from "@tabler/icons-react"
 
 import { INITIAL_VIEW_STATE } from "./map.config"
-import { GeoJsonLayer, ArcLayer, DeckProps } from "deck.gl"
-import { MapboxOverlay as DeckOverlay } from "@deck.gl/mapbox"
+import { GeoJsonLayer, DeckProps } from "deck.gl"
+import { MapboxOverlay } from "@deck.gl/mapbox"
 import DrawControl, { drawRef } from "./drawControls"
 import { useMe } from "@/hooks/useMe"
 import { DrawCreateEvent, DrawUpdateEvent } from "@mapbox/mapbox-gl-draw"
-import { User, UserSchema } from "@/types/User"
+import { UserSchema } from "@/types/User"
 import MapStyleMenu, { mapStyles } from "./mapStyleMenu"
 import MyGardenMenu, { fieldColors } from "./myGardenMenu"
-import { Box, Button } from "@mantine/core"
+import { Box, Button, Group, ActionIcon } from "@mantine/core"
+import classes from "./map.module.css"
+import * as turf from "@turf/turf"
+import GeocoderControl from "./geocoderControl"
+import { setQueryOnPage } from "@/utils/setQueryOnPage"
+import { useRouter } from "next/router"
+import Marker from "./marker"
+import { ParsedUrlQuery } from "querystring"
+import { processFeatures } from "./utils/processFeatures"
+import GardenPlot from "./gardenPlot"
+
+interface Query extends ParsedUrlQuery {
+  feature?: string
+  mapStyle?: string
+}
 
 const mapboxAccessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 
 const DeckGLOverlay: FC<DeckProps> = (props) => {
-  const overlay = useControl(() => new DeckOverlay(props))
+  const overlay = useControl(() => new MapboxOverlay(props))
   overlay.setProps(props)
   return null
 }
 
-let updateGardenLocation = false
 let myGardenLocationFeatureId: string | null = null
 
 const Map: FC = () => {
-  const { me, updateMe } = useMe()
+  const router = useRouter()
+  const query = router.query as Query
+
+  const { me, updateMe, isPending } = useMe()
   const mapRef = useRef<MapRef>(null)
-  const { current: map } = useMap()
-
-  const [mapStyle, setMapStyle] = useState(mapStyles[0].url)
-
-  const onClick = (info: any) => {
-    console.log({ info })
-    if (info.object) {
-      // eslint-disable-next-line
-      alert(`${info.object.properties.name}`)
-    }
-  }
 
   const [myGardenSettings, setMyGardenSettings] = useState({
     visible: true,
@@ -62,33 +66,64 @@ const Map: FC = () => {
     fieldColorIndex: 0,
     fieldColorAlpha: 100,
   })
+
+  const processedFeatures = processFeatures(
+    query.feature ? [JSON.parse(query.feature)] : [],
+  )
+
   const layers = useMemo(
-    () => [
-      new GeoJsonLayer({
-        id: "myGarden",
-        data: me?.gardenLocation ?? [],
-        filled: true,
-        pointRadiusScale: myGardenSettings.radius,
-        getFillColor: [
-          ...fieldColors[myGardenSettings.fieldColorIndex].fillColor,
-          myGardenSettings.fieldColorAlpha,
-        ],
-        // Interactive props
-        highlightColor: [
-          ...fieldColors[
-            (myGardenSettings.fieldColorIndex + 1) % fieldColors.length
-          ].fillColor,
-          myGardenSettings.fieldColorAlpha,
-        ],
-        // pickable: true,
-        // autoHighlight: true,
-        // onClick,
-        beforeId: "waterway-label", // In interleaved mode render the layer under map labels
-        visible: myGardenSettings.visible,
-        stroked: false,
-      }),
-    ],
-    [me, myGardenSettings],
+    () =>
+      //[
+      // new GeoJsonLayer({
+      //   id: "myGarden",
+      //   data: me?.gardenLocation ?? [],
+      //   filled: true,
+      //   pointRadiusScale: myGardenSettings.radius,
+      //   getFillColor: [
+      //     ...fieldColors[myGardenSettings.fieldColorIndex].fillColor,
+      //     myGardenSettings.fieldColorAlpha,
+      //   ],
+      //   // Interactive props
+      //   highlightColor: [
+      //     ...fieldColors[
+      //       (myGardenSettings.fieldColorIndex + 1) % fieldColors.length
+      //     ].fillColor,
+      //     myGardenSettings.fieldColorAlpha,
+      //   ],
+      //   // pickable: true,
+      //   // autoHighlight: true,
+      //   // onClick,
+      //   beforeId: "waterway-label", // In interleaved mode render the layer under map labels
+      //   visible: myGardenSettings.visible,
+      //   stroked: false,
+      // }),
+      // new GeoJsonLayer({
+      //   id: "newFeature",
+      //   data: query.feature ? JSON.parse(query.feature) : [],
+      //   filled: true,
+      //   getFillColor: [
+      //     ...fieldColors[
+      //       (myGardenSettings.fieldColorIndex + 1) % fieldColors.length
+      //     ].fillColor,
+      //     myGardenSettings.fieldColorAlpha,
+      //   ],
+      //   highlightColor: [
+      //     ...fieldColors[
+      //       (myGardenSettings.fieldColorIndex + 2) % fieldColors.length
+      //     ].fillColor,
+      //     myGardenSettings.fieldColorAlpha,
+      //   ],
+      //   pickable: true,
+      //   autoHighlight: true,
+      //   // onClick,
+      //   beforeId: "waterway-label", // In interleaved mode render the layer under map labels
+      //   visible: true,
+      //   stroked: false,
+      // }),
+      processedFeatures.map(({ geoJsonLayer }) => geoJsonLayer),
+    // ],
+    // [me?.gardenLocation, myGardenSettings, query.feature],
+    [processedFeatures],
   )
 
   const [features, setFeatures] = useState<{ [key: string]: any }>({})
@@ -98,41 +133,77 @@ const Map: FC = () => {
     if (me?.gardenLocation?.id) myGardenLocationFeatureId = me.gardenLocation.id
   }, [me])
 
-  const onUpdate = async (e: DrawUpdateEvent | DrawCreateEvent) => {
-    console.log("[onUpdate]: ", { e })
-    console.log("[updateGardenLocation]: ", updateGardenLocation)
-    const feature = e.features[0]
-    console.log("[feature]: ", feature)
+  const onUpdate = useCallback(
+    async (e: DrawUpdateEvent | DrawCreateEvent) => {
+      console.log("[onUpdate]: ", { e })
+      const feature = e.features[0]
+      console.log("[feature]: ", feature)
 
-    if (updateGardenLocation || feature.id === myGardenLocationFeatureId) {
-      const parsedUpdatedMe = UserSchema.safeParse({
-        ...me,
-        gardenLocation: {
-          ...feature,
-          properties: { ...feature.properties, name: "gardenLocation" },
-        },
-      })
+      if (
+        drawRef?.getMode() === drawRef?.modes.DRAW_POINT || // we use DRAW_POINT to mark the garden location
+        feature.id === myGardenLocationFeatureId
+      ) {
+        const parsedUpdatedMyGardenLocation = UserSchema.safeParse({
+          ...me,
+          gardenLocation: {
+            ...feature,
+            properties: { ...feature.properties, name: "gardenLocation" },
+          },
+        })
 
-      if (!parsedUpdatedMe.success) console.info(parsedUpdatedMe.error)
-      else {
-        console.log("[parsedUpdatedMe]: ", { parsedUpdatedMe })
-        const res = await updateMe(parsedUpdatedMe.data)
-        if (res) {
-          myGardenLocationFeatureId = parsedUpdatedMe.data.gardenLocation!.id
-          updateGardenLocation = false
-          drawRef?.delete?.(myGardenLocationFeatureId)
+        if (!parsedUpdatedMyGardenLocation.success)
+          console.info(parsedUpdatedMyGardenLocation.error)
+        else {
+          console.log("[parsedUpdatedMyGardenLocation]: ", {
+            parsedUpdatedMyGardenLocation,
+          })
+          const res = await updateMe(parsedUpdatedMyGardenLocation.data)
+          if (res) {
+            myGardenLocationFeatureId =
+              parsedUpdatedMyGardenLocation.data.gardenLocation!.id
+
+            drawRef?.delete?.(myGardenLocationFeatureId)
+          }
         }
+        return
       }
-    }
-    // setFeatures((currFeatures) => {
-    //   const newFeatures = { ...currFeatures }
-    //   for (const f of e.features) {
-    //     newFeatures[f.id!] = f
-    //   }
-    //   return newFeatures
-    // })
-  }
+      try {
+        // const area = turf.area(feature)
 
+        const featureCollection = turf.featureCollection([
+          ...(me?.gardenFeatures?.features ?? []),
+          feature,
+        ])
+        console.log("featureCollection", featureCollection)
+        const parsedUpdatedMyGardenFeatures = UserSchema.safeParse({
+          ...me,
+          gardenFeatures: featureCollection,
+        })
+        if (!parsedUpdatedMyGardenFeatures.success)
+          console.info(parsedUpdatedMyGardenFeatures.error)
+        else {
+          const res = await updateMe(parsedUpdatedMyGardenFeatures.data)
+          if (res) {
+            drawRef?.delete?.(`${feature.id}`)
+          }
+        }
+
+        // setQueryOnPage(router, { feature: JSON.stringify(feature) })
+        // console.log("area", area)
+      } catch (error) {
+        console.info("error", error)
+      }
+
+      // setFeatures((currFeatures) => {
+      //   const newFeatures = { ...currFeatures }
+      //   for (const f of e.features) {
+      //     newFeatures[f.id!] = f
+      //   }
+      //   return newFeatures
+      // })
+    },
+    [me, updateMe],
+  )
   const onDelete = useCallback((e: any) => {
     console.log("delete", e.features)
 
@@ -144,77 +215,14 @@ const Map: FC = () => {
       return newFeatures
     })
   }, [])
+
+  const activeMapStyleIndex = query.mapStyle ? Number(query.mapStyle) : 0
   return (
-    <Box style={{ width: "800px", height: "600px" }}>
-      <MapStyleMenu
-        activeMapStyleUrl={mapStyle}
-        onChange={(mapStyleUrl) => setMapStyle(mapStyleUrl)}
-      />
-      <MyGardenMenu
-        toMyGarden={
-          me?.gardenLocation
-            ? () => {
-                mapRef.current?.flyTo({
-                  center: me.gardenLocation!.geometry.coordinates,
-                  zoom: 19,
-                  essential: true,
-                })
-              }
-            : undefined
-        }
-        gardenVisible={
-          me?.gardenLocation ? myGardenSettings.visible : undefined
-        }
-        setGardenVisible={(visible) =>
-          setMyGardenSettings((settings) => ({ ...settings, visible }))
-        }
-        gardenRadius={me?.gardenLocation ? myGardenSettings.radius : undefined}
-        setGardenRadius={(radius) =>
-          setMyGardenSettings((settings) => ({ ...settings, radius }))
-        }
-        fieldColorIndex={myGardenSettings.fieldColorIndex}
-        setFieldColor={(fieldColorIndex) =>
-          setMyGardenSettings((settings) => ({ ...settings, fieldColorIndex }))
-        }
-        fieldColorAlpha={myGardenSettings.fieldColorAlpha}
-        setFieldColorAlpha={(fieldColorAlpha) =>
-          setMyGardenSettings((settings) => ({ ...settings, fieldColorAlpha }))
-        }
-      />
-
-      {/* <button
-        onClick={() => {
-          console.log({
-            center: mapRef.current?.snapToNorth(),
-            drawRef: drawRef?.getAll(),
-          })
-        }}
-      >
-        get bounds
-      </button> */}
-      <Button
-        ml={1}
-        h={28}
-        onClick={() => {
-          if (!drawRef) {
-            console.info(
-              "drawRef is null, please try to refresh the page and try again.",
-            )
-          }
-          console.log("marking garden location")
-          console.log("updateGardenLocation", updateGardenLocation)
-          if (!updateGardenLocation) {
-            drawRef?.changeMode(drawRef?.modes.DRAW_POINT)
-            updateGardenLocation = true
-            console.log("updateGardenLocation", updateGardenLocation)
-          }
-        }}
-      >
-        Mark Garden
-      </Button>
-
+    <Box className={classes.base}>
       <MapGl
+        mapboxAccessToken={mapboxAccessToken}
         ref={mapRef}
+        mapStyle={mapStyles[activeMapStyleIndex].url}
         initialViewState={{
           ...INITIAL_VIEW_STATE,
           longitude:
@@ -224,33 +232,130 @@ const Map: FC = () => {
             me?.gardenLocation?.geometry.coordinates[1] ??
             INITIAL_VIEW_STATE.latitude,
         }}
-        mapStyle={mapStyle}
-        mapboxAccessToken={mapboxAccessToken}
       >
-        <DeckGLOverlay layers={layers} />
-        <GeolocateControl
-          position="top-left"
-          onGeolocate={(e) => {
-            console.log("geolocate", e)
-          }}
+        <FullscreenControl position="top-left" />
+        <GeocoderControl
+          mapboxAccessToken={mapboxAccessToken!}
+          position={"top-left"}
         />
+        <GeolocateControl position="top-left" />
+
         <NavigationControl position="top-left" />
         <DrawControl
           position="top-left"
-          displayControlsDefault
+          displayControlsDefault={false}
           userProperties
-          controls={{
-            polygon: true,
-            trash: true,
-            point: false,
-            combine_features: false,
-            uncombine_features: false,
-            line_string: false,
-          }}
           onCreate={onUpdate}
           onUpdate={onUpdate}
           onDelete={onDelete}
         />
+        <Group
+          style={{
+            marginLeft: "3rem",
+            paddingTop: "0.6rem",
+            gap: "0.25rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <MapStyleMenu
+            activeMapStyle={activeMapStyleIndex}
+            onChange={(mapStyleUrl) => {
+              setQueryOnPage(router, { mapStyle: mapStyleUrl })
+            }}
+          />
+          <MyGardenMenu
+            toMyGarden={
+              me?.gardenLocation
+                ? () => {
+                    mapRef.current?.flyTo({
+                      center: me.gardenLocation!.geometry.coordinates,
+                      zoom: 19,
+                      essential: true,
+                    })
+                  }
+                : undefined
+            }
+            gardenVisible={
+              me?.gardenLocation ? myGardenSettings.visible : undefined
+            }
+            setGardenVisible={(visible) =>
+              setMyGardenSettings((settings) => ({ ...settings, visible }))
+            }
+            onMarkMyGarden={() => {
+              if (!drawRef) {
+                console.info(
+                  "drawRef is null, please try to refresh the page and try again.",
+                )
+              }
+
+              if (
+                !!drawRef?.getMode() &&
+                drawRef?.getMode() === drawRef?.modes.DRAW_POINT
+              ) {
+                drawRef?.changeMode(drawRef?.modes.SIMPLE_SELECT)
+              } else {
+                drawRef?.changeMode(drawRef?.modes.DRAW_POINT)
+                const cancelDraw = ({ key }: KeyboardEvent) => {
+                  if (key === "Escape") {
+                    drawRef?.changeMode(drawRef?.modes.SIMPLE_SELECT)
+                    if (document !== undefined) {
+                      document.removeEventListener("keydown", cancelDraw)
+                      document!.body.style.cursor = "pointer"
+                    }
+                  }
+                }
+                document?.addEventListener("keydown", cancelDraw)
+              }
+            }}
+            isMarkingMyGarden={
+              !!drawRef?.getMode() &&
+              drawRef?.getMode() === drawRef?.modes.DRAW_POINT
+            }
+          />
+
+          <Button
+            ml={1}
+            h={28}
+            className={classes.button}
+            bg="dark.2"
+            onClick={() => {
+              if (!drawRef) {
+                console.info(
+                  "drawRef is null, please try to refresh the page and try again.",
+                )
+              }
+
+              drawRef?.changeMode(drawRef?.modes.DRAW_POLYGON)
+            }}
+          >
+            Draw a Polygon
+          </Button>
+        </Group>
+        <ScaleControl position="bottom-left" />
+        {me?.gardenLocation && myGardenSettings.visible ? (
+          <Marker
+            latitude={me.gardenLocation.geometry.coordinates[1]}
+            longitude={me.gardenLocation.geometry.coordinates[0]}
+            popupContent="My Garden"
+            customIcon={
+              <ActionIcon loading={isPending}>
+                <IconGardenCart />
+              </ActionIcon>
+            }
+          />
+        ) : null}
+        {(me?.gardenFeatures?.features ?? []).map((f, i) => {
+          const [{ feature, center, area }] = processFeatures([f])
+          return (
+            <GardenPlot
+              key={i}
+              feature={feature}
+              position={center.geometry.coordinates}
+              area_m2={area}
+            />
+          )
+        })}
+        <DeckGLOverlay layers={layers} />
       </MapGl>
     </Box>
   )

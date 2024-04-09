@@ -18,7 +18,7 @@ export default async function handler(
       .object({ email: z.string(), harvestId: z.string() })
       .parse(JSON.parse(req.body))
 
-    const range = `'${getSheetId(email)}'${harvestId}`
+    const range = `${getSheetId(email)}!A${harvestId}`
 
     try {
       const response = await sheets.spreadsheets.values.clear({

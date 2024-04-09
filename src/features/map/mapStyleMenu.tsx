@@ -19,12 +19,12 @@ export const mapStyles: MapStyle[] = [
 ]
 
 interface MapStyleMenuProps extends Omit<MenuProps, "children" | "onChange"> {
-  activeMapStyleUrl: string
-  onChange: (mapStyleUrl: string) => void
+  activeMapStyle: number
+  onChange: (mapStyleUrl: number) => void
   disabled?: boolean
 }
 const MapStyleMenu: FC<MapStyleMenuProps> = ({
-  activeMapStyleUrl,
+  activeMapStyle,
   onChange,
   disabled,
   shadow = "md",
@@ -40,18 +40,19 @@ const MapStyleMenu: FC<MapStyleMenuProps> = ({
     closeDelay={closeDelay}
     closeOnItemClick={closeOnItemClick}
     position={position}
+    withArrow
     {...props}
   >
     <Menu.Target>
       <Button variant="subtle" h="min-content" p={0} component="span">
-        <MapIcon disabled={disabled} size="md" label="Select Map" />
+        <MapIcon disabled={disabled} size="md" label="Select Map" bg="dark.2" />
       </Button>
     </Menu.Target>
 
     <Menu.Dropdown>
       <Menu.Label>Select Map</Menu.Label>
-      {mapStyles.map((mapStyle) => {
-        const onClick = () => onChange(mapStyle.url)
+      {mapStyles.map((mapStyle, i) => {
+        const onClick = () => onChange(i)
         return (
           <Menu.Item
             key={mapStyle.label}
@@ -60,7 +61,7 @@ const MapStyleMenu: FC<MapStyleMenuProps> = ({
             leftSection={
               <Checkbox
                 {...{
-                  checked: mapStyle.url === activeMapStyleUrl,
+                  checked: i === activeMapStyle,
                   onChange: onClick,
                   title: mapStyle.label,
                   color: "dark.3",

@@ -23,7 +23,6 @@ export default async function handler(
       spreadsheetId: GOOGLE_SPREADSHEET_ID,
       range,
     })
-
     if (response.data.values) {
       const tasks = response.data.values as [string[]]
       return res.status(200).json(JSON.stringify(tasks))

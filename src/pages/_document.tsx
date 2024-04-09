@@ -31,6 +31,11 @@ export default function Document() {
           href="/icons/favicon-16x16.png"
         />
         <link rel="manifest" href="/manifest.json" />
+        <link
+          rel="stylesheet"
+          href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css"
+          type="text/css"
+        />
 
         <ColorSchemeScript defaultColorScheme={"auto"} />
       </Head>

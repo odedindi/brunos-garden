@@ -9,7 +9,7 @@ import {
   ColorPicker,
   AlphaSlider,
 } from "@mantine/core"
-import { IconGardenCart, IconMap2 } from "@tabler/icons-react"
+import { IconGardenCart, IconSettingsPin } from "@tabler/icons-react"
 
 const radiusSliderMarks = [
   { value: 10, label: "xs" },
@@ -75,23 +75,17 @@ interface MyGardenMenuProps extends Omit<MenuProps, "children"> {
   toMyGarden?: () => void
   gardenVisible?: boolean
   setGardenVisible?: (visible: boolean) => void
-  gardenRadius?: number
-  setGardenRadius?: (radius: number) => void
-  fieldColorIndex?: number
-  setFieldColor?: (fieldColorIndex: number) => void
-  fieldColorAlpha?: number
-  setFieldColorAlpha?: (alpha: number) => void
+
+  onMarkMyGarden?: () => void
+  isMarkingMyGarden?: boolean
 }
 const MyGardenMenu: FC<MyGardenMenuProps> = ({
   toMyGarden,
   gardenVisible = false,
   setGardenVisible,
-  gardenRadius = 10,
-  setGardenRadius,
-  fieldColorIndex = 0,
-  setFieldColor,
-  fieldColorAlpha = 0,
-  setFieldColorAlpha,
+
+  onMarkMyGarden,
+  isMarkingMyGarden,
   disabled,
   shadow = "md",
   openDelay = 100,
@@ -107,6 +101,7 @@ const MyGardenMenu: FC<MyGardenMenuProps> = ({
       closeDelay={closeDelay}
       closeOnItemClick={closeOnItemClick}
       position={position}
+      withArrow
       {...props}
     >
       <Menu.Target>
@@ -115,18 +110,15 @@ const MyGardenMenu: FC<MyGardenMenuProps> = ({
             disabled={disabled}
             size="md"
             label="My Garden Settings"
+            bg="dark.2"
           />
         </Button>
       </Menu.Target>
 
       <Menu.Dropdown>
         <Menu.Label>Garden Settings</Menu.Label>
-        <Menu.Item
-          disabled={!toMyGarden}
-          onClick={toMyGarden}
-          leftSection={<IconMap2 />}
-          closeMenuOnClick
-        >
+
+        <Menu.Item disabled={!toMyGarden} onClick={toMyGarden} closeMenuOnClick>
           Take me To My Garden
         </Menu.Item>
         <Menu.Divider />
@@ -142,43 +134,21 @@ const MyGardenMenu: FC<MyGardenMenuProps> = ({
             }
           />
         </Menu.Item>
-        <Menu.Label>Radius Size</Menu.Label>
-        <Menu.Item disabled={gardenRadius === undefined || !setGardenRadius}>
-          <Slider
-            value={gardenRadius}
-            onChange={(value) => setGardenRadius?.(value)}
-            label={(val) =>
-              radiusSliderMarks.find((mark) => mark.value === val)?.label
-            }
-            step={20}
-            marks={radiusSliderMarks}
-            min={radiusSliderMarks[0].value}
-            max={radiusSliderMarks.at(-1)?.value}
-            styles={{ markLabel: { display: "none" } }}
-          />
-        </Menu.Item>
-        <Menu.Label>Color </Menu.Label>
-        <Menu.Item component="div">
-          <AlphaSlider
-            value={fieldColorAlpha / 275}
-            onChange={(value) => setFieldColorAlpha?.(value * 275)}
-            color={fieldColors[fieldColorIndex].rgba}
-          />
-          <ColorPicker
-            value={fieldColors[fieldColorIndex].rgba}
-            onChange={(color) => {
-              const colorIndex = fieldColors.findIndex(
-                ({ rgba }) => rgba === color,
-              )
-              setFieldColor?.(colorIndex === -1 ? 0 : colorIndex)
-            }}
-            format="rgba"
-            withPicker={false}
-            swatches={fieldColors.map(({ rgba }) => rgba)}
-          />
-        </Menu.Item>
 
         <Menu.Divider />
+        <Menu.Item
+          disabled={!onMarkMyGarden}
+          onClick={onMarkMyGarden}
+          rightSection={<IconSettingsPin />}
+          closeMenuOnClick
+          style={{
+            background: isMarkingMyGarden
+              ? "var(--mantine-color-gray-2)"
+              : undefined,
+          }}
+        >
+          Set Garden Position
+        </Menu.Item>
       </Menu.Dropdown>
     </Menu>
   )

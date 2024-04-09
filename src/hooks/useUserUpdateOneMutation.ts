@@ -15,6 +15,5 @@ export const useUserUpdateOneMutation = () =>
     },
     onSuccess: (_data, { email }, _context) => {
       invalidateQueries({ queryKey: ["me", email] })
-      console.log("[onSuccess]: updated user data")
     },
   })

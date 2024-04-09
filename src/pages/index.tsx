@@ -1,7 +1,13 @@
 import { NextPage } from "next"
 import dynamic from "next/dynamic"
 import { ReactNode } from "react"
-import { AppShell, Group, Tabs as MantineTabs, Container } from "@mantine/core"
+import {
+  AppShell,
+  Group,
+  Tabs as MantineTabs,
+  Container,
+  Box,
+} from "@mantine/core"
 import classes from "../styles/layout.module.css"
 
 import { ParsedUrlQuery } from "querystring"
@@ -37,12 +43,20 @@ const tabs: Tab[] = [
   {
     id: "0",
     label: "Home",
-    view: <Steps />,
+    view: (
+      <Box className={classes.contentWrapper}>
+        <Steps />
+      </Box>
+    ),
   },
   {
     id: "1",
     label: "Overview",
-    view: <OverviewTable searchable />,
+    view: (
+      <Box className={classes.contentWrapper}>
+        <OverviewTable searchable />
+      </Box>
+    ),
     footer: <Jokes />,
   },
   { id: "2", label: "Map", view: <Map /> },
@@ -59,7 +73,7 @@ const HomePage: NextPage = () => {
 
   const activeTab = tabs.find((t) => t.id === activeTabID)
   return (
-    <AppShell header={{ height: 115 }} footer={{ height: 90 }} padding="md">
+    <AppShell header={{ height: 120 }} footer={{ height: 90 }} padding="md">
       <AppShell.Header className={classes.header}>
         <Container pb="lg">
           <Group wrap="nowrap" justify="flex-end">
