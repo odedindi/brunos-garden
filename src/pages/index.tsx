@@ -56,6 +56,7 @@ const HomePage: NextPage = () => {
       : tabs[0].id
 
   const activeTab = tabs.find((t) => t.id === activeTabID)
+
   return (
     <AppShell header={{ height: 115 }} footer={{ height: 90 }} padding="md">
       <AppShell.Header className={classes.header}>

@@ -1,5 +1,4 @@
-import { useMeQuery } from "@/hooks/useMe"
-import { useUserCreateOneMutation } from "@/hooks/useUserCreateOneMutation"
+import { useMe } from "@/hooks/useMe"
 import {
   Avatar,
   Button,
@@ -12,7 +11,7 @@ import {
   rem,
   BoxProps,
 } from "@mantine/core"
-import { signIn, signOut, useSession } from "next-auth/react"
+import { signIn, signOut } from "next-auth/react"
 import { ComponentPropsWithoutRef, FC, useState } from "react"
 import classes from "./authentication.module.css"
 import cx from "clsx"
@@ -29,25 +28,9 @@ const Loader: FC = () => (
 const Authentication: FC<BoxProps> = (props) => {
   const [userMenuOpened, setUserMenuOpened] = useState(false)
 
-  const { data: session, status: sessionStatus } = useSession()
-  const { data: me, isLoading: meIsLoading } = useMeQuery()
-  const {
-    mutate: createNewUser,
-    data: createdUser,
-    error: createdUserError,
-  } = useUserCreateOneMutation()
-  if (createdUser) console.log({ createdUser })
-  if (createdUserError) console.info({ createdUserError })
+  const { me, isLoading } = useMe()
 
-  if (sessionStatus === "loading" || meIsLoading) return <Loader />
-  if (session?.user?.email && !me) {
-    createNewUser({
-      email: session.user.email,
-      name: session.user.name ?? null,
-      image: session.user.image ?? null,
-    })
-    return <Loader />
-  }
+  if (isLoading) return <Loader />
 
   return (
     <Box {...props}>

@@ -14,25 +14,26 @@ import { useRouter } from "next/router"
 import { ParsedUrlQuery } from "querystring"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
 import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
-import { useHarvests } from "@/hooks/useHarvests"
 import classes from "./input.module.css"
+import { useMe } from "@/hooks/useMe"
 
 interface Query extends ParsedUrlQuery {
   crop?: string
 }
 
 const useHarvestData = () => {
-  const { harvests } = useHarvests()
+  const { me } = useMe()
+
   const [crops, setCrops] = useState<string[]>(
-    () => harvests?.map(({ crop }) => crop) ?? [],
+    () => me?.harvests?.map(({ crop }) => crop) ?? [],
   )
 
   useEffect(() => {
-    const crops = harvests.map(({ crop }) => crop)
+    const crops = (me?.harvests ?? []).map(({ crop }) => crop)
     if (crops.length) {
       setCrops((prev) => Array.from(new Set(prev.concat(crops))))
     }
-  }, [harvests])
+  }, [me?.harvests])
 
   return [crops, setCrops] as const
 }

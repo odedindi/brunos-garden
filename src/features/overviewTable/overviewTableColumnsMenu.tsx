@@ -1,4 +1,4 @@
-import { Harvest } from "@/types/Harvest"
+import { Harvest } from "@/db/modules/harvest"
 import SettingsIcon from "@/ui/icons/Settings"
 import { Menu, Button, Checkbox, MenuProps } from "@mantine/core"
 

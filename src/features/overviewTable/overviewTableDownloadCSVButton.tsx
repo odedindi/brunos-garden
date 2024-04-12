@@ -1,7 +1,7 @@
 import type { Table as TanstackTable } from "@tanstack/react-table"
 
 import { FC, useRef, useState } from "react"
-import type { Harvest } from "@/types/Harvest"
+import type { Harvest } from "@/db/modules/harvest"
 
 import { Button } from "@mantine/core"
 import { CSVLink } from "react-csv"
@@ -15,7 +15,7 @@ type OverviewTableDownloadCSVProps = {
 
 const OverviewTableDownloadCSV: FC<OverviewTableDownloadCSVProps> = (props) => {
   const [loading, setLoading] = useState<boolean>(false)
-  const [csvData, setCsvData] = useState<(string | number)[][]>([])
+  const [csvData, setCsvData] = useState<(string | number | Date)[][]>([])
   const ref = useRef<CSVLink & HTMLAnchorElement>(null!)
   const disabled = props.disabled || loading
   return (
@@ -35,7 +35,7 @@ const OverviewTableDownloadCSV: FC<OverviewTableDownloadCSVProps> = (props) => {
         })
 
         const cols = Array.from(columns)
-        const dataCsvFormat: (string | number)[][] = [
+        const dataCsvFormat: (string | number | Date)[][] = [
           cols,
           ...data.map((crop) =>
             cols.map((colName) => crop[colName as keyof Harvest] ?? ""),

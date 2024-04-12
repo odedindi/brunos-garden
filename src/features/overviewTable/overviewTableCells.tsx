@@ -1,4 +1,4 @@
-import type { Harvest } from "@/types/Harvest"
+// import type { Harvest } from "@/types/Harvest"
 import { Input, NumberInput } from "@mantine/core"
 import type { CellContext } from "@tanstack/react-table"
 import { type FC, useEffect, useState, useRef } from "react"
@@ -7,6 +7,7 @@ import { DateInput } from "@mantine/dates"
 import dayjs from "dayjs"
 import classes from "./overviewTable.module.css"
 import { dateFormat } from "@/utils/parseDateStr"
+import type { Harvest } from "@/db/modules/harvest"
 
 // It is required to extend dayjs with customParseFormat plugin
 // in order to parse dates with custom format
@@ -52,10 +53,10 @@ export const StringCell: FC<CellContext<Harvest, unknown>> = ({
 }
 
 export const NumberCell: FC<
-  CellContext<Harvest, unknown> & { unit: string }
-> = ({ getValue, row, column, table: { options }, unit }) => {
-  const initialValue = getValue<number>()
-  const [value, setValue] = useState(initialValue)
+  CellContext<Harvest, unknown> & { unit: string; preventDecimal?: boolean }
+> = ({ getValue, row, column, table: { options }, unit, preventDecimal }) => {
+  const initialValue = getValue<number | string>()
+  const [value, setValue] = useState(Number(initialValue))
   const ref = useRef<HTMLInputElement>(null)
 
   const onBlur = () => {
@@ -64,7 +65,7 @@ export const NumberCell: FC<
   }
   // If the initialValue is changed external, sync it up with our state
   useEffect(() => {
-    setValue(initialValue)
+    setValue(Number(initialValue))
   }, [initialValue])
 
   return (
@@ -77,10 +78,10 @@ export const NumberCell: FC<
       onChange={(value) => setValue(Number(value))}
       onBlur={onBlur}
       onKeyDown={(e) => {
-        if (e.key === ".") e.preventDefault()
+        if (preventDecimal && e.key === ".") e.preventDefault()
         if (e.key === "Enter") onBlur()
         if (e.key === "Escape") {
-          setValue(initialValue)
+          setValue(Number(initialValue))
           setTimeout(() => ref.current?.blur())
         }
       }}
@@ -104,6 +105,7 @@ export const DateCell: FC<CellContext<Harvest, unknown>> = ({
   useEffect(() => {
     setValue(initialValue)
   }, [initialValue])
+
   return (
     <DateInput
       ref={ref}

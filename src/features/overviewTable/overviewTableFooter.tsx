@@ -1,6 +1,6 @@
 import type { Table as TanstackTable } from "@tanstack/react-table"
 import type { FC } from "react"
-import type { Harvest } from "@/types/Harvest"
+import type { Harvest } from "@/db/modules/harvest"
 
 import {
   Box,

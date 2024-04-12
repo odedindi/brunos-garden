@@ -1,30 +1,25 @@
 import { useSession } from "next-auth/react"
-
-import { User, UserSchema } from "@/types/User"
 import { useQuery } from "@tanstack/react-query"
+import { User } from "@/db/modules/user"
+import { Harvest } from "@/db/modules/harvest"
 
-import * as dataIndex from "./utils/dataIndexes"
-
-export const useMeQuery = () => {
-  const { data: session } = useSession()
-  const email = session?.user?.email
-  const { data, isLoading } = useQuery<User | null>({
+const useMeQuery = (email?: string | null) =>
+  useQuery<(User & { harvests: Harvest[] }) | null>({
     queryKey: ["me", email],
     queryFn: async () => {
-      const res = await fetch("api/sheet", {
-        method: "POST",
-        body: JSON.stringify({ email: email }),
-      })
-      const rawData = await res.json()
-      const data: string[][] = rawData ? JSON.parse(rawData) : []
-      const userStr = data.length ? dataIndex.me(data) : "{}"
-
-      const user = UserSchema.safeParse(JSON.parse(userStr))
-      if (!user.success) console.info(user.error)
-      return user.success ? user.data : null
+      const res = await fetch("api/auth/signin", { method: "POST" })
+      if (!res.ok) throw new Error("Network response was not ok")
+      return (await res.json()) as User & { harvests: Harvest[] }
     },
     enabled: !!email,
   })
 
-  return { data, isLoading }
+export const useMe = () => {
+  const session = useSession()
+  const query = useMeQuery(session.data?.user?.email)
+
+  return {
+    me: query.data,
+    isLoading: query.isLoading || session.status === "loading",
+  }
 }

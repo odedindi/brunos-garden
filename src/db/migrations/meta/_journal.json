@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1712758988146,
+      "tag": "0000_broken_wasp",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1712759332104,
+      "tag": "0001_melodic_sally_floyd",
+      "breakpoints": true
+    }
+  ]
+}
