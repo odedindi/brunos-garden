@@ -3,8 +3,7 @@ import { drizzle } from "drizzle-orm/neon-http"
 import * as userSchema from "./modules/user/schema"
 import * as harvestSchema from "./modules/harvest/schema"
 import * as geoFeatureSchema from "./modules/geoFeature/schema"
-import { eq, type Logger as ILogger } from "drizzle-orm"
-import { omit } from "lodash"
+import { type Logger as ILogger } from "drizzle-orm"
 
 class Logger implements ILogger {
   logQuery = (query: string, params: unknown[]): void =>

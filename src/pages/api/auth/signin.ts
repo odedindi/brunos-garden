@@ -1,9 +1,10 @@
 import { z } from "zod"
 import type { NextApiRequest, NextApiResponse } from "next"
-import { findUser, insertUser, InsertUserSchema, User } from "@/db/modules/user"
+import { findUser, insertUser } from "@/db/modules/user"
 import { Harvest } from "@/db/modules/harvest"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "./[...nextauth]"
+import { InsertUserSchema, type User } from "@/db/modules/user/schema"
 
 type Data = User & { harvests: Harvest[] }
 

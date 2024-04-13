@@ -1,9 +1,5 @@
 import { db } from "@/db"
-import { NewUser, User, users } from "./schema"
-import { omit } from "lodash"
-import { eq } from "drizzle-orm"
-
-export * from "./schema"
+import { NewUser, users } from "./schema"
 
 export const findUser = async (email: string) =>
   db.query.users.findFirst({
@@ -17,13 +13,3 @@ export const findUser = async (email: string) =>
 
 export const insertUser = async (user: NewUser) =>
   db.insert(users).values(user).returning()
-
-export const updateUser = async (user: User) =>
-  db
-    .update(users)
-    .set(omit(user, ["id", "email"]))
-    .where(eq(users.email, user.email))
-    .returning()
-
-export const deleteUser = async (id: number) =>
-  db.delete(users).where(eq(users.id, id)).returning()

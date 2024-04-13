@@ -1,0 +1,42 @@
+"""
+A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar Date
+
+type HarvestObject {
+  area_m2: String!
+  createdAt: Date
+  crop: String!
+  date: String!
+  id: Int!
+  userEmail: String!
+  weight_g: Int!
+  yield_Kg_m2: String!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type Mutation {
+  addUser(email: String!, image: String, name: String): [User!]!
+  removeUser(id: Int!): [User!]!
+  updateUser(email: String, id: Int!, image: String, name: String): [User!]!
+}
+
+type Query {
+  getUser(email: String!): User
+  getUsers: [User!]!
+  me: User
+}
+
+type User {
+  createdAt: Date
+  email: String!
+  harvests: [HarvestObject!]!
+  id: Int!
+  image: String
+  name: String
+  updatedAt: Date
+}

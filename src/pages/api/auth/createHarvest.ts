@@ -7,7 +7,7 @@ import {
 } from "@/db/modules/harvest"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "./[...nextauth]"
-import { InsertUserSchema } from "@/db/modules/user"
+import { InsertUserSchema } from "@/db/modules/user/schema"
 
 type Data = Harvest
 

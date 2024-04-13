@@ -7,6 +7,8 @@ import classes from "../styles/layout.module.css"
 import { ParsedUrlQuery } from "querystring"
 import { useRouter } from "next/router"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
+import { graphql } from "../../generated"
+import { useGraphQL } from "@/hooks/useGraphQL"
 
 const Steps = dynamic(() => import("@/features/steps"), { ssr: false })
 const OverviewTable = dynamic(() => import("@/features/overviewTable"), {
@@ -46,6 +48,39 @@ const tabs: Tab[] = [
   },
 ]
 
+const getUsersQueryDocument = graphql(/* GraphQL */ `
+  query GetUsersQuery {
+    getUsers {
+      __typename
+      id
+      name
+      email
+      image
+    }
+  }
+`)
+
+const getUserQueryDocument = graphql(/* GraphQL */ `
+  query GetUserQuery($email: String!) {
+    getUser(email: $email) {
+      __typename
+      id
+      name
+      email
+      image
+
+      harvests {
+        __typename
+        id
+        crop
+        weight_g
+        area_m2
+        yield_Kg_m2
+      }
+    }
+  }
+`)
+
 const HomePage: NextPage = () => {
   const router = useRouter()
   const query = router.query as Query
@@ -57,6 +92,14 @@ const HomePage: NextPage = () => {
 
   const activeTab = tabs.find((t) => t.id === activeTabID)
 
+  const { data } = useGraphQL(
+    getUserQueryDocument,
+    // variables are also properly type-checked.
+    { email: "brunos.garden.app@gmail.com" },
+  )
+
+  const allUsers = data?.getUser ?? []
+  console.log({ allUsers })
   return (
     <AppShell header={{ height: 115 }} footer={{ height: 90 }} padding="md">
       <AppShell.Header className={classes.header}>

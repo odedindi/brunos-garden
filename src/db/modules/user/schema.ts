@@ -34,3 +34,9 @@ export const InsertUserSchema = createInsertSchema(users).required({
   email: true,
 })
 export type NewUser = z.infer<typeof InsertUserSchema> // insert type
+
+export const UpdateUserSchema = createInsertSchema(users)
+  .required({ id: true })
+  .extend({ email: z.string().optional().nullable() })
+
+export type UpdateUser = z.infer<typeof UpdateUserSchema> // insert type

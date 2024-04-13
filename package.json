@@ -14,7 +14,8 @@
     "db:push": "drizzle-kit push:pg",
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate:pg",
-    "db:seed": "tsx ./src/db/seed/index.ts"
+    "db:seed": "tsx ./src/db/seed/index.ts",
+    "generate:types": "graphql-codegen"
   },
   "dependencies": {
     "@mantine/carousel": "^7.7.1",
@@ -28,6 +29,8 @@
     "@mantine/spotlight": "^7.7.1",
     "@mantine/tiptap": "^7.7.1",
     "@neondatabase/serverless": "^0.9.0",
+    "@pothos/core": "^3.41.0",
+    "@pothos/plugin-simple-objects": "^3.7.0",
     "@tabler/icons-react": "^3.1.0",
     "@tanstack/react-query": "^5.28.12",
     "@tanstack/react-query-devtools": "^5.28.12",
@@ -42,9 +45,9 @@
     "drizzle-orm": "^0.30.7",
     "drizzle-zod": "^0.5.1",
     "embla-carousel-react": "^8.0.0",
-    "garph": "^0.6.8",
     "googleapis": "^128.0.0",
     "graphql": "^16.8.1",
+    "graphql-scalars": "^1.23.0",
     "graphql-yoga": "^5.3.0",
     "lodash": "^4.17.21",
     "next": "14.1.4",
@@ -56,6 +59,12 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@0no-co/graphqlsp": "^1.9.1",
+    "@graphql-codegen/cli": "^5.0.2",
+    "@graphql-codegen/client-preset": "^4.2.5",
+    "@graphql-codegen/typescript": "^4.0.6",
+    "@graphql-codegen/typescript-resolvers": "^4.0.6",
+    "@graphql-eslint/eslint-plugin": "^3.20.1",
     "@tanstack/eslint-plugin-query": "^5.28.11",
     "@types/add": "^2.0.3",
     "@types/lodash": "^4.17.0",
@@ -77,7 +86,7 @@
     "postcss-simple-vars": "^7.0.1",
     "prettier": "^3.2.5",
     "tsx": "^4.7.2",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.5"
   },
   "packageManager": "yarn@4.0.2"
 }

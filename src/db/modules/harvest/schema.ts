@@ -41,7 +41,9 @@ export const harvestsRelations = relations(harvests, ({ one }) => ({
   }),
 }))
 
-export const HarvestSchema = createSelectSchema(harvests)
+export const HarvestSchema = createSelectSchema(harvests).required({
+  userEmail: true,
+})
 export type Harvest = z.infer<typeof HarvestSchema> // return type when queried
 export const InsertHarvestSchema = createInsertSchema(harvests)
 
