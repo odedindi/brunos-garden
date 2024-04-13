@@ -25,8 +25,5 @@ export const updateUser = async (user: User) =>
     .where(eq(users.email, user.email))
     .returning()
 
-export const deleteUser = async (email: string) =>
-  db
-    .delete(users)
-    .where(eq(users.email, email))
-    .returning({ deletedId: users.email })
+export const deleteUser = async (id: number) =>
+  db.delete(users).where(eq(users.id, id)).returning()
