@@ -15,6 +15,7 @@ const ReactQueryDevtoolsProduction = dynamic(() =>
 const queryClient = new QueryClient()
 
 type InvalidateQueries = typeof queryClient.invalidateQueries
+
 export const invalidateQueries: InvalidateQueries = async (
   filters,
   options,

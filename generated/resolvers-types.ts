@@ -20,13 +20,28 @@ export type Scalars = {
   JSON: { input: any; output: any; }
 };
 
-export type HarvestObject = {
-  __typename?: 'HarvestObject';
+export type AddHarvestInput = {
+  area_m2: Scalars['String']['input'];
+  crop: Scalars['String']['input'];
+  date: Scalars['String']['input'];
+  weight_g: Scalars['Int']['input'];
+  yield_Kg_m2: Scalars['String']['input'];
+};
+
+export type AddUserInput = {
+  email: Scalars['String']['input'];
+  image?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type Harvest = {
+  __typename?: 'Harvest';
   area_m2: Scalars['String']['output'];
-  createdAt?: Maybe<Scalars['Date']['output']>;
+  createdAt: Scalars['Date']['output'];
   crop: Scalars['String']['output'];
   date: Scalars['String']['output'];
   id: Scalars['Int']['output'];
+  updatedAt: Scalars['Date']['output'];
   userEmail: Scalars['String']['output'];
   weight_g: Scalars['Int']['output'];
   yield_Kg_m2: Scalars['String']['output'];
@@ -34,21 +49,37 @@ export type HarvestObject = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  addUser: Array<User>;
-  removeUser: Array<User>;
-  updateUser: Array<User>;
+  addHarvest: Harvest;
+  addUser: User;
+  deleteHarvests: Array<Harvest>;
+  removeUser: User;
+  updateHarvest: Harvest;
+  updateUser: User;
+};
+
+
+export type MutationAddHarvestArgs = {
+  harvest: AddHarvestInput;
 };
 
 
 export type MutationAddUserArgs = {
-  email: Scalars['String']['input'];
-  image?: InputMaybe<Scalars['String']['input']>;
-  name?: InputMaybe<Scalars['String']['input']>;
+  user: AddUserInput;
+};
+
+
+export type MutationDeleteHarvestsArgs = {
+  ids: Array<Scalars['Int']['input']>;
 };
 
 
 export type MutationRemoveUserArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type MutationUpdateHarvestArgs = {
+  harvest: UpdateHarvestInput;
 };
 
 
@@ -59,10 +90,17 @@ export type MutationUpdateUserArgs = {
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
+export enum OrderBy {
+  Asc = 'asc',
+  Desc = 'desc'
+}
+
 export type Query = {
   __typename?: 'Query';
   getUser?: Maybe<User>;
   getUsers: Array<User>;
+  harvest?: Maybe<Harvest>;
+  harvests: Array<Harvest>;
   me?: Maybe<User>;
 };
 
@@ -71,15 +109,56 @@ export type QueryGetUserArgs = {
   email: Scalars['String']['input'];
 };
 
+
+export type QueryGetUsersArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<OrderBy>;
+};
+
+
+export type QueryHarvestArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type QueryHarvestsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<OrderBy>;
+};
+
+export enum Role {
+  Admin = 'admin',
+  User = 'user'
+}
+
+export type UpdateHarvestInput = {
+  area_m2?: InputMaybe<Scalars['String']['input']>;
+  crop?: InputMaybe<Scalars['String']['input']>;
+  date?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['Int']['input'];
+  weight_g?: InputMaybe<Scalars['Int']['input']>;
+  yield_Kg_m2?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type User = {
   __typename?: 'User';
   createdAt?: Maybe<Scalars['Date']['output']>;
   email: Scalars['String']['output'];
-  harvests: Array<HarvestObject>;
+  harvests: Array<Harvest>;
   id: Scalars['Int']['output'];
   image?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  role: Role;
   updatedAt?: Maybe<Scalars['Date']['output']>;
+};
+
+
+export type UserHarvestsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  orderBy?: InputMaybe<OrderBy>;
 };
 
 
@@ -153,27 +232,35 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  AddHarvestInput: AddHarvestInput;
+  AddUserInput: AddUserInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
-  HarvestObject: ResolverTypeWrapper<HarvestObject>;
+  Harvest: ResolverTypeWrapper<Harvest>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
+  OrderBy: OrderBy;
   Query: ResolverTypeWrapper<{}>;
+  Role: Role;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  UpdateHarvestInput: UpdateHarvestInput;
   User: ResolverTypeWrapper<User>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  AddHarvestInput: AddHarvestInput;
+  AddUserInput: AddUserInput;
   Boolean: Scalars['Boolean']['output'];
   Date: Scalars['Date']['output'];
-  HarvestObject: HarvestObject;
+  Harvest: Harvest;
   Int: Scalars['Int']['output'];
   JSON: Scalars['JSON']['output'];
   Mutation: {};
   Query: {};
   String: Scalars['String']['output'];
+  UpdateHarvestInput: UpdateHarvestInput;
   User: User;
 };
 
@@ -181,12 +268,13 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
   name: 'Date';
 }
 
-export type HarvestObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['HarvestObject'] = ResolversParentTypes['HarvestObject']> = {
+export type HarvestResolvers<ContextType = any, ParentType extends ResolversParentTypes['Harvest'] = ResolversParentTypes['Harvest']> = {
   area_m2?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   crop?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   userEmail?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   weight_g?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   yield_Kg_m2?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -198,31 +286,37 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  addUser?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationAddUserArgs, 'email'>>;
-  removeUser?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationRemoveUserArgs, 'id'>>;
-  updateUser?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'id'>>;
+  addHarvest?: Resolver<ResolversTypes['Harvest'], ParentType, ContextType, RequireFields<MutationAddHarvestArgs, 'harvest'>>;
+  addUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationAddUserArgs, 'user'>>;
+  deleteHarvests?: Resolver<Array<ResolversTypes['Harvest']>, ParentType, ContextType, RequireFields<MutationDeleteHarvestsArgs, 'ids'>>;
+  removeUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationRemoveUserArgs, 'id'>>;
+  updateHarvest?: Resolver<ResolversTypes['Harvest'], ParentType, ContextType, RequireFields<MutationUpdateHarvestArgs, 'harvest'>>;
+  updateUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'id'>>;
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   getUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryGetUserArgs, 'email'>>;
-  getUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
+  getUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, Partial<QueryGetUsersArgs>>;
+  harvest?: Resolver<Maybe<ResolversTypes['Harvest']>, ParentType, ContextType, RequireFields<QueryHarvestArgs, 'id'>>;
+  harvests?: Resolver<Array<ResolversTypes['Harvest']>, ParentType, ContextType, Partial<QueryHarvestsArgs>>;
   me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
 };
 
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  harvests?: Resolver<Array<ResolversTypes['HarvestObject']>, ParentType, ContextType>;
+  harvests?: Resolver<Array<ResolversTypes['Harvest']>, ParentType, ContextType, Partial<UserHarvestsArgs>>;
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   image?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  role?: Resolver<ResolversTypes['Role'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type Resolvers<ContextType = any> = {
   Date?: GraphQLScalarType;
-  HarvestObject?: HarvestObjectResolvers<ContextType>;
+  Harvest?: HarvestResolvers<ContextType>;
   JSON?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;

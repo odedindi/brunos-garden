@@ -22,7 +22,10 @@ export const harvests = pgTable(
     weight_g: integer("weight_g").notNull(),
     area_m2: decimal("area_m2", { precision: 10, scale: 3 }).notNull(),
     yield_Kg_m2: decimal("yield_Kg_m2", { precision: 10, scale: 3 }).notNull(),
-    createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .notNull()
+      .$onUpdate(() => new Date()),
     userEmail: varchar("user_email")
       .notNull()
       .references(() => users.email),
@@ -41,50 +44,10 @@ export const harvestsRelations = relations(harvests, ({ one }) => ({
   }),
 }))
 
-export const HarvestSchema = createSelectSchema(harvests).required({
+const HarvestSchema = createSelectSchema(harvests).required({
   userEmail: true,
 })
 export type Harvest = z.infer<typeof HarvestSchema> // return type when queried
-export const InsertHarvestSchema = createInsertSchema(harvests)
+const InsertHarvestSchema = createInsertSchema(harvests)
 
 export type NewHarvest = z.infer<typeof InsertHarvestSchema> // insert type
-
-export const CreateHarvestRequestBodySchema = InsertHarvestSchema.omit({
-  id: true,
-  userEmail: true,
-  createdAt: true,
-}).required({
-  crop: true,
-  date: true,
-  weight_g: true,
-  area_m2: true,
-  yield_Kg_m2: true,
-})
-
-export type CreateHarvestRequestBody = z.infer<
-  typeof CreateHarvestRequestBodySchema
->
-
-export const UpdateHarvestRequestBodySchema = InsertHarvestSchema.omit({
-  createdAt: true,
-})
-  .required({ id: true, userEmail: true })
-  .extend({
-    crop: z.string().optional(),
-    date: z.string().optional(),
-    weight_g: z.number().optional(),
-    area_m2: z.number().optional(),
-    yield_Kg_m2: z.number().optional(),
-  })
-  .transform((harvest) => ({
-    ...harvest,
-    area_m2: harvest.area_m2 ? harvest.area_m2.toString() : undefined,
-    yield_Kg_m2:
-      harvest.area_m2 && harvest.weight_g
-        ? (harvest.weight_g / 1000 / harvest.area_m2).toString()
-        : undefined,
-  }))
-
-export type UpdateHarvestRequestBody = z.infer<
-  typeof UpdateHarvestRequestBodySchema
->

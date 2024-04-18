@@ -2,7 +2,6 @@ import {
   ChangeEvent,
   FC,
   KeyboardEvent,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -23,20 +22,16 @@ interface Query extends ParsedUrlQuery {
 
 const useHarvestData = () => {
   const { me } = useMe()
+  const myHarvests = (me?.harvests ?? []).map(({ crop }) => crop)
 
-  const [crops, setCrops] = useState<string[]>(
-    () => me?.harvests?.map(({ crop }) => crop) ?? [],
-  )
+  const [crops, setCrops] = useState<string[]>(() => [])
 
-  useEffect(() => {
-    const crops = (me?.harvests ?? []).map(({ crop }) => crop)
-    if (crops.length) {
-      setCrops((prev) => Array.from(new Set(prev.concat(crops))))
-    }
-  }, [me?.harvests])
-
-  return [crops, setCrops] as const
+  return [
+    [...Array.from(new Set([...myHarvests, ...crops]))],
+    setCrops,
+  ] as const
 }
+
 const SelectCrop: FC<{
   onSubmit: () => void
 }> = ({ onSubmit }) => {
@@ -45,7 +40,7 @@ const SelectCrop: FC<{
   })
   const ref = useRef<HTMLInputElement>(null)
   useFocusOnLoad<"input">(ref)
-  const [crops, setCrops] = useHarvestData()
+  const [crops, setNewCrops] = useHarvestData()
   const router = useRouter()
   const query = router.query as Query
 
@@ -68,26 +63,18 @@ const SelectCrop: FC<{
     [crops, exactOptionMatch, search],
   )
 
-  const options = Array.from(new Set(filteredOptions)).map((item) => (
-    <Combobox.Option value={item} key={item}>
-      {item}
-    </Combobox.Option>
-  ))
-
   return (
     <Combobox
       store={combobox}
       withinPortal={false}
       onOptionSubmit={(val) => {
         if (val === "$create") {
-          setCrops((current) => [...current, search])
+          setNewCrops((current) => [...current, search])
           onChange(search)
         } else {
           onChange(val)
           setSearch(val)
         }
-        onSubmit()
-
         combobox.closeDropdown()
       }}
     >
@@ -119,7 +106,11 @@ const SelectCrop: FC<{
 
       <Combobox.Dropdown>
         <Combobox.Options>
-          {options}
+          {Array.from(new Set(filteredOptions)).map((item) => (
+            <Combobox.Option value={item} key={item}>
+              {item}
+            </Combobox.Option>
+          ))}
           {!exactOptionMatch && search.trim().length > 0 && (
             <Combobox.Option value="$create">+ {search}</Combobox.Option>
           )}

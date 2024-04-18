@@ -11,8 +11,10 @@ import {
 } from "@tabler/icons-react"
 import classes from "./steps.module.css"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
-import { useHarvestCreateMutation } from "@/hooks/useHarvestCreateMutation"
-import { CreateHarvestRequestBody, Harvest } from "@/db/modules/harvest"
+import { AddHarvestInput, HarvestFragmentFragment } from "generated/graphql"
+import { useFragment } from "generated"
+import { useAddHarvest } from "@/hooks/useAddHarvest"
+import { HarvestFragment } from "@/hooks/useMe"
 
 const SelectCrop = dynamic(() => import("./inputs/crop"), { ssr: false })
 const SelectDate = dynamic(() => import("./inputs/date"), { ssr: false })
@@ -27,7 +29,7 @@ interface Query extends ParsedUrlQuery {
   area?: string
 }
 
-const parseHarvest = (query: Query): CreateHarvestRequestBody => {
+const parseHarvest = (query: Query): AddHarvestInput => {
   const [weightStr, weightUnit] = (query.weight ?? "").split("_")
   const weightNum = Number(weightStr)
   const weight_g = weightUnit === "g" ? weightNum : weightNum * 1000
@@ -88,10 +90,13 @@ const Steps: FC = () => {
   const router = useRouter()
   const query = router.query as Query
 
-  const { mutateAsync: createHarvest, isPending: createHarvestIsPending } =
-    useHarvestCreateMutation()
-
-  const [newHarvests, setNewHarvests] = useState<Harvest[]>([])
+  const {
+    mutateAsync: createHarvest,
+    isPending: createHarvestIsPending,
+    data: addHarvestData,
+  } = useAddHarvest()
+  const newHarvest = useFragment(HarvestFragment, addHarvestData?.addHarvest)
+  const [newHarvests, setNewHarvests] = useState<HarvestFragmentFragment[]>([])
   const [currentStep, setCurrentStep] = useState(() => {
     const currentStep =
       !query || !query.crop
@@ -132,9 +137,9 @@ const Steps: FC = () => {
       !!query.weight &&
       !!query.area
     ) {
-      const parsedHarvest = parseHarvest(query)
-      const NewHarvest = await createHarvest(parsedHarvest)
-      setNewHarvests((prev) => [...prev, NewHarvest])
+      await createHarvest({ harvest: parseHarvest(query) })
+
+      // setNewHarvests((prev) => [...prev, NewHarvest])
     }
   }, [currentStep, query, createHarvest])
 
@@ -170,7 +175,7 @@ const Steps: FC = () => {
       <Stepper.Completed>
         <Box className={classes.wrapper}>
           <OverviewTable
-            harvests={newHarvests}
+            harvests={newHarvest ? [newHarvest] : []}
             disableSelectRows
             hideOverviewTableFooter
             hideTableFoot

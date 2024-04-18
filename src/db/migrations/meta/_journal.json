@@ -15,6 +15,41 @@
       "when": 1712759332104,
       "tag": "0001_melodic_sally_floyd",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1713089887525,
+      "tag": "0002_fresh_doctor_faustus",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1713090212261,
+      "tag": "0003_mean_shocker",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1713090316688,
+      "tag": "0004_slimy_hobgoblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1713181492517,
+      "tag": "0005_absurd_ironclad",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1713181582145,
+      "tag": "0006_woozy_captain_cross",
+      "breakpoints": true
     }
   ]
 }

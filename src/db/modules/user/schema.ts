@@ -1,9 +1,18 @@
 import { relations } from "drizzle-orm"
-import { pgTable, timestamp, varchar, index, serial } from "drizzle-orm/pg-core"
+import {
+  pgTable,
+  timestamp,
+  varchar,
+  index,
+  serial,
+  pgEnum,
+} from "drizzle-orm/pg-core"
 import { harvests } from "../harvest/schema"
 import { geoFeatures } from "../geoFeature/schema"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { z } from "zod"
+
+export const roleEnum = pgEnum("role", ["admin", "user"])
 
 export const users = pgTable(
   "users",
@@ -16,6 +25,7 @@ export const users = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(
       () => new Date(),
     ),
+    role: roleEnum("role").notNull().default("user"),
   },
   (users) => ({
     emailIdx: index("email_idx").on(users.email),
@@ -27,16 +37,10 @@ export const userRelations = relations(users, ({ many }) => ({
   gardenFeatures: many(geoFeatures),
 }))
 
-export const UserSchema = createSelectSchema(users)
+const UserSchema = createSelectSchema(users)
 export type User = z.infer<typeof UserSchema> // return type when queried
 
-export const InsertUserSchema = createInsertSchema(users).required({
+const InsertUserSchema = createInsertSchema(users).required({
   email: true,
 })
 export type NewUser = z.infer<typeof InsertUserSchema> // insert type
-
-export const UpdateUserSchema = createInsertSchema(users)
-  .required({ id: true })
-  .extend({ email: z.string().optional().nullable() })
-
-export type UpdateUser = z.infer<typeof UpdateUserSchema> // insert type

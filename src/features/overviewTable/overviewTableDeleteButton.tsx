@@ -1,14 +1,14 @@
 import type { Table as TanstackTable } from "@tanstack/react-table"
 
 import type { FC } from "react"
-import type { Harvest } from "@/db/modules/harvest"
 
 import TrashIcon from "@/ui/icons/Trash"
 import { useMe } from "@/hooks/useMe"
-import { useHarvestsDeleteMutation } from "@/hooks/useHarvestsDeleteMutation"
+import type { HarvestFragmentFragment } from "generated/graphql"
+import { useDeleteHarvests } from "@/hooks/useDeleteHarvest"
 
 type OverviewTableDeleteButtonProps = {
-  table: TanstackTable<Harvest>
+  table: TanstackTable<HarvestFragmentFragment>
   disabled?: boolean
 }
 
@@ -17,7 +17,7 @@ const OverviewTableDeleteButton: FC<OverviewTableDeleteButtonProps> = (
 ) => {
   const { me } = useMe()
   const { mutateAsync: deleteHarvests, isPending: deleteHarvestsIsPending } =
-    useHarvestsDeleteMutation()
+    useDeleteHarvests()
 
   const selectedRows = props.table.getFilteredSelectedRowModel().rows
   const disabled = props.disabled || !selectedRows.length || !me
@@ -29,12 +29,12 @@ const OverviewTableDeleteButton: FC<OverviewTableDeleteButtonProps> = (
       onClick={() => {
         if (!me) return
         const selectedRows = props.table.getFilteredSelectedRowModel().rows
-        const harvestIds = selectedRows.map((row) => {
+        const ids = selectedRows.map((row) => {
           props.table.setRowSelection({ [row.original.id]: false })
           return Number(row.original.id)
         })
 
-        deleteHarvests({ harvestIds })
+        deleteHarvests({ ids })
       }}
       loading={deleteHarvestsIsPending}
     />

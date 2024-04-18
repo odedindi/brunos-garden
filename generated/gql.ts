@@ -13,8 +13,14 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "\n  query GetUsersQuery {\n    getUsers {\n      __typename\n      id\n      name\n      email\n      image\n    }\n  }\n": types.GetUsersQueryDocument,
-    "\n  query GetUserQuery($email: String!) {\n    getUser(email: $email) {\n      __typename\n      id\n      name\n      email\n      image\n\n      harvests {\n        __typename\n        id\n        crop\n        weight_g\n        area_m2\n        yield_Kg_m2\n      }\n    }\n  }\n": types.GetUserQueryDocument,
+    "\n  query Harvests($orderBy: OrderBy, $offset: Int, $limit: Int) {\n    harvests(orderBy: $orderBy, offset: $offset, limit: $limit) {\n      ...HarvestFragment\n    }\n  }\n": types.HarvestsDocument,
+    "\n  mutation AddHarvest($harvest: AddHarvestInput!) {\n    addHarvest(harvest: $harvest) {\n      ...HarvestFragment\n    }\n  }\n": types.AddHarvestDocument,
+    "\n  mutation DeleteHarvests($ids: [Int!]!) {\n    deleteHarvests(ids: $ids) {\n      ...HarvestFragment\n    }\n  }\n": types.DeleteHarvestsDocument,
+    "\n  fragment HarvestFragment on Harvest {\n    __typename\n    id\n    crop\n    date\n    weight_g\n    area_m2\n    yield_Kg_m2\n    createdAt\n    updatedAt\n    userEmail\n  }\n": types.HarvestFragmentFragmentDoc,
+    "\n  fragment MeFragment on User {\n    __typename\n    id\n    email\n    name\n    image\n    role\n    harvests {\n      ...HarvestFragment\n    }\n  }\n": types.MeFragmentFragmentDoc,
+    "\n  query Me {\n    me {\n      ...MeFragment\n    }\n  }\n": types.MeDocument,
+    "\n  mutation AddUser($user: AddUserInput!) {\n    addUser(user: $user) {\n      ...MeFragment\n    }\n  }\n": types.AddUserDocument,
+    "\n  mutation UpdateHarvest($harvest: UpdateHarvestInput!) {\n    updateHarvest(harvest: $harvest) {\n      ...HarvestFragment\n    }\n  }\n": types.UpdateHarvestDocument,
 };
 
 /**
@@ -34,11 +40,35 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetUsersQuery {\n    getUsers {\n      __typename\n      id\n      name\n      email\n      image\n    }\n  }\n"): (typeof documents)["\n  query GetUsersQuery {\n    getUsers {\n      __typename\n      id\n      name\n      email\n      image\n    }\n  }\n"];
+export function graphql(source: "\n  query Harvests($orderBy: OrderBy, $offset: Int, $limit: Int) {\n    harvests(orderBy: $orderBy, offset: $offset, limit: $limit) {\n      ...HarvestFragment\n    }\n  }\n"): (typeof documents)["\n  query Harvests($orderBy: OrderBy, $offset: Int, $limit: Int) {\n    harvests(orderBy: $orderBy, offset: $offset, limit: $limit) {\n      ...HarvestFragment\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetUserQuery($email: String!) {\n    getUser(email: $email) {\n      __typename\n      id\n      name\n      email\n      image\n\n      harvests {\n        __typename\n        id\n        crop\n        weight_g\n        area_m2\n        yield_Kg_m2\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetUserQuery($email: String!) {\n    getUser(email: $email) {\n      __typename\n      id\n      name\n      email\n      image\n\n      harvests {\n        __typename\n        id\n        crop\n        weight_g\n        area_m2\n        yield_Kg_m2\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  mutation AddHarvest($harvest: AddHarvestInput!) {\n    addHarvest(harvest: $harvest) {\n      ...HarvestFragment\n    }\n  }\n"): (typeof documents)["\n  mutation AddHarvest($harvest: AddHarvestInput!) {\n    addHarvest(harvest: $harvest) {\n      ...HarvestFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteHarvests($ids: [Int!]!) {\n    deleteHarvests(ids: $ids) {\n      ...HarvestFragment\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteHarvests($ids: [Int!]!) {\n    deleteHarvests(ids: $ids) {\n      ...HarvestFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment HarvestFragment on Harvest {\n    __typename\n    id\n    crop\n    date\n    weight_g\n    area_m2\n    yield_Kg_m2\n    createdAt\n    updatedAt\n    userEmail\n  }\n"): (typeof documents)["\n  fragment HarvestFragment on Harvest {\n    __typename\n    id\n    crop\n    date\n    weight_g\n    area_m2\n    yield_Kg_m2\n    createdAt\n    updatedAt\n    userEmail\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment MeFragment on User {\n    __typename\n    id\n    email\n    name\n    image\n    role\n    harvests {\n      ...HarvestFragment\n    }\n  }\n"): (typeof documents)["\n  fragment MeFragment on User {\n    __typename\n    id\n    email\n    name\n    image\n    role\n    harvests {\n      ...HarvestFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query Me {\n    me {\n      ...MeFragment\n    }\n  }\n"): (typeof documents)["\n  query Me {\n    me {\n      ...MeFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation AddUser($user: AddUserInput!) {\n    addUser(user: $user) {\n      ...MeFragment\n    }\n  }\n"): (typeof documents)["\n  mutation AddUser($user: AddUserInput!) {\n    addUser(user: $user) {\n      ...MeFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateHarvest($harvest: UpdateHarvestInput!) {\n    updateHarvest(harvest: $harvest) {\n      ...HarvestFragment\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateHarvest($harvest: UpdateHarvestInput!) {\n    updateHarvest(harvest: $harvest) {\n      ...HarvestFragment\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

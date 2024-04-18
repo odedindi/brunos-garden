@@ -10,13 +10,14 @@ class Logger implements ILogger {
     console.log({ query, params })
 }
 
-const schema = {
-  ...userSchema,
-  ...harvestSchema,
-  ...geoFeatureSchema,
-}
-
 const sql = neon(process.env.DRIZZLE_DATABASE_URL!)
-const db = drizzle(sql, { schema, logger: new Logger() })
+const db = drizzle(sql, {
+  schema: {
+    ...userSchema,
+    ...harvestSchema,
+    ...geoFeatureSchema,
+  },
+  logger: new Logger(),
+})
 
 export { db }

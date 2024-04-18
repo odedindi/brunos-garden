@@ -1,14 +1,29 @@
+input AddHarvestInput {
+  area_m2: String!
+  crop: String!
+  date: String!
+  weight_g: Int!
+  yield_Kg_m2: String!
+}
+
+input AddUserInput {
+  email: String!
+  image: String
+  name: String
+}
+
 """
 A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
 scalar Date
 
-type HarvestObject {
+type Harvest {
   area_m2: String!
-  createdAt: Date
+  createdAt: Date!
   crop: String!
   date: String!
   id: Int!
+  updatedAt: Date!
   userEmail: String!
   weight_g: Int!
   yield_Kg_m2: String!
@@ -20,23 +35,48 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 scalar JSON
 
 type Mutation {
-  addUser(email: String!, image: String, name: String): [User!]!
-  removeUser(id: Int!): [User!]!
-  updateUser(email: String, id: Int!, image: String, name: String): [User!]!
+  addHarvest(harvest: AddHarvestInput!): Harvest!
+  addUser(user: AddUserInput!): User!
+  deleteHarvests(ids: [Int!]!): [Harvest!]!
+  removeUser(id: Int!): User!
+  updateHarvest(harvest: UpdateHarvestInput!): Harvest!
+  updateUser(email: String, id: Int!, image: String, name: String): User!
+}
+
+enum OrderBy {
+  asc
+  desc
 }
 
 type Query {
   getUser(email: String!): User
-  getUsers: [User!]!
+  getUsers(limit: Int, offset: Int, orderBy: OrderBy): [User!]!
+  harvest(id: Int!): Harvest
+  harvests(limit: Int, offset: Int, orderBy: OrderBy): [Harvest!]!
   me: User
+}
+
+enum Role {
+  admin
+  user
+}
+
+input UpdateHarvestInput {
+  area_m2: String
+  crop: String
+  date: String
+  id: Int!
+  weight_g: Int
+  yield_Kg_m2: String
 }
 
 type User {
   createdAt: Date
   email: String!
-  harvests: [HarvestObject!]!
+  harvests(limit: Int, offset: Int, orderBy: OrderBy): [Harvest!]!
   id: Int!
   image: String
   name: String
+  role: Role!
   updatedAt: Date
 }

@@ -14,4 +14,6 @@ export default {
     database: process.env.DB_DATABASE!,
     ssl: true,
   },
+  verbose: true,
+  strict: true,
 } satisfies Config

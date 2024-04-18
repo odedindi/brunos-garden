@@ -1,15 +1,13 @@
 import type { Table as TanstackTable } from "@tanstack/react-table"
-
-import { FC, useRef, useState } from "react"
-import type { Harvest } from "@/db/modules/harvest"
-
+import { type FC, useRef, useState } from "react"
 import { Button } from "@mantine/core"
 import { CSVLink } from "react-csv"
 import dayjs from "dayjs"
 import classes from "./overviewTable.module.css"
+import type { HarvestFragmentFragment } from "generated/graphql"
 
 type OverviewTableDownloadCSVProps = {
-  table: TanstackTable<Harvest>
+  table: TanstackTable<HarvestFragmentFragment>
   disabled?: boolean
 }
 
@@ -38,7 +36,9 @@ const OverviewTableDownloadCSV: FC<OverviewTableDownloadCSVProps> = (props) => {
         const dataCsvFormat: (string | number | Date)[][] = [
           cols,
           ...data.map((crop) =>
-            cols.map((colName) => crop[colName as keyof Harvest] ?? ""),
+            cols.map(
+              (colName) => crop[colName as keyof HarvestFragmentFragment] ?? "",
+            ),
           ),
         ]
 

@@ -1,5 +1,6 @@
 import {
   ColumnDef,
+  PaginationState,
   SortingState,
   getCoreRowModel,
   getFilteredRowModel,
@@ -28,12 +29,14 @@ import OverviewTableColumnsMenu from "./overviewTableColumnsMenu"
 import TableTfoot from "./TableTfoot"
 import TableTbody from "./TableTbody"
 import TableThead from "./TableThead"
-import { Harvest } from "@/db/modules/harvest"
-import { useMe } from "@/hooks/useMe"
-import { useHarvestUpdateMutation } from "@/hooks/useHarvestUpdateMutation"
+import { HarvestFragment, useMe } from "@/hooks/useMe"
+import type { HarvestFragmentFragment } from "generated/graphql"
+import { useUpdateHarvest } from "@/hooks/useUpdateHarvest"
+import { graphql, useFragment } from "generated"
+import { useGraphQLQuery } from "@/hooks/useGraphQL"
 
 type OverviewProps = {
-  harvests?: Harvest[]
+  harvests?: HarvestFragmentFragment[]
   disableSelectRows?: boolean
   hideTableFoot?: boolean
   hideOverviewTableFooter?: boolean
@@ -43,6 +46,14 @@ type OverviewProps = {
 }
 
 export const wideColumns = ["crop", "yield"]
+
+const Harvests_Query = graphql(/* GraphQL */ `
+  query Harvests($orderBy: OrderBy, $offset: Int, $limit: Int) {
+    harvests(orderBy: $orderBy, offset: $offset, limit: $limit) {
+      ...HarvestFragment
+    }
+  }
+`)
 
 const OverviewTable: FC<OverviewProps> = ({
   harvests: defaultHarvests,
@@ -58,9 +69,26 @@ const OverviewTable: FC<OverviewProps> = ({
   const [globalFilter, setGlobalFilter] = useState("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState({})
+
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+
+  const { data } = useGraphQLQuery(Harvests_Query, {
+    variables: {
+      offset: pagination.pageIndex * pagination.pageSize,
+      limit: pagination.pageSize,
+    },
+  })
+
+  const harvestsData = Array.from(
+    defaultHarvests ?? useFragment(HarvestFragment, data?.harvests) ?? [],
+  )
+
   const { mutateAsync: updateHarvest, isPending: updateHarvestIsPending } =
-    useHarvestUpdateMutation()
-  const columns = useMemo<ColumnDef<Harvest>[]>(
+    useUpdateHarvest()
+  const columns = useMemo<ColumnDef<HarvestFragmentFragment>[]>(
     () => [
       {
         id: "select",
@@ -99,10 +127,10 @@ const OverviewTable: FC<OverviewProps> = ({
           ),
         footer: ({ table }) => {
           const { rows: selectedRows } = table.getFilteredSelectedRowModel()
-          const { rows: allRows } = table.getPreFilteredRowModel()
+          const rowsCount = table.getRowCount()
           return (
             <Text>
-              {selectedRows.length} of {allRows.length} Selected
+              {selectedRows.length} of {rowsCount} Selected
             </Text>
           )
         },
@@ -172,10 +200,10 @@ const OverviewTable: FC<OverviewProps> = ({
         accessorKey: "yield_Kg_m2",
         header: "Yield (Kg/m2)",
         cell: (info) => {
-          const value = info.getValue<number>()
+          const value = info.getValue<string>()
           return (
             <MantineTooltip openDelay={250} label={`${value} (Kg/m2)`}>
-              <Text>{value?.toFixed(3)}</Text>
+              <Text>{value}</Text>
             </MantineTooltip>
           )
         },
@@ -195,13 +223,17 @@ const OverviewTable: FC<OverviewProps> = ({
     [disableSelectRows],
   )
   const table = useReactTable({
-    data: defaultHarvests ?? me?.harvests ?? [],
+    data: harvestsData,
     columns,
     state: {
       rowSelection,
       sorting,
       columnVisibility,
+      pagination,
     },
+    rowCount: me?.harvests.length ?? 0,
+    onPaginationChange: setPagination,
+    manualPagination: true,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
@@ -211,20 +243,19 @@ const OverviewTable: FC<OverviewProps> = ({
     getSortedRowModel: getSortedRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
 
-    debugTable: true,
+    debugTable: false, // true,
     meta: {
       updateData: async (rowIndex, columnId, value) => {
         const row = table.getCoreRowModel().rows[rowIndex]
 
-        const updatedHarvest = {
-          ...row.original,
+        const harvest = {
           [columnId]: value,
+          id: row.original.id,
         }
 
-        console.log({ updatedHarvest })
+        console.log({ updatedHarvest: harvest })
 
-        const res = await updateHarvest(updatedHarvest)
-        console.log({ res })
+        const res = await updateHarvest({ harvest })
       },
     },
   })

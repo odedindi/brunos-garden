@@ -1,14 +1,14 @@
 import { flexRender, type Table as TanstackTable } from "@tanstack/react-table"
 import type { FC } from "react"
-import type { Harvest } from "@/db/modules/harvest"
 import { Table, Title } from "@mantine/core"
 import classes from "./overviewTable.module.css"
 import cx from "clsx"
 import ChevronIcon from "@/ui/icons/Chevron"
 import { wideColumns } from "."
+import type { HarvestFragmentFragment } from "generated/graphql"
 
 type TableTheadProps = {
-  table: TanstackTable<Harvest>
+  table: TanstackTable<HarvestFragmentFragment>
 }
 
 const TableThead: FC<TableTheadProps> = ({ table }) => {
