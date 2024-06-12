@@ -1,12 +1,12 @@
-import { Harvest } from "@/types/Harvest"
+import type { HarvestFragmentFragment } from "generated/graphql"
 import SettingsIcon from "@/ui/icons/Settings"
 import { Menu, Button, Checkbox, MenuProps } from "@mantine/core"
 
 import { Table as TanstackTable } from "@tanstack/react-table"
-import { FC } from "react"
+import type { FC } from "react"
 
 interface OverviewTableColumnsMenuProps extends Omit<MenuProps, "children"> {
-  table: TanstackTable<Harvest>
+  table: TanstackTable<HarvestFragmentFragment>
   disabled?: boolean
 }
 

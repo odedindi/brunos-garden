@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next"
 import { getGoogleSheetApi } from "@/utils/getGoogleSheetApi"
 import { getSheetId } from "@/utils/getSheetId"
 
-type Data = string
+type Data = string | any[][] | null | undefined
 const { GOOGLE_SPREADSHEET_ID } = process.env
 
 export default async function handler(
@@ -13,14 +13,10 @@ export default async function handler(
   const sheets = await getGoogleSheetApi()
 
   try {
-    const { email, name, image } = z
-      .object({
-        email: z.string(),
-        name: z.nullable(z.string()),
-        image: z.nullable(z.string()),
-      })
+    const { email } = z
+      .object({ email: z.string() })
       .parse(JSON.parse(req.body))
-    console.log({ email, name, image })
+    console.log("[Create user spread sheet]: got body params: ", { email })
 
     const newSheetReq = await sheets.spreadsheets.batchUpdate({
       spreadsheetId: GOOGLE_SPREADSHEET_ID,
@@ -34,14 +30,14 @@ export default async function handler(
         range: getSheetId(email),
         includeValuesInResponse: true,
         valueInputOption: "RAW",
-        requestBody: {
-          values: [[JSON.stringify({ email, name, image })]],
-        },
+        // requestBody: {
+        //   values: [[JSON.stringify({ email, name })]],
+        // },
       })
       return res
         .status(response.status)
-        .json(JSON.stringify(response.data.updates?.updatedData?.values))
-    } else return res.status(newSheetReq.status).send(newSheetReq.statusText)
+        .json(response.data.updates?.updatedData?.values)
+    } else return res.status(newSheetReq.status).json(newSheetReq.statusText)
   } catch (e) {
     console.info(e)
     return res.status(503).json(

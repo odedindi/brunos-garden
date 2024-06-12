@@ -1,5 +1,6 @@
 import {
   ColumnDef,
+  PaginationState,
   SortingState,
   getCoreRowModel,
   getFilteredRowModel,
@@ -8,7 +9,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 import { FC, memo, useMemo, useState } from "react"
-import { HarvestSchema, type Harvest } from "@/types/Harvest"
 import {
   Box,
   Table,
@@ -23,16 +23,20 @@ import OverviewTableFooter from "./overviewTableFooter"
 import OverviewTableSeach from "./overviewTableSeach"
 import OverviewTableDeleteButton from "./overviewTableDeleteButton"
 import OverviewTableDownloadCSV from "./overviewTableDownloadCSVButton"
-import { parseRawHarvest, useHarvests } from "@/hooks/useHarvests"
 import { StringCell, NumberCell, DateCell } from "./overviewTableCells"
 import { parseDateStr } from "@/utils/parseDateStr"
 import OverviewTableColumnsMenu from "./overviewTableColumnsMenu"
 import TableTfoot from "./TableTfoot"
 import TableTbody from "./TableTbody"
 import TableThead from "./TableThead"
+import { HarvestFragment, useMe } from "@/hooks/useMe"
+import type { HarvestFragmentFragment } from "generated/graphql"
+import { useUpdateHarvest } from "@/hooks/useUpdateHarvest"
+import { graphql, useFragment } from "generated"
+import { useGraphQLQuery } from "@/hooks/useGraphQL"
 
 type OverviewProps = {
-  harvests?: Harvest[]
+  harvests?: HarvestFragmentFragment[]
   disableSelectRows?: boolean
   hideTableFoot?: boolean
   hideOverviewTableFooter?: boolean
@@ -43,6 +47,14 @@ type OverviewProps = {
 
 export const wideColumns = ["crop", "yield"]
 
+const Harvests_Query = graphql(/* GraphQL */ `
+  query Harvests($orderBy: OrderBy, $offset: Int, $limit: Int) {
+    harvests(orderBy: $orderBy, offset: $offset, limit: $limit) {
+      ...HarvestFragment
+    }
+  }
+`)
+
 const OverviewTable: FC<OverviewProps> = ({
   harvests: defaultHarvests,
   disableSelectRows,
@@ -52,17 +64,31 @@ const OverviewTable: FC<OverviewProps> = ({
   noDownloadCSV,
   isLoading,
 }) => {
-  const {
-    harvests,
-    isLoading: harvestsIsLoading,
-    updateHarvest,
-  } = useHarvests()
+  const { me, isLoading: meIsLoading } = useMe()
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState({})
 
-  const columns = useMemo<ColumnDef<Harvest>[]>(
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+
+  const { data } = useGraphQLQuery(Harvests_Query, {
+    variables: {
+      offset: pagination.pageIndex * pagination.pageSize,
+      limit: pagination.pageSize,
+    },
+  })
+
+  const harvestsData = Array.from(
+    defaultHarvests ?? useFragment(HarvestFragment, data?.harvests) ?? [],
+  )
+
+  const { mutateAsync: updateHarvest, isPending: updateHarvestIsPending } =
+    useUpdateHarvest()
+  const columns = useMemo<ColumnDef<HarvestFragmentFragment>[]>(
     () => [
       {
         id: "select",
@@ -101,10 +127,10 @@ const OverviewTable: FC<OverviewProps> = ({
           ),
         footer: ({ table }) => {
           const { rows: selectedRows } = table.getFilteredSelectedRowModel()
-          const { rows: allRows } = table.getPreFilteredRowModel()
+          const rowsCount = table.getRowCount()
           return (
             <Text>
-              {selectedRows.length} of {allRows.length} Selected
+              {selectedRows.length} of {rowsCount} Selected
             </Text>
           )
         },
@@ -113,7 +139,7 @@ const OverviewTable: FC<OverviewProps> = ({
         id: "date",
         header: "Date",
         accessorKey: "date",
-        accessorFn: (row) => parseDateStr(row.date),
+        accessorFn: (row) => parseDateStr(row.date, "YYYY-MM-DD"),
         cell: (info) => <DateCell {...info} />,
       },
       {
@@ -139,7 +165,7 @@ const OverviewTable: FC<OverviewProps> = ({
       {
         header: "weight (g)",
         accessorKey: "weight_g",
-        cell: (info) => <NumberCell unit="g" {...info} />,
+        cell: (info) => <NumberCell unit="g" preventDecimal {...info} />,
 
         footer: (props) => {
           const { rows: selectedRows } =
@@ -163,7 +189,7 @@ const OverviewTable: FC<OverviewProps> = ({
           const { rows: modelRows } = props.table.getFilteredRowModel()
           const rows = selectedRows.length ? selectedRows : modelRows
           const totalArea = rows.reduce<number>(
-            (acc, { original: { area_m2 } }) => acc + area_m2,
+            (acc, { original: { area_m2 } }) => acc + Number(area_m2),
             0,
           )
           return <>{totalArea}</>
@@ -174,10 +200,10 @@ const OverviewTable: FC<OverviewProps> = ({
         accessorKey: "yield_Kg_m2",
         header: "Yield (Kg/m2)",
         cell: (info) => {
-          const value = info.getValue<number>()
+          const value = info.getValue<string>()
           return (
             <MantineTooltip openDelay={250} label={`${value} (Kg/m2)`}>
-              <Text>{value?.toFixed(3)}</Text>
+              <Text>{value}</Text>
             </MantineTooltip>
           )
         },
@@ -187,7 +213,7 @@ const OverviewTable: FC<OverviewProps> = ({
           const { rows: modelRows } = props.table.getFilteredRowModel()
           const rows = selectedRows.length ? selectedRows : modelRows
           const totalYield = rows.reduce<number>(
-            (acc, { original: { yield_Kg_m2 } }) => acc + yield_Kg_m2,
+            (acc, { original: { yield_Kg_m2 } }) => acc + Number(yield_Kg_m2),
             0,
           )
           return <>{totalYield.toFixed(3)}</>
@@ -197,13 +223,17 @@ const OverviewTable: FC<OverviewProps> = ({
     [disableSelectRows],
   )
   const table = useReactTable({
-    data: defaultHarvests ?? harvests ?? [],
+    data: harvestsData,
     columns,
     state: {
       rowSelection,
       sorting,
       columnVisibility,
+      pagination,
     },
+    rowCount: me?.harvests.length ?? 0,
+    onPaginationChange: setPagination,
+    manualPagination: true,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
@@ -213,18 +243,19 @@ const OverviewTable: FC<OverviewProps> = ({
     getSortedRowModel: getSortedRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
 
-    debugTable: true,
+    debugTable: false, // true,
     meta: {
-      updateData: (rowIndex, columnId, value) => {
+      updateData: async (rowIndex, columnId, value) => {
         const row = table.getCoreRowModel().rows[rowIndex]
 
-        const parsedHarvest = parseRawHarvest(
-          HarvestSchema.parse({
-            ...row.original,
-            [columnId]: value,
-          }),
-        )
-        updateHarvest(parsedHarvest)
+        const harvest = {
+          [columnId]: value,
+          id: row.original.id,
+        }
+
+        console.log({ updatedHarvest: harvest })
+
+        const res = await updateHarvest({ harvest })
       },
     },
   })
@@ -250,13 +281,13 @@ const OverviewTable: FC<OverviewProps> = ({
           <Flex align="center" gap={"xs"} pl={"xs"}>
             {disableSelectRows ? null : (
               <OverviewTableDeleteButton
-                disabled={!defaultHarvests && harvestsIsLoading}
+                disabled={!defaultHarvests && meIsLoading}
                 table={table}
               />
             )}
             {noDownloadCSV ? null : (
               <OverviewTableDownloadCSV
-                disabled={!defaultHarvests && harvestsIsLoading}
+                disabled={!defaultHarvests && meIsLoading}
                 table={table}
               />
             )}
@@ -267,7 +298,7 @@ const OverviewTable: FC<OverviewProps> = ({
         </Grid.Col>
       </Grid>
 
-      {isLoading || (!defaultHarvests && harvestsIsLoading) ? (
+      {isLoading || (!defaultHarvests && meIsLoading) ? (
         <Box style={{ margin: "auto", flex: 1, height: "100%" }}>
           <Loader color="dark.3" />
         </Box>

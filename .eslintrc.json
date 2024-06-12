@@ -10,17 +10,19 @@
     "plugin:react/recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@tanstack/eslint-plugin-query/recommended",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "plugin:drizzle/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
+    "schema": "./schema.graphql",
     "ecmaFeatures": {
       "jsx": true
     },
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "plugins": ["react", "@typescript-eslint"],
+  "plugins": ["react", "@typescript-eslint", "drizzle"],
   "rules": {
     "no-console": 0,
     "prefer-template": 1,
@@ -36,5 +38,19 @@
     "react": {
       "version": "detect"
     }
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "processor": "@graphql-eslint/graphql"
+    },
+    {
+      "files": ["*.graphql"],
+      "parser": "@graphql-eslint/eslint-plugin",
+      "plugins": ["@graphql-eslint"],
+      "rules": {
+        "@graphql-eslint/known-type-names": "error"
+      }
+    }
+  ]
 }

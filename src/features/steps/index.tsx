@@ -3,7 +3,6 @@ import { Stepper, Button, Box } from "@mantine/core"
 import dynamic from "next/dynamic"
 import { ParsedUrlQuery } from "querystring"
 import { useRouter } from "next/router"
-import { parseRawHarvest, useHarvests } from "@/hooks/useHarvests"
 import {
   IconCalendarEvent,
   IconPlant,
@@ -11,8 +10,11 @@ import {
   IconScale,
 } from "@tabler/icons-react"
 import classes from "./steps.module.css"
-import { Harvest, RawHarvest } from "@/types/Harvest"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
+import { AddHarvestInput, HarvestFragmentFragment } from "generated/graphql"
+import { useFragment } from "generated"
+import { useAddHarvest } from "@/hooks/useAddHarvest"
+import { HarvestFragment } from "@/hooks/useMe"
 
 const SelectCrop = dynamic(() => import("./inputs/crop"), { ssr: false })
 const SelectDate = dynamic(() => import("./inputs/date"), { ssr: false })
@@ -27,17 +29,19 @@ interface Query extends ParsedUrlQuery {
   area?: string
 }
 
-const parseQuery = (query: Query): RawHarvest => {
+const parseHarvest = (query: Query): AddHarvestInput => {
   const [weightStr, weightUnit] = (query.weight ?? "").split("_")
   const weightNum = Number(weightStr)
   const weight_g = weightUnit === "g" ? weightNum : weightNum * 1000
   const [area_m2Str, _areaUnit] = (query.area ?? "").split("_")
   const area_m2 = Number(area_m2Str)
+  const yield_Kg_m2 = area_m2 > 0 ? weight_g / 1000 / area_m2 : 0
   return {
-    crop: query.crop ?? "",
-    date: query.date ?? "",
+    crop: query.crop!,
+    date: query.date!,
     weight_g,
-    area_m2,
+    area_m2: area_m2.toFixed(3),
+    yield_Kg_m2: yield_Kg_m2.toFixed(3),
   }
 }
 
@@ -85,9 +89,14 @@ const steps = [
 const Steps: FC = () => {
   const router = useRouter()
   const query = router.query as Query
-  const { createHarvest, isPending } = useHarvests()
 
-  const [newHarvest, setNewHarvest] = useState<Harvest[]>([])
+  const {
+    mutateAsync: createHarvest,
+    isPending: createHarvestIsPending,
+    data: addHarvestData,
+  } = useAddHarvest()
+  const newHarvest = useFragment(HarvestFragment, addHarvestData?.addHarvest)
+  const [newHarvests, setNewHarvests] = useState<HarvestFragmentFragment[]>([])
   const [currentStep, setCurrentStep] = useState(() => {
     const currentStep =
       !query || !query.crop
@@ -99,7 +108,7 @@ const Steps: FC = () => {
             : !query.area
               ? 3
               : 4
-    if (currentStep === 4 && !newHarvest.length) {
+    if (currentStep === 4 && !newHarvests.length) {
       setQueryOnPage(router, {
         crop: null,
         date: null,
@@ -128,9 +137,9 @@ const Steps: FC = () => {
       !!query.weight &&
       !!query.area
     ) {
-      const parsedRawHarvest = parseRawHarvest(parseQuery(query))
-      const newHarvest = await createHarvest(parsedRawHarvest)
-      setNewHarvest([newHarvest ?? parsedRawHarvest])
+      await createHarvest({ harvest: parseHarvest(query) })
+
+      // setNewHarvests((prev) => [...prev, NewHarvest])
     }
   }, [currentStep, query, createHarvest])
 
@@ -166,12 +175,12 @@ const Steps: FC = () => {
       <Stepper.Completed>
         <Box className={classes.wrapper}>
           <OverviewTable
-            harvests={newHarvest}
+            harvests={newHarvest ? [newHarvest] : []}
             disableSelectRows
             hideOverviewTableFooter
             hideTableFoot
             noDownloadCSV
-            isLoading={isPending}
+            isLoading={createHarvestIsPending}
           />
           <Button component={"a"} href="/" bg="dark.3">
             Create New Entry

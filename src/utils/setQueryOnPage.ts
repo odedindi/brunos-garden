@@ -31,7 +31,8 @@ export const setQueryOnPage = (router: NextRouter, query: Query) => {
   const as: Url = {
     // Extract the pathname from the current `asPath` and remove the query string
     pathname: router.asPath?.split("?")[0],
-    query: sanitizedQuery,
+    // query: sanitizedQuery,
+    query: { ...router.query, ...sanitizedQuery },
   }
   router.replace(url, as, { shallow: true, scroll: false })
 }

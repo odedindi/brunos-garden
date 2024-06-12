@@ -1,11 +1,11 @@
 import { flexRender, type Table as TanstackTable } from "@tanstack/react-table"
 import type { FC } from "react"
-import type { Harvest } from "@/types/Harvest"
 import { Table } from "@mantine/core"
 import classes from "./overviewTable.module.css"
+import type { HarvestFragmentFragment } from "generated/graphql"
 
 type TableTfootProps = {
-  table: TanstackTable<Harvest>
+  table: TanstackTable<HarvestFragmentFragment>
 }
 
 const TableTfoot: FC<TableTfootProps> = ({ table }) => (

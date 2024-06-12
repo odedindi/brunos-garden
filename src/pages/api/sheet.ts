@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next"
 
 import { getGoogleSheetApi } from "@/utils/getGoogleSheetApi"
 import { getSheetId } from "@/utils/getSheetId"
+import { db } from "@/db"
 
 type Data = string
 const { GOOGLE_SPREADSHEET_ID } = process.env

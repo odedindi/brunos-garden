@@ -56,6 +56,7 @@ const HomePage: NextPage = () => {
       : tabs[0].id
 
   const activeTab = tabs.find((t) => t.id === activeTabID)
+
   return (
     <AppShell header={{ height: 115 }} footer={{ height: 90 }} padding="md">
       <AppShell.Header className={classes.header}>
@@ -82,7 +83,15 @@ const HomePage: NextPage = () => {
                     <MantineTabs.Tab
                       value={tab.id}
                       key={tab.id}
-                      onClick={() => setQueryOnPage(router, { tab: tab.id })}
+                      onClick={() => {
+                        setQueryOnPage(router, { tab: tab.id })
+                        // if (!i) {
+                        //   setTimeout(() => {
+                        //     router.push("/")
+                        //     router.reload()
+                        //   })
+                        // }
+                      }}
                     >
                       {tab.label}
                     </MantineTabs.Tab>

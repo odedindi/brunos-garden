@@ -2,7 +2,6 @@ import {
   ChangeEvent,
   FC,
   KeyboardEvent,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -14,28 +13,25 @@ import { useRouter } from "next/router"
 import { ParsedUrlQuery } from "querystring"
 import { setQueryOnPage } from "@/utils/setQueryOnPage"
 import { useFocusOnLoad } from "@/hooks/useFocusOnLoad"
-import { useHarvests } from "@/hooks/useHarvests"
 import classes from "./input.module.css"
+import { useMe } from "@/hooks/useMe"
 
 interface Query extends ParsedUrlQuery {
   crop?: string
 }
 
 const useHarvestData = () => {
-  const { harvests } = useHarvests()
-  const [crops, setCrops] = useState<string[]>(
-    () => harvests?.map(({ crop }) => crop) ?? [],
-  )
+  const { me } = useMe()
+  const myHarvests = (me?.harvests ?? []).map(({ crop }) => crop)
 
-  useEffect(() => {
-    const crops = harvests.map(({ crop }) => crop)
-    if (crops.length) {
-      setCrops((prev) => Array.from(new Set(prev.concat(crops))))
-    }
-  }, [harvests])
+  const [crops, setCrops] = useState<string[]>(() => [])
 
-  return [crops, setCrops] as const
+  return [
+    [...Array.from(new Set([...myHarvests, ...crops]))],
+    setCrops,
+  ] as const
 }
+
 const SelectCrop: FC<{
   onSubmit: () => void
 }> = ({ onSubmit }) => {
@@ -44,7 +40,7 @@ const SelectCrop: FC<{
   })
   const ref = useRef<HTMLInputElement>(null)
   useFocusOnLoad<"input">(ref)
-  const [crops, setCrops] = useHarvestData()
+  const [crops, setNewCrops] = useHarvestData()
   const router = useRouter()
   const query = router.query as Query
 
@@ -67,26 +63,18 @@ const SelectCrop: FC<{
     [crops, exactOptionMatch, search],
   )
 
-  const options = Array.from(new Set(filteredOptions)).map((item) => (
-    <Combobox.Option value={item} key={item}>
-      {item}
-    </Combobox.Option>
-  ))
-
   return (
     <Combobox
       store={combobox}
       withinPortal={false}
       onOptionSubmit={(val) => {
         if (val === "$create") {
-          setCrops((current) => [...current, search])
+          setNewCrops((current) => [...current, search])
           onChange(search)
         } else {
           onChange(val)
           setSearch(val)
         }
-        onSubmit()
-
         combobox.closeDropdown()
       }}
     >
@@ -118,7 +106,11 @@ const SelectCrop: FC<{
 
       <Combobox.Dropdown>
         <Combobox.Options>
-          {options}
+          {Array.from(new Set(filteredOptions)).map((item) => (
+            <Combobox.Option value={item} key={item}>
+              {item}
+            </Combobox.Option>
+          ))}
           {!exactOptionMatch && search.trim().length > 0 && (
             <Combobox.Option value="$create">+ {search}</Combobox.Option>
           )}
