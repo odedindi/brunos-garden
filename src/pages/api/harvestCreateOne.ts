@@ -24,20 +24,17 @@ export default async function handler(
     try {
       const response = await sheets.spreadsheets.values.append({
         spreadsheetId: GOOGLE_SPREADSHEET_ID,
-        range: getSheetId(email),
+        range,
         valueInputOption: "RAW",
         requestBody: { values: [[JSON.stringify(harvest)]] },
       })
-      if (response.data.updates?.updatedRange) {
-        const harvestId = response.data.updates.updatedRange.replace(
-          `'${range}'`,
-          "",
-        )
 
+      if (response.data.updates?.updatedRange) {
+        const harvestId = response.data.updates?.updatedRange?.at(-1)!
         // update new id
         await sheets.spreadsheets.values.update({
           spreadsheetId: GOOGLE_SPREADSHEET_ID,
-          range: `${getSheetId(email)}${harvestId}`,
+          range: `${range}!A${harvestId}`,
           valueInputOption: "RAW",
           requestBody: {
             values: [[JSON.stringify({ ...harvest, id: harvestId })]],

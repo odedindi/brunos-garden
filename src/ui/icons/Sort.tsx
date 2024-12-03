@@ -1,11 +1,9 @@
-import { FC } from "react"
-
+import type { FC } from "react"
 import { IconArrowsSort } from "@tabler/icons-react"
+import Icon, { type IconProps } from "./Icon"
 
-import Icon, { IconProps } from "./Icon"
-
-const SortIcon: FC<Omit<IconProps, "label">> = (props) => (
-  <Icon label="Sort" {...props}>
+const SortIcon: FC<IconProps> = ({ label = "Sort", ...props }) => (
+  <Icon label={label} {...props}>
     <IconArrowsSort stroke={1.5} />
   </Icon>
 )

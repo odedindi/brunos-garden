@@ -8,21 +8,22 @@ import {
 } from "@mantine/core"
 import classes from "./Icon.module.css"
 
-export type IconProps = PropsWithChildren<{
+export interface IconProps
+  extends Pick<
+    ActionIconProps,
+    "size" | "bg" | "disabled" | "style" | "color"
+  > {
   onClick?: () => void
   label?: string
-  size?: ActionIconProps["size"]
-  bg?: ActionIconProps["bg"]
-  disabled?: ActionIconProps["disabled"]
-  style?: CSSProperties
   loading?: boolean
-}>
+}
 
-const Icon: FC<IconProps> = ({
+const Icon: FC<PropsWithChildren<IconProps>> = ({
   onClick,
   label,
   size = "xs",
   bg = "dark.3",
+  color,
   disabled,
   style,
   loading,
@@ -39,8 +40,9 @@ const Icon: FC<IconProps> = ({
         bg={bg}
         disabled={disabled}
         style={style}
+        color={color}
       >
-        {loading ? <Loader size={size} /> : children}
+        {loading ? <Loader size={size} color={color} /> : children}
       </ActionIcon>
     </Tooltip>
   ) : loading ? (
@@ -54,6 +56,7 @@ const Icon: FC<IconProps> = ({
       size={size}
       bg={bg}
       disabled={disabled}
+      color={color}
       style={style}
     >
       {children}

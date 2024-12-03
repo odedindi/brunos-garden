@@ -1,11 +1,9 @@
-import { FC } from "react"
-
+import type { FC } from "react"
 import { IconPlus } from "@tabler/icons-react"
+import Icon, { type IconProps } from "./Icon"
 
-import Icon, { IconProps } from "./Icon"
-
-const CreateIcon: FC<Omit<IconProps, "label">> = (props) => (
-  <Icon label="Create" {...props}>
+const CreateIcon: FC<IconProps> = ({ label = "Create", ...props }) => (
+  <Icon label={label} {...props}>
     <IconPlus stroke={1.5} />
   </Icon>
 )

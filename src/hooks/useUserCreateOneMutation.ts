@@ -13,7 +13,7 @@ export const useUserCreateOneMutation = () =>
       const data = await res.json()
       return data
     },
-    onSuccess: (_data, _variables, _context) => {
-      invalidateQueries({ queryKey: ["me"] })
+    onSuccess: (_data, { email }, _context) => {
+      invalidateQueries({ queryKey: ["me", email] })
     },
   })

@@ -1,20 +1,30 @@
-import { FC } from "react"
+import type { FC } from "react"
 import { IconTrash } from "@tabler/icons-react"
 
-import Icon, { IconProps } from "./Icon"
+import Icon, { type IconProps } from "./Icon"
 import { useDisclosure } from "@mantine/hooks"
 import { Button, Modal, Text } from "@mantine/core"
 
-const DeleteIcon: FC<
-  Omit<IconProps, "label" | "bg"> & { verifyBeforeDelete?: boolean }
-> = ({ onClick, size, verifyBeforeDelete, ...props }) => {
-  const [opened, { open, close }] = useDisclosure(false)
+interface DeleteIconProps extends IconProps {
+  verifyBeforeDelete?: boolean
+}
+
+const DeleteIcon: FC<DeleteIconProps> = ({
+  onClick,
+  size,
+  verifyBeforeDelete,
+  label = "Delete",
+  bg = "red.9",
+  ...props
+}) => {
+  const [modalOpened, { open: openModal, close: closeModal }] =
+    useDisclosure(false)
 
   return (
     <>
       <Modal
-        opened={opened}
-        onClose={close}
+        opened={modalOpened}
+        onClose={closeModal}
         withCloseButton={false}
         size="auto"
         overlayProps={{
@@ -24,17 +34,14 @@ const DeleteIcon: FC<
         centered
       >
         <Text>Are you sure?</Text>{" "}
-        <Button bg="red.9" onClick={onClick}>
+        <Button bg={bg} onClick={onClick}>
           Delete <IconTrash stroke={1.5} />
         </Button>
       </Modal>
       <Icon
-        label="Delete task"
-        bg="red.9"
-        onClick={() => {
-          if (verifyBeforeDelete) return open()
-          else if (onClick) onClick()
-        }}
+        label={label}
+        bg={bg}
+        onClick={() => (verifyBeforeDelete ? openModal() : onClick?.())}
         size={size}
         {...props}
       >

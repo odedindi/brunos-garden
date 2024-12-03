@@ -22,7 +22,7 @@ export default async function handler(
     try {
       const response = await sheets.spreadsheets.values.update({
         spreadsheetId: GOOGLE_SPREADSHEET_ID,
-        range: `${getSheetId(email)}${harvest.id}`,
+        range: `${getSheetId(email)}!A${harvest.id}`,
         valueInputOption: "RAW",
         requestBody: { values: [[JSON.stringify(harvest)]] },
       })

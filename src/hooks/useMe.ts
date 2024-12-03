@@ -4,8 +4,9 @@ import { User, UserSchema } from "@/types/User"
 import { useQuery } from "@tanstack/react-query"
 
 import * as dataIndex from "./utils/dataIndexes"
+import { useUserUpdateOneMutation } from "./useUserUpdateOneMutation"
 
-export const useMeQuery = () => {
+export const useMe = () => {
   const { data: session } = useSession()
   const email = session?.user?.email
   const { data, isLoading } = useQuery<User | null>({
@@ -26,5 +27,12 @@ export const useMeQuery = () => {
     enabled: !!email,
   })
 
-  return { data, isLoading }
+  const { mutateAsync: updateMe, isPending } = useUserUpdateOneMutation()
+
+  return {
+    me: data,
+    isLoading,
+    updateMe,
+    isPending,
+  }
 }

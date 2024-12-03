@@ -1,19 +1,10 @@
-import { FC } from "react"
-
+import type { FC } from "react"
 import { IconTrash } from "@tabler/icons-react"
+import Icon, { type IconProps } from "./Icon"
 
-import Icon, { IconProps } from "./Icon"
-
-const TrashIcon: FC<
-  IconProps & { up?: boolean; down?: boolean; left?: boolean }
-> = ({ up, down, left, ...props }) => (
+const TrashIcon: FC<IconProps> = ({ ...props }) => (
   <Icon {...props}>
-    <IconTrash
-      stroke={1.5}
-      style={{
-        transform: `rotate(${down ? 90 : left ? 180 : up ? 270 : 0}deg)`,
-      }}
-    />
+    <IconTrash stroke={1.5} />
   </Icon>
 )
 

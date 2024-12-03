@@ -1,11 +1,9 @@
-import { FC } from "react"
-
+import type { FC } from "react"
 import { IconRepeat } from "@tabler/icons-react"
+import Icon, { type IconProps } from "./Icon"
 
-import Icon, { IconProps } from "./Icon"
-
-const RefreshIcon: FC<Omit<IconProps, "label">> = (props) => (
-  <Icon label="Refresh" {...props}>
+const RefreshIcon: FC<IconProps> = ({ label = "Refresh", ...props }) => (
+  <Icon label={label} {...props}>
     <IconRepeat stroke={1.5} />
   </Icon>
 )

@@ -1,4 +1,4 @@
-import { useMeQuery } from "@/hooks/useMe"
+import { useMe } from "@/hooks/useMe"
 import { useUserCreateOneMutation } from "@/hooks/useUserCreateOneMutation"
 import {
   Avatar,
@@ -30,7 +30,7 @@ const Authentication: FC<BoxProps> = (props) => {
   const [userMenuOpened, setUserMenuOpened] = useState(false)
 
   const { data: session, status: sessionStatus } = useSession()
-  const { data: me, isLoading: meIsLoading } = useMeQuery()
+  const { me, isLoading: meIsLoading } = useMe()
   const {
     mutate: createNewUser,
     data: createdUser,

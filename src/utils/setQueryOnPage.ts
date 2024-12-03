@@ -21,17 +21,18 @@ export const setQueryOnPage = (router: NextRouter, query: Query) => {
     ]),
   )
 
+  const newQuery = { ...router.query, ...sanitizedQuery }
   // Create a new URL object with the updated query parameters
   const url: Url = {
     pathname: router.pathname,
-    query: { ...router.query, ...sanitizedQuery },
+    query: newQuery,
   }
 
   // Create a new URL object for the `as` property (used for server-side rendering)
   const as: Url = {
     // Extract the pathname from the current `asPath` and remove the query string
     pathname: router.asPath?.split("?")[0],
-    query: sanitizedQuery,
+    query: newQuery,
   }
   router.replace(url, as, { shallow: true, scroll: false })
 }
